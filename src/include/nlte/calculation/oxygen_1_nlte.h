@@ -38,7 +38,7 @@ Eigen::MatrixXd oxygen_nlte_transition_operator(
     for (int j = 0; j < R.cols(); j++) {
       if (i == j) {
         for (int k = 0; k < R.cols(); k++) {
-          if (i != k) {
+          if (j != k) {
             R(i, j) += -P(k, i);
           }
         }
