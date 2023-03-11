@@ -1,0 +1,60 @@
+#pragma once
+
+
+#include <Eigen/Dense>
+
+#include "../data/constants.h"
+#include "../data/oxygen_1_rbf.h"
+#include "../data/oxygen_1.h"
+#include "../interpolation/linear_interpolant.h"
+
+
+Eigen::MatrixXd oxygen_rbf_rates(
+  std::vector<double> wavelengths /* nm */,
+  std::vector<double> spectral_flux_densities /* W * m^{-2} * nm^{-1} */
+) {
+  Oxygen oxygen;
+  OxygenRbf rbf;
+
+  Eigen::MatrixXd P = // s^{-1}
+  Eigen::MatrixXd::Zero(oxygen.levels.size(), oxygen.levels.size());
+  auto& c = SPEED_OF_LIGHT; // cm * s^{-1}
+  auto eV_to_J = 1.602177e-19;
+  auto cm_to_m = 0.01;
+  auto cm_to_nm = 1.0e7;
+  auto hbar = REDUCED_PLANCK_CONSTANT * eV_to_J; // J * s = W * s^2
+
+  for (int i = 0; i < oxygen.levels.size(); i++) {
+    auto& initial = oxygen.levels[i];
+    for (int j = 0; j < oxygen.levels.size(); j++) {
+      auto& final = oxygen.levels[j];
+      for (auto& transition : rbf.transitions) {
+        if (
+          transition.initial == initial.term && final.term == initial.limit_term
+        ) {
+          LinearInterpolant F; // W * m^{-2} * nm^{-1}
+          F.data_points(wavelengths, spectral_flux_densities);
+
+          auto P_ij = 0.0;
+          for (
+            int k = transition.start_index - 1;
+            k < transition.finish_index - 2;
+            k++
+          ) {
+            auto& nu = rbf.frequencies[k]; // s^{-1}
+            auto lambda = c / nu * cm_to_nm; // nm
+            auto sigma = cm_to_m * rbf.photoionization_cross_sections[k]; // m^2
+            auto dnu = rbf.frequencies[k + 1] - rbf.frequencies[k]; // s^{-1}
+            auto dlambda = c / dnu * cm_to_nm; // nm
+
+            P_ij += F(lambda) / (hbar * nu) * sigma * dlambda;
+          }
+
+          P(i, j) = P_ij;
+        }
+      }
+    }
+  }
+
+  return P;
+};

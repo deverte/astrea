@@ -1,0 +1,8 @@
+/build
+/build_tests
+/builddir
+
+/docs/html
+/docs/latex
+/docs/*.aux
+/docs/*.doc*
