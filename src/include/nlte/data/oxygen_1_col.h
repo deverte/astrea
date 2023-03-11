@@ -5,18 +5,21 @@
 #include <vector>
 
 
+namespace nlte {
+
+
 class ColTransition {
  public:
-  std::string initial;
-  std::string final;
-  std::vector<double> collision_rate_coefficients; // cm^3 * s^{-1},
-  std::vector<double> temperatures; // K
+  const std::string initial;
+  const std::string final;
+  const std::vector<double> collision_rate_coefficients; // cm^3 * s^{-1},
+  const std::vector<double> temperatures; // K
 };
 
 
 class OxygenCol {
  public:
-  std::vector<ColTransition> transitions{
+  const std::vector<ColTransition> transitions{
     {
       .initial = "12P3P4",
       .final = "12P1S4",
@@ -943,3 +946,6 @@ class OxygenCol {
     },
   };
 };
+
+
+}

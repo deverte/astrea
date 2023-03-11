@@ -5,20 +5,23 @@
 #include <vector>
 
 
+namespace nlte {
+
+
 class RbbVoigtTransition {
  public:
-  std::string initial;
-  std::string final;
-  double oscillator_strength; // one
-  double van_der_waals_constant; // ?
-  double quadratic_stark_constant; // ?
-  double radiative_damping_constant; // ?
+  const std::string initial;
+  const std::string final;
+  const double oscillator_strength; // one
+  const double van_der_waals_constant; // ?
+  const double quadratic_stark_constant; // ?
+  const double radiative_damping_constant; // ?
 };
 
 
 class OxygenRbbVoigt {
  public:
-  std::vector<RbbVoigtTransition> transitions{
+  const std::vector<RbbVoigtTransition> transitions{
     {
       .initial = "12P3P4",
       .final = "13S3S",
@@ -165,3 +168,6 @@ class OxygenRbbVoigt {
     },
   };
 };
+
+
+}

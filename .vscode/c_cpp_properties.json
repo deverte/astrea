@@ -4,8 +4,9 @@
             "name": "default",
             "includePath": [
                 "${workspaceFolder}/src/include",
-                "${workspaceFolder}/tests/fixtures",
-                "~/.conan/data/**"
+                "${workspaceFolder}/src/include/eigen",
+                "${workspaceFolder}/src/include/pybind11/include",
+                "/usr/include/python3.10"
             ],
             "intelliSenseMode": "linux-gcc-x64",
             "compilerPath": "/usr/bin/g++",

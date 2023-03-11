@@ -8,6 +8,9 @@
 #include "../interpolation/linear_interpolant.h"
 
 
+namespace nlte {
+
+
 Eigen::MatrixXd oxygen_col_rates(
   double temperature /* K */,
   double electron_number_density /* cm^{-3} */
@@ -24,7 +27,7 @@ Eigen::MatrixXd oxygen_col_rates(
 
   for (int i = 0; i < oxygen.levels.size(); i++) {
     auto& initial = oxygen.levels[i];
-    for (int j = 0; oxygen.levels.size(); j++) {
+    for (int j = 0; j < oxygen.levels.size(); j++) {
       auto& final = oxygen.levels[j];
       for (auto& transition : col.transitions) {
         if (
@@ -46,3 +49,6 @@ Eigen::MatrixXd oxygen_col_rates(
 
   return P;
 };
+
+
+}

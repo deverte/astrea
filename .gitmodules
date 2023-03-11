@@ -1,0 +1,6 @@
+[submodule "src/include/pybind11"]
+	path = src/include/pybind11
+	url = https://github.com/pybind/pybind11
+[submodule "src/include/eigen"]
+	path = src/include/eigen
+	url = https://gitlab.com/libeigen/eigen

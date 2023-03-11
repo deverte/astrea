@@ -10,6 +10,9 @@
 #include "../data/oxygen_1.h"
 
 
+namespace nlte {
+
+
 Eigen::VectorXd oxygen_lte_population(double temperature /* K */) {
   Oxygen oxygen;
 
@@ -34,3 +37,6 @@ Eigen::VectorXd oxygen_lte_population(double temperature /* K */) {
 
   return n;
 };
+
+
+}

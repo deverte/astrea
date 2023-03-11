@@ -5,17 +5,20 @@
 #include <vector>
 
 
+namespace nlte {
+
+
 class RbbDopplerTransition {
  public:
-  std::string initial;
-  std::string final;
-  double oscillator_strength; // s^{-1},
+  const std::string initial;
+  const std::string final;
+  const double oscillator_strength; // s^{-1},
 };
 
 
 class OxygenRbbDoppler {
  public:
-  std::vector<RbbDopplerTransition> transitions{
+  const std::vector<RbbDopplerTransition> transitions{
     // {
     //   .initial = "12P3P4",
     //   .final = "13S3S",
@@ -1193,3 +1196,6 @@ class OxygenRbbDoppler {
     },
   };
 };
+
+
+}

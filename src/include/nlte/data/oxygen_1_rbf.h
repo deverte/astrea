@@ -5,17 +5,20 @@
 #include <vector>
 
 
+namespace nlte {
+
+
 class RbfTransition {
  public:
-  std::string initial;
-  int start_index;
-  int finish_index;
+  const std::string initial;
+  const int start_index;
+  const int finish_index;
 };
 
 
 class OxygenRbf {
  public:
-  std::vector<RbfTransition> transitions = {
+  const std::vector<RbfTransition> transitions = {
     {
       .initial = "12P1S4",
       .start_index = 1,
@@ -274,7 +277,7 @@ class OxygenRbf {
   };
 
   // s^{-1}
-  std::vector<double> frequencies = {
+  const std::vector<double> frequencies = {
     0.3000271E+16,  0.3006535E+16,  0.3009617E+16,  0.3012666E+16,  0.3015684E+16,
     0.3018670E+16,  0.3021624E+16,  0.3024548E+16,  0.3027442E+16,  0.3030305E+16,
     0.3033139E+16,  0.3033170E+16,  0.3036041E+16,  0.3038881E+16,  0.3041692E+16,
@@ -6126,7 +6129,7 @@ class OxygenRbf {
   };
 
   // cm^2
-  std::vector<double> photoionization_cross_sections = {
+  const std::vector<double> photoionization_cross_sections = {
     0.2481000E-19,  0.9265000E-20,  0.2603000E-20,
     0.1016000E-21,  0.9151000E-20,  0.4913000E-19,  0.1771000E-18,  0.5979000E-18,
     0.2357000E-17,  0.1737000E-16,  0.1376000E-15,  0.1324000E-15,  0.1390000E-16,
@@ -11977,3 +11980,6 @@ class OxygenRbf {
     0.8693000E-24,  0.6956000E-24,  0.5686000E-24,  0.4641000E-24,
   };
 };
+
+
+}

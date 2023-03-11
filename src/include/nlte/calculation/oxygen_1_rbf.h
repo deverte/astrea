@@ -1,12 +1,17 @@
 #pragma once
 
 
+#include <cmath>
+
 #include <Eigen/Dense>
 
 #include "../data/constants.h"
 #include "../data/oxygen_1_rbf.h"
 #include "../data/oxygen_1.h"
 #include "../interpolation/linear_interpolant.h"
+
+
+namespace nlte {
 
 
 Eigen::MatrixXd oxygen_rbf_rates(
@@ -43,9 +48,14 @@ Eigen::MatrixXd oxygen_rbf_rates(
           ) {
             auto& nu = rbf.frequencies[k]; // s^{-1}
             auto lambda = c / nu * cm_to_nm; // nm
-            auto sigma = cm_to_m * rbf.photoionization_cross_sections[k]; // m^2
-            auto dnu = rbf.frequencies[k + 1] - rbf.frequencies[k]; // s^{-1}
-            auto dlambda = c / dnu * cm_to_nm; // nm
+            auto sigma =
+              + rbf.photoionization_cross_sections[k]
+              * std::pow(cm_to_m, 2); // m^2
+            auto dnu =
+              + std::abs(rbf.frequencies[k + 1] - rbf.frequencies[k]); // s^{-1}
+            auto dlambda =
+              + std::abs(c / rbf.frequencies[k + 1] - c / rbf.frequencies[k])
+              * cm_to_nm; // nm
 
             P_ij += F(lambda) / (hbar * nu) * sigma * dlambda;
           }
@@ -58,3 +68,6 @@ Eigen::MatrixXd oxygen_rbf_rates(
 
   return P;
 };
+
+
+}

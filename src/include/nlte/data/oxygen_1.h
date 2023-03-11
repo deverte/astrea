@@ -5,21 +5,24 @@
 #include <vector>
 
 
+namespace nlte {
+
+
 class Level {
  public:
-  std::string term;
-  std::string limit_term;
-  std::string ground_state_term;
-  double principal_quantum_number; // one
-  double statistical_weight; // one
-  double energy; // eV
-  double ionization_energy; // eV
+  const std::string term;
+  const std::string limit_term;
+  const std::string ground_state_term;
+  const double principal_quantum_number; // one
+  const double statistical_weight; // one
+  const double energy; // eV
+  const double ionization_energy; // eV
 };
 
 
 class Oxygen {
  public:
-  std::vector<Level> levels{
+  const std::vector<Level> levels{
     {
       .term = "12P3P4",
       .limit_term = "22P4S",
@@ -491,3 +494,5 @@ class Oxygen {
   };
 };
 
+
+}

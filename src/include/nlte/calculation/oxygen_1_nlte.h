@@ -11,10 +11,13 @@
 #include "./oxygen_1_rbf.h"
 
 
+namespace nlte {
+
+
 Eigen::MatrixXd oxygen_nlte_transition_operator(
   double temperature /* K */,
   double electron_number_density /* cm^{-3} */,
-  std::vector<double> spectral_flux_densities /*  */,
+  std::vector<double> spectral_flux_densities /* W * m^{-2} * nm^{-1} */,
   std::vector<double> wavelengths /* cm */
 ) {
   auto P_col = oxygen_col_rates(temperature, electron_number_density); // s^{-1}
@@ -27,7 +30,8 @@ Eigen::MatrixXd oxygen_nlte_transition_operator(
     + P_col
     + P_rbb_doppler
     + P_rbb_voigt
-    + P_rbf;
+    + P_rbf
+  ;
 
   Eigen::MatrixXd R = Eigen::MatrixXd::Zero(P.rows(), P.cols()); // s^{-1}
   for (int i = 0; i < R.rows(); i++) {
@@ -49,17 +53,30 @@ Eigen::MatrixXd oxygen_nlte_transition_operator(
 };
 
 
-Eigen::VectorXd oxygen_nlte(
+Eigen::VectorXd oxygen_nlte_population(
   Eigen::VectorXd population /* 1 */,
   double delta_time /* s */,
-  Eigen::MatrixXd transition_operator /* s^{-1} */
+  double temperature /* K */,
+  double electron_number_density /* cm^{-3} */,
+  std::vector<double> spectral_flux_densities /* W * m^{-2} * nm^{-1} */,
+  std::vector<double> wavelengths /* cm */
 ) {
-  auto& R = transition_operator; // s^{-1}
+  auto R = oxygen_nlte_transition_operator(
+    temperature,
+    electron_number_density,
+    spectral_flux_densities,
+    wavelengths
+  ); // s^{-1}
   auto I = Eigen::MatrixXd::Identity(R.rows(), R.cols()); // 1
   auto& dt = delta_time; // s
   auto& n_t = population; // 1
 
   auto n_t_plus_dt = (I - R * dt).inverse() * n_t; // 1
 
-  return n_t_plus_dt;
+  auto norm_n_t_plus_dt = n_t_plus_dt / n_t_plus_dt.sum();
+
+  return norm_n_t_plus_dt;
+}
+
+
 }

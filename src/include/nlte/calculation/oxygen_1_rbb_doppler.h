@@ -7,13 +7,16 @@
 #include <Eigen/Dense>
 
 #include "../data/constants.h"
-#include "../data/oxygen_1_rbb_voigt.h"
+#include "../data/oxygen_1_rbb_doppler.h"
 #include "../data/oxygen_1.h"
 
 
-Eigen::MatrixXd oxygen_rbb_voigt_rates() {
+namespace nlte {
+
+
+Eigen::MatrixXd oxygen_rbb_doppler_rates() {
   Oxygen oxygen;
-  OxygenRbbVoigt rbb;
+  OxygenRbbDoppler rbb;
 
   Eigen::MatrixXd P = // s^{-1}
   Eigen::MatrixXd::Zero(oxygen.levels.size(), oxygen.levels.size());
@@ -37,8 +40,10 @@ Eigen::MatrixXd oxygen_rbb_voigt_rates() {
         if (
           transition.initial == initial.term && transition.final == final.term
         ) {
-          auto& f_ij = transition.oscillator_strength;
+          auto& f_ij = transition.oscillator_strength; // 1
 
+          // 0.66702 Constant from
+          // https://www.nist.gov/pml/atomic-spectroscopy-compendium-basic-ideas-notation-data-and-formulas/atomic-spectroscopy
           P(i, j) =
             + 0.66702 / std::pow(c / (std::abs(E(i) - E(j)) / hbar), 2)
             * (g(j) / g(i)) * f_ij;
@@ -49,3 +54,6 @@ Eigen::MatrixXd oxygen_rbb_voigt_rates() {
 
   return P;
 };
+
+
+}
