@@ -8,6 +8,9 @@
 namespace nlte {
 
 
+/**
+ * Radiative bound-bound transition using Voigt profile.
+ */
 class RbbVoigtTransition {
  public:
   const std::string initial;

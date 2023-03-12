@@ -7,6 +7,9 @@
 namespace nlte {
 
 
+/**
+ * C. Gueymard, ""THE SUN�S TOTAL AND SPECTRAL IRRADIANCE FOR SOLAR ENERGY APPLICATIONS AND SOLAR RADIATION MODELS"", submitted to Solar Energy, 2003."
+ */
 class Sun {
  public:
   /**

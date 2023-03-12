@@ -8,6 +8,9 @@
 namespace nlte {
 
 
+/**
+ * Radiative bound-bound transition using Doppler profile.
+ */
 class RbbDopplerTransition {
  public:
   const std::string initial;

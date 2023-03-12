@@ -8,6 +8,9 @@
 namespace nlte {
 
 
+/**
+ * Collisional transition.
+ */
 class ColTransition {
  public:
   const std::string initial;

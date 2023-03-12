@@ -8,6 +8,9 @@
 namespace nlte {
 
 
+/**
+ * Radiative bound-free transition.
+ */
 class RbfTransition {
  public:
   const std::string initial;
