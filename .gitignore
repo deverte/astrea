@@ -1,11 +1,9 @@
 /build
-/build_tests
-/builddir
-
-/docs/html
-/docs/latex
-/docs/*.aux
-/docs/*.doc*
 
 *.so
 *.dll
+
+*.venv
+
+*.ipynb_checkpoints
+*__pycache__
