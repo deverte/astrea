@@ -1,7 +1,5 @@
 import nlte
 
-sun = nlte.Sun()
-
 
 temperature = 1.0e5
 delta_time = 60.0
@@ -19,8 +17,8 @@ population_nlte_2 = nlte.oxygen_nlte_population(
   delta_time,
   temperature,
   electron_number_density,
-  sun.spectral_flux_density,
-  sun.wavelengths,
+  nlte.Sun.spectral_flux_density,
+  nlte.Sun.wavelengths,
 )
 
 
@@ -30,3 +28,5 @@ print(population_nlte_2)
 
 print(sum(population_lte))
 print(sum(population_nlte_2))
+
+print(nlte.Oxygen.keys)

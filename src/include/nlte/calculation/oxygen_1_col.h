@@ -15,21 +15,18 @@ Eigen::MatrixXd oxygen_col_rates(
   double temperature /* K */,
   double electron_number_density /* cm^{-3} */
 ) {
-  Oxygen oxygen;
-  OxygenCol col;
-
   auto& T = temperature; // K
   auto& N_e = electron_number_density; // cm^{-3}
   Eigen::MatrixXd P = // s^{-1}
-  Eigen::MatrixXd::Zero(oxygen.levels.size(), oxygen.levels.size());
+  Eigen::MatrixXd::Zero(Oxygen::levels().size(), Oxygen::levels().size());
   Eigen::MatrixXd q = // cm^3 * s^{-1}
-  Eigen::MatrixXd::Zero(oxygen.levels.size(), oxygen.levels.size());
+  Eigen::MatrixXd::Zero(Oxygen::levels().size(), Oxygen::levels().size());
 
-  for (int i = 0; i < oxygen.levels.size(); i++) {
-    auto& initial = oxygen.levels[i];
-    for (int j = 0; j < oxygen.levels.size(); j++) {
-      auto& final = oxygen.levels[j];
-      for (auto& transition : col.transitions) {
+  for (int i = 0; i < Oxygen::levels().size(); i++) {
+    auto& initial = Oxygen::levels()[i];
+    for (int j = 0; j < Oxygen::levels().size(); j++) {
+      auto& final = Oxygen::levels()[j];
+      for (auto& transition : OxygenCol::transitions()) {
         if (
           transition.initial == initial.term && transition.final == final.term
         ) {

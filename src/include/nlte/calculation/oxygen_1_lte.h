@@ -14,16 +14,14 @@ namespace nlte {
 
 
 Eigen::VectorXd oxygen_lte_population(double temperature /* K */) {
-  Oxygen oxygen;
-
-  Eigen::VectorXd E(oxygen.levels.size()); // eV
-  Eigen::VectorXd n(oxygen.levels.size()); // 1
+  Eigen::VectorXd E(Oxygen::levels().size()); // eV
+  Eigen::VectorXd n(Oxygen::levels().size()); // 1
   auto& k = BOLTZMANN_CONSTANT; // eV * K^{-1}
   auto& T = temperature; // K
   auto sum_n = 1.0; // 1
 
-  for (int i = 0; i < oxygen.levels.size(); i++) {
-    E(i) = oxygen.levels[i].energy;
+  for (int i = 0; i < Oxygen::levels().size(); i++) {
+    E(i) = Oxygen::levels()[i].energy;
   }
 
   auto sum_exp_E_kT = 0.0; // 1

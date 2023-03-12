@@ -9,6 +9,7 @@
 #include "./oxygen_1_rbb_doppler.h"
 #include "./oxygen_1_rbb_voigt.h"
 #include "./oxygen_1_rbf.h"
+#include "../data/oxygen_1.h"
 
 
 namespace nlte {
@@ -26,7 +27,7 @@ Eigen::MatrixXd oxygen_nlte_transition_operator(
   auto P_rbf = oxygen_rbf_rates(wavelengths, spectral_flux_densities); // s^{-1}
 
   auto P = // s^{-1}
-    Eigen::MatrixXd::Zero(P_col.rows(), P_col.cols())
+    Eigen::MatrixXd::Zero(Oxygen::levels().size(), Oxygen::levels().size())
     + P_col
     + P_rbb_doppler
     + P_rbb_voigt

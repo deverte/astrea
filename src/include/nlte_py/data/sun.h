@@ -18,9 +18,15 @@ inline void Sun(py::module_& m) {
 
   sun.def(py::init());
 
-  sun.def_readonly("wavelengths", &nlte::Sun::wavelengths);
+  sun.def_property_readonly_static(
+    "wavelengths",
+    [&](py::object /* self */) { return nlte::Sun::wavelengths(); }
+  );
 
-  sun.def_readonly("spectral_flux_density", &nlte::Sun::spectral_flux_density);
+  sun.def_property_readonly_static(
+    "spectral_flux_density",
+    [&](py::object /* self */) { return nlte::Sun::spectral_flux_density(); }
+  );
 }
 
 

@@ -15,28 +15,25 @@ namespace nlte {
 
 
 Eigen::MatrixXd oxygen_rbb_voigt_rates() {
-  Oxygen oxygen;
-  OxygenRbbVoigt rbb;
-
   Eigen::MatrixXd P = // s^{-1}
-  Eigen::MatrixXd::Zero(oxygen.levels.size(), oxygen.levels.size());
-  Eigen::VectorXd E(oxygen.levels.size()); // eV
-  Eigen::VectorXd g(oxygen.levels.size()); // 1
+  Eigen::MatrixXd::Zero(Oxygen::levels().size(), Oxygen::levels().size());
+  Eigen::VectorXd E(Oxygen::levels().size()); // eV
+  Eigen::VectorXd g(Oxygen::levels().size()); // 1
   auto& c = SPEED_OF_LIGHT; // cm * s^{-1}
   auto& hbar = REDUCED_PLANCK_CONSTANT; // eV * s
 
-  for (int i = 0; i < oxygen.levels.size(); i++) {
-    E(i) = oxygen.levels[i].energy;
+  for (int i = 0; i < Oxygen::levels().size(); i++) {
+    E(i) = Oxygen::levels()[i].energy;
   }
-  for (int i = 0; i < oxygen.levels.size(); i++) {
-    g(i) = oxygen.levels[i].statistical_weight;
+  for (int i = 0; i < Oxygen::levels().size(); i++) {
+    g(i) = Oxygen::levels()[i].statistical_weight;
   }
 
-  for (int i = 0; i < oxygen.levels.size(); i++) {
-    auto& initial = oxygen.levels[i];
-    for (int j = 0; j < oxygen.levels.size(); j++) {
-      auto& final = oxygen.levels[j];
-      for (auto& transition : rbb.transitions) {
+  for (int i = 0; i < Oxygen::levels().size(); i++) {
+    auto& initial = Oxygen::levels()[i];
+    for (int j = 0; j < Oxygen::levels().size(); j++) {
+      auto& final = Oxygen::levels()[j];
+      for (auto& transition : OxygenRbbVoigt::transitions()) {
         if (
           transition.initial == initial.term && transition.final == final.term
         ) {

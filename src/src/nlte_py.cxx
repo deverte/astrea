@@ -7,4 +7,5 @@ PYBIND11_MODULE(nlte, m) {
   nlte_py::oxygen_lte_population(m);
   nlte_py::oxygen_nlte_population(m);
   nlte_py::Sun(m);
+  nlte_py::Oxygen(m);
 }
