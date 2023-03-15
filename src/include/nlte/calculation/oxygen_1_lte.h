@@ -30,6 +30,7 @@ Eigen::VectorXd oxygen_lte_population(double temperature /* K */) {
   }
 
   for (int i = 0; i < E.size(); i++) {
+    // statw
     n(i) = std::exp(-E(i) / (k * T)) / sum_exp_E_kT * sum_n;
   }
 

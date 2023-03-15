@@ -29,9 +29,9 @@ Eigen::MatrixXd oxygen_nlte_transition_operator(
   auto P = // s^{-1}
     Eigen::MatrixXd::Zero(Oxygen::levels().size(), Oxygen::levels().size())
     + P_col
-    + P_rbb_doppler
-    + P_rbb_voigt
-    + P_rbf
+    // + P_rbb_doppler
+    // + P_rbb_voigt
+    // + P_rbf
   ;
 
   Eigen::MatrixXd R = Eigen::MatrixXd::Zero(P.rows(), P.cols()); // s^{-1}
