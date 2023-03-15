@@ -5,7 +5,6 @@
 
 #include <Eigen/Dense>
 
-#include "./oxygen_1_col.h"
 #include "./oxygen_1_col_regemorter.h"
 #include "./oxygen_1_rbb_doppler.h"
 #include "./oxygen_1_rbb_voigt.h"
@@ -23,7 +22,6 @@ Eigen::MatrixXd oxygen_nlte_transition_operator(
   std::vector<double> spectral_flux_densities /* W * m^{-2} * nm^{-1} */,
   std::vector<double> wavelengths /* cm */
 ) {
-  // auto P_col = oxygen_col_rates(temperature, electron_number_density); // s^{-1}
   auto P_col_regemorter = oxygen_col_regemorter_rates(
     temperature,
     electron_temperature,
@@ -35,11 +33,10 @@ Eigen::MatrixXd oxygen_nlte_transition_operator(
 
   auto P = // s^{-1}
     Eigen::MatrixXd::Zero(Oxygen::levels().size(), Oxygen::levels().size())
-    // + P_col
     + P_col_regemorter
-    // + P_rbb_doppler
-    // + P_rbb_voigt
-    // + P_rbf
+    + P_rbb_doppler
+    + P_rbb_voigt
+    + P_rbf
   ;
 
   Eigen::MatrixXd R = Eigen::MatrixXd::Zero(P.rows(), P.cols()); // s^{-1}
