@@ -7,6 +7,7 @@ import nlte
 def calculate_b_factors(
     population_nlte_1,
     temperatures,
+    electron_temperatures,
     electron_number_densities,
     delta_time = 60.0,
 ):
@@ -18,6 +19,7 @@ def calculate_b_factors(
             population_nlte_2,
             delta_time,
             temperatures[i],
+            electron_temperatures[i],
             electron_number_densities[i],
             nlte.Sun.spectral_flux_density,
             nlte.Sun.wavelengths,

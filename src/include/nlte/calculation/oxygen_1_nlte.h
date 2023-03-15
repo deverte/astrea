@@ -6,6 +6,7 @@
 #include <Eigen/Dense>
 
 #include "./oxygen_1_col.h"
+#include "./oxygen_1_col_regemorter.h"
 #include "./oxygen_1_rbb_doppler.h"
 #include "./oxygen_1_rbb_voigt.h"
 #include "./oxygen_1_rbf.h"
@@ -17,18 +18,25 @@ namespace nlte {
 
 Eigen::MatrixXd oxygen_nlte_transition_operator(
   double temperature /* K */,
+  double electron_temperature /* K */,
   double electron_number_density /* cm^{-3} */,
   std::vector<double> spectral_flux_densities /* W * m^{-2} * nm^{-1} */,
   std::vector<double> wavelengths /* cm */
 ) {
-  auto P_col = oxygen_col_rates(temperature, electron_number_density); // s^{-1}
+  // auto P_col = oxygen_col_rates(temperature, electron_number_density); // s^{-1}
+  auto P_col_regemorter = oxygen_col_regemorter_rates(
+    temperature,
+    electron_temperature,
+    electron_number_density
+  ); // s^{-1}
   auto P_rbb_doppler = oxygen_rbb_doppler_rates(); // s^{-1}
   auto P_rbb_voigt = oxygen_rbb_voigt_rates(); // s^{-1}
   auto P_rbf = oxygen_rbf_rates(wavelengths, spectral_flux_densities); // s^{-1}
 
   auto P = // s^{-1}
     Eigen::MatrixXd::Zero(Oxygen::levels().size(), Oxygen::levels().size())
-    + P_col
+    // + P_col
+    + P_col_regemorter
     // + P_rbb_doppler
     // + P_rbb_voigt
     // + P_rbf
@@ -58,12 +66,14 @@ Eigen::VectorXd oxygen_nlte_population(
   Eigen::VectorXd population /* 1 */,
   double delta_time /* s */,
   double temperature /* K */,
+  double electron_temperature /* K */,
   double electron_number_density /* cm^{-3} */,
   std::vector<double> spectral_flux_densities /* W * m^{-2} * nm^{-1} */,
   std::vector<double> wavelengths /* cm */
 ) {
   auto R = oxygen_nlte_transition_operator(
     temperature,
+    electron_temperature,
     electron_number_density,
     spectral_flux_densities,
     wavelengths
