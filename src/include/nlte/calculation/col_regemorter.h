@@ -2,17 +2,19 @@
 
 
 #include <cmath>
+#include <memory>
 
 #include <Eigen/Dense>
 
 #include "../data/constants.h"
-#include "../data/oxygen_1.h"
+#include "../data/element.h"
 
 
 namespace nlte {
 
 
-Eigen::MatrixXd oxygen_col_regemorter_rates(
+Eigen::MatrixXd col_regemorter_rates(
+  std::shared_ptr<Element> element,
   double temperature /* K */,
   double electron_temperature /* K */,
   double electron_number_density /* cm^{-3} */
@@ -27,16 +29,16 @@ Eigen::MatrixXd oxygen_col_regemorter_rates(
   auto& k = BOLTZMANN_CONSTANT; // eV * K^{-1}
   auto gamma_ij = 1.0; // effective electron collision strength.
   Eigen::MatrixXd P = // s^{-1}
-  Eigen::MatrixXd::Zero(Oxygen::levels().size(), Oxygen::levels().size());
+  Eigen::MatrixXd::Zero(element->levels().size(), element->levels().size());
   Eigen::MatrixXd q = // cm^3 * s^{-1}
-  Eigen::MatrixXd::Zero(Oxygen::levels().size(), Oxygen::levels().size());
+  Eigen::MatrixXd::Zero(element->levels().size(), element->levels().size());
 
-  for (int alpha = 0; alpha < Oxygen::levels().size(); alpha++) {
-    auto& initial = Oxygen::levels()[alpha];
+  for (int alpha = 0; alpha < element->levels().size(); alpha++) {
+    auto& initial = element->levels()[alpha];
     auto& E_alpha = initial.energy;
 
-    for (int beta = 0; beta < Oxygen::levels().size(); beta++) {
-      auto& final = Oxygen::levels()[beta];
+    for (int beta = 0; beta < element->levels().size(); beta++) {
+      auto& final = element->levels()[beta];
       auto& E_beta = final.energy;
 
       if (E_alpha == E_beta) {

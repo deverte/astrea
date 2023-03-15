@@ -4,48 +4,27 @@
 #include <string>
 #include <vector>
 
+#include "./element.h"
+
 
 namespace nlte {
 
 
-class Level {
+class Oxygen1 : public Element {
  public:
-  const std::string term;
-  const std::string limit_term;
-  const std::string ground_state_term;
-  const double principal_quantum_number; // one
-  const double statistical_weight; // one
-  const double energy; // eV
-  const double ionization_energy; // eV
-};
-
-
-class Oxygen {
- public:
-  static const std::vector<std::string> keys();
-
-  static const std::vector<Level>& levels();
+  const std::vector<Level>& all_levels() override;
 
  private:
-  static const std::vector<Level> levels_;
+  static const std::vector<Level> all_levels_;
 };
 
 
-inline const std::vector<std::string> Oxygen::keys() {
-  auto keys = std::vector<std::string>();
-  for (auto& level : levels_) {
-    keys.push_back(level.term);
-  }
-  return keys;
+inline const std::vector<Level>& Oxygen1::all_levels() {
+  return all_levels_;
 }
 
 
-inline const std::vector<Level>& Oxygen::levels() {
-  return levels_;
-}
-
-
-inline const std::vector<Level> Oxygen::levels_{
+inline const std::vector<Level> Oxygen1::all_levels_{
   {
     .term = "12P3P4",
     .limit_term = "22P4S",

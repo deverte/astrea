@@ -16,7 +16,7 @@ namespace nlte_py {
 inline void Sun(py::module_& m) {
   py::class_<nlte::Sun> sun(m, "Sun");
 
-  sun.def(py::init());
+  sun.def(py::init<>());
 
   sun.def_property_readonly_static(
     "wavelengths",

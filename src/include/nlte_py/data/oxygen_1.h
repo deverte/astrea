@@ -1,6 +1,8 @@
 #pragma once
 
 
+#include <memory>
+
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
 
@@ -13,15 +15,11 @@ namespace py = pybind11;
 namespace nlte_py {
 
 
-inline void Oxygen(py::module_& m) {
-  py::class_<nlte::Oxygen> oxygen(m, "Oxygen");
+inline void Oxygen1(py::module_& m) {
+  py::class_<nlte::Oxygen1, nlte::Element, std::shared_ptr<nlte::Oxygen1>>
+  oxygen_1(m, "Oxygen1");
 
-  oxygen.def(py::init());
-
-  oxygen.def_property_readonly_static(
-    "keys",
-    [&](py::object /* self */) { return nlte::Oxygen::keys(); }
-  );
+  oxygen_1.def(py::init<>());
 }
 
 

@@ -2,37 +2,38 @@
 
 
 #include <cmath>
+#include <memory>
 #include <numbers>
 
 #include <Eigen/Dense>
 
 #include "../data/constants.h"
+#include "../data/element.h"
 #include "../data/oxygen_1_rbb_voigt.h"
-#include "../data/oxygen_1.h"
 
 
 namespace nlte {
 
 
-Eigen::MatrixXd oxygen_rbb_voigt_rates() {
+Eigen::MatrixXd oxygen_1_rbb_voigt_rates(std::shared_ptr<Element> element) {
   Eigen::MatrixXd P = // s^{-1}
-  Eigen::MatrixXd::Zero(Oxygen::levels().size(), Oxygen::levels().size());
-  Eigen::VectorXd E(Oxygen::levels().size()); // eV
-  Eigen::VectorXd g(Oxygen::levels().size()); // 1
+  Eigen::MatrixXd::Zero(element->levels().size(), element->levels().size());
+  Eigen::VectorXd E(element->levels().size()); // eV
+  Eigen::VectorXd g(element->levels().size()); // 1
   auto& c = SPEED_OF_LIGHT; // cm * s^{-1}
   auto& hbar = REDUCED_PLANCK_CONSTANT; // eV * s
 
-  for (int i = 0; i < Oxygen::levels().size(); i++) {
-    E(i) = Oxygen::levels()[i].energy;
+  for (int i = 0; i < element->levels().size(); i++) {
+    E(i) = element->levels()[i].energy;
   }
-  for (int i = 0; i < Oxygen::levels().size(); i++) {
-    g(i) = Oxygen::levels()[i].statistical_weight;
+  for (int i = 0; i < element->levels().size(); i++) {
+    g(i) = element->levels()[i].statistical_weight;
   }
 
-  for (int i = 0; i < Oxygen::levels().size(); i++) {
-    auto& initial = Oxygen::levels()[i];
-    for (int j = 0; j < Oxygen::levels().size(); j++) {
-      auto& final = Oxygen::levels()[j];
+  for (int i = 0; i < element->levels().size(); i++) {
+    auto& initial = element->levels()[i];
+    for (int j = 0; j < element->levels().size(); j++) {
+      auto& final = element->levels()[j];
       for (auto& transition : OxygenRbbVoigt::transitions()) {
         if (
           transition.initial == initial.term && transition.final == final.term

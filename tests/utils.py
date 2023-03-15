@@ -5,31 +5,48 @@ import nlte
 
 
 def calculate_b_factors(
+    element,
     population_nlte_1,
     temperatures,
     electron_temperatures,
     electron_number_densities,
     delta_time = 60.0,
+    transitions_types = [],
 ):
-    b_factors = np.zeros((len(temperatures), len(nlte.Oxygen.keys)))
+    b_factors = np.zeros((len(temperatures), len(element.keys)))
     population_nlte_2 = population_nlte_1
     for i, _ in enumerate(temperatures):
-        population_lte = nlte.oxygen_lte_population(temperatures[i])
-        population_nlte_2 = nlte.oxygen_nlte_population(
+        population_lte = nlte.lte_population(element, temperatures[i])
+
+        rates_matrix = np.zeros((len(element.keys), len(element.keys)))
+        if "col_regemorter" in transitions_types:
+            rates_matrix += nlte.col_regemorter_rates(
+                element,
+                temperatures[i],
+                electron_temperatures[i],
+                electron_number_densities[i],
+            )
+        if "oxygen_1_col" in transitions_types:
+            rates_matrix += nlte.oxygen_1_col_rates(
+                element,
+                temperatures[i],
+                electron_number_densities[i],
+            )
+        if "oxygen_1_rbb_doppler" in transitions_types:
+            rates_matrix += nlte.oxygen_1_rbb_doppler_rates(element)
+        if "oxygen_1_rbb_voigt" in transitions_types:
+            rates_matrix += nlte.oxygen_1_rbb_voigt_rates(element)
+        if "oxygen_1_rbf" in transitions_types:
+            rates_matrix += nlte.oxygen_1_rbf_rates(
+                element,
+                nlte.Sun.wavelengths,
+                nlte.Sun.spectral_flux_density,
+            )
+        population_nlte_2 = nlte.nlte_population(
+            element,
             population_nlte_2,
             delta_time,
-            temperatures[i],
-            electron_temperatures[i],
-            electron_number_densities[i],
-            nlte.Sun.spectral_flux_density,
-            nlte.Sun.wavelengths,
+            rates_matrix,
         )
         b_factors[i] = population_nlte_2 / population_lte
     return b_factors
-
-
-def plot_b_factors(b_factors, key):
-    i = nlte.Oxygen.keys.index(key)
-    plt.plot(b_factors.T[i], label=key)
-    plt.legend()
-    plt.show()

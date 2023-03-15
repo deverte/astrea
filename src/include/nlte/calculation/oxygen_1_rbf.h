@@ -2,34 +2,36 @@
 
 
 #include <cmath>
+#include <memory>
 
 #include <Eigen/Dense>
 
 #include "../data/constants.h"
+#include "../data/element.h"
 #include "../data/oxygen_1_rbf.h"
-#include "../data/oxygen_1.h"
 #include "../interpolation/linear_interpolant.h"
 
 
 namespace nlte {
 
 
-Eigen::MatrixXd oxygen_rbf_rates(
+Eigen::MatrixXd oxygen_1_rbf_rates(
+  std::shared_ptr<Element> element,
   std::vector<double> wavelengths /* nm */,
   std::vector<double> spectral_flux_densities /* W * m^{-2} * nm^{-1} */
 ) {
   Eigen::MatrixXd P = // s^{-1}
-  Eigen::MatrixXd::Zero(Oxygen::levels().size(), Oxygen::levels().size());
+  Eigen::MatrixXd::Zero(element->levels().size(), element->levels().size());
   auto& c = SPEED_OF_LIGHT; // cm * s^{-1}
   auto eV_to_J = 1.602177e-19;
   auto cm_to_m = 0.01;
   auto cm_to_nm = 1.0e7;
   auto hbar = REDUCED_PLANCK_CONSTANT * eV_to_J; // J * s = W * s^2
 
-  for (int i = 0; i < Oxygen::levels().size(); i++) {
-    auto& initial = Oxygen::levels()[i];
-    for (int j = 0; j < Oxygen::levels().size(); j++) {
-      auto& final = Oxygen::levels()[j];
+  for (int i = 0; i < element->levels().size(); i++) {
+    auto& initial = element->levels()[i];
+    for (int j = 0; j < element->levels().size(); j++) {
+      auto& final = element->levels()[j];
       for (auto& transition : OxygenRbf::transitions()) {
         if (
           transition.initial == initial.term && final.term == initial.limit_term
