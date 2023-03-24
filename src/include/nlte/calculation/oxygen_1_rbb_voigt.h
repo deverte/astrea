@@ -15,6 +15,9 @@
 namespace nlte {
 
 
+/**
+ * INASAN
+ */
 Eigen::MatrixXd oxygen_1_rbb_voigt_rates(std::shared_ptr<Element> element) {
   Eigen::MatrixXd P = // s^{-1}
   Eigen::MatrixXd::Zero(element->levels().size(), element->levels().size());

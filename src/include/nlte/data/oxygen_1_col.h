@@ -24,7 +24,7 @@ class OxygenCol {
  public:
   static const std::vector<ColTransition>& transitions();
 
- public:
+ private:
   static const std::vector<ColTransition> transitions_;
 };
 

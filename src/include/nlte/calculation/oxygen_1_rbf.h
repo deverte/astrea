@@ -15,6 +15,9 @@
 namespace nlte {
 
 
+/**
+ * INASAN
+ */
 Eigen::MatrixXd oxygen_1_rbf_rates(
   std::shared_ptr<Element> element,
   std::vector<double> wavelengths /* nm */,

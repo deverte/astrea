@@ -13,6 +13,9 @@
 namespace nlte {
 
 
+/**
+ * Regemorter formula
+ */
 Eigen::MatrixXd col_regemorter_rates(
   std::shared_ptr<Element> element,
   double temperature /* K */,

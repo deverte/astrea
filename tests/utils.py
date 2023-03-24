@@ -42,6 +42,8 @@ def calculate_b_factors(
                 nlte.Sun.wavelengths,
                 nlte.Sun.spectral_flux_density,
             )
+        if "oxygen_1_spontaneous_emission" in transitions_types:
+            rates_matrix += nlte.oxygen_1_spontaneous_emission_rates(element)
         population_nlte_2 = nlte.nlte_population(
             element,
             population_nlte_2,
