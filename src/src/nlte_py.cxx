@@ -13,6 +13,7 @@ PYBIND11_MODULE(nlte, m) {
   nlte_py::oxygen_1_rbf_rates(m);
   nlte_py::oxygen_1_spontaneous_emission_rates(m);
   nlte_py::photoexcitation_rates(m);
+  nlte_py::photoionization_rates(m);
 
   nlte_py::Element(m);
   nlte_py::Oxygen1(m);

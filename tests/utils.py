@@ -56,6 +56,15 @@ def calculate_b_factors(
                 temperatures[i],
                 wavelengths_step,
             )
+        if "photoionization" in transitions_types:
+            rates_matrix += nlte.photoionization_rates(
+                element,
+                nlte.Sun.wavelengths,
+                nlte.Sun.spectral_flux_density,
+                optical_depth,
+                temperatures[i],
+                wavelengths_step,
+            )
         population_nlte_2 = nlte.nlte_population(
             element,
             population_nlte_2,
