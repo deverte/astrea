@@ -10,7 +10,9 @@ def calculate_b_factors(
     temperatures,
     electron_temperatures,
     electron_number_densities,
+    optical_depth = 0.0,
     delta_time = 60.0,
+    wavelengths_step = 0.5,
     transitions_types = [],
 ):
     b_factors = np.zeros((len(temperatures), len(element.keys)))
@@ -41,9 +43,19 @@ def calculate_b_factors(
                 element,
                 nlte.Sun.wavelengths,
                 nlte.Sun.spectral_flux_density,
+                optical_depth,
             )
         if "oxygen_1_spontaneous_emission" in transitions_types:
             rates_matrix += nlte.oxygen_1_spontaneous_emission_rates(element)
+        if "photoexcitation" in transitions_types:
+            rates_matrix += nlte.photoexcitation_rates(
+                element,
+                nlte.Sun.wavelengths,
+                nlte.Sun.spectral_flux_density,
+                optical_depth,
+                temperatures[i],
+                wavelengths_step,
+            )
         population_nlte_2 = nlte.nlte_population(
             element,
             population_nlte_2,

@@ -28,6 +28,8 @@ class Element {
 
   virtual const std::vector<Level>& all_levels() = 0;
 
+  virtual const double mass() = 0;
+
   std::vector<std::string> keys();
 
   void keys(std::vector<std::string> value);

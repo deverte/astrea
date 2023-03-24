@@ -28,6 +28,14 @@ class PyElement : public nlte::Element {
       all_levels
     );
   }
+
+  const double mass() override {
+    PYBIND11_OVERRIDE_PURE(
+      const double,
+      nlte::Element,
+      mass
+    );
+  }
 };
 
 

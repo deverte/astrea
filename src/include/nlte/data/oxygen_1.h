@@ -14,13 +14,22 @@ class Oxygen1 : public Element {
  public:
   const std::vector<Level>& all_levels() override;
 
+  const double mass() override;
+
  private:
   static const std::vector<Level> all_levels_;
+
+  const double mass_ = 16.0; // u
 };
 
 
 inline const std::vector<Level>& Oxygen1::all_levels() {
   return all_levels_;
+}
+
+
+inline const double Oxygen1::mass() {
+  return mass_;
 }
 
 

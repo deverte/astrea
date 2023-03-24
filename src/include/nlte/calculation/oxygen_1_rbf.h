@@ -21,11 +21,13 @@ namespace nlte {
 Eigen::MatrixXd oxygen_1_rbf_rates(
   std::shared_ptr<Element> element,
   std::vector<double> wavelengths /* nm */,
-  std::vector<double> spectral_flux_densities /* W * m^{-2} * nm^{-1} */
+  std::vector<double> spectral_flux_densities /* W * m^{-2} * nm^{-1} */,
+  double optical_depth /* 1 */
 ) {
   Eigen::MatrixXd P = // s^{-1}
   Eigen::MatrixXd::Zero(element->levels().size(), element->levels().size());
   auto& c = SPEED_OF_LIGHT; // cm * s^{-1}
+  auto& tau = optical_depth; // 1
   auto eV_to_J = 1.602177e-19;
   auto cm_to_m = 0.01;
   auto cm_to_nm = 1.0e7;
@@ -64,7 +66,7 @@ Eigen::MatrixXd oxygen_1_rbf_rates(
               )
               * cm_to_nm; // nm
 
-            P_ij += F(lambda) / (hbar * nu) * sigma * dlambda;
+            P_ij += F(lambda) / (hbar * nu) * sigma * std::exp(-tau) * dlambda;
           }
 
           P(i, j) = P_ij;
