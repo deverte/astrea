@@ -14,12 +14,20 @@ class Oxygen1 : public Element {
  public:
   const std::vector<Level>& all_levels() override;
 
+  const double atomic_number() override;
+
   const double mass() override;
+
+  const double number_of_ion_electrons_before_recombination() override;
 
  private:
   static const std::vector<Level> all_levels_;
 
+  const double atomic_number_ = 8.0; // 1
+
   const double mass_ = 16.0; // u
+
+  const double number_of_ion_electrons_before_recombination_ = 7.0; // 1
 };
 
 
@@ -28,8 +36,18 @@ inline const std::vector<Level>& Oxygen1::all_levels() {
 }
 
 
+inline const double Oxygen1::atomic_number() {
+  return atomic_number_;
+}
+
+
 inline const double Oxygen1::mass() {
   return mass_;
+}
+
+
+inline const double Oxygen1::number_of_ion_electrons_before_recombination() {
+  return number_of_ion_electrons_before_recombination_;
 }
 
 

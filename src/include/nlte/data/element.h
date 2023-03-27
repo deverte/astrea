@@ -28,7 +28,11 @@ class Element {
 
   virtual const std::vector<Level>& all_levels() = 0;
 
+  virtual const double atomic_number() = 0;
+
   virtual const double mass() = 0;
+
+  virtual const double number_of_ion_electrons_before_recombination() = 0;
 
   std::vector<std::string> keys();
 

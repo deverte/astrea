@@ -13,8 +13,8 @@ namespace py = pybind11;
 namespace nlte_py {
 
 
-inline void photoexcitation_rates(py::module_& m) {
-  m.def("photoexcitation_rates", &nlte::photoexcitation_rates);
+inline void pe_rates(py::module_& m) {
+  m.def("pe_rates", &nlte::pe_rates);
 }
 
 

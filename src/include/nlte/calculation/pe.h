@@ -19,7 +19,7 @@ namespace nlte {
 /**
  * Formula
  */
-Eigen::MatrixXd photoexcitation_rates(
+Eigen::MatrixXd pe_rates(
   std::shared_ptr<Element> element,
   std::vector<double> wavelengths /* nm */,
   std::vector<double> spectral_flux_densities /* W * m^{-2} * nm^{-1} */,

@@ -28,6 +28,12 @@ def calculate_b_factors(
                 electron_temperatures[i],
                 electron_number_densities[i],
             )
+        if "dr" in transitions_types:
+            rates_matrix += nlte.dr_rates(
+                element,
+                temperatures[i],
+                electron_number_densities[i],
+            )
         if "oxygen_1_col" in transitions_types:
             rates_matrix += nlte.oxygen_1_col_rates(
                 element,
@@ -47,8 +53,8 @@ def calculate_b_factors(
             )
         if "oxygen_1_spontaneous_emission" in transitions_types:
             rates_matrix += nlte.oxygen_1_spontaneous_emission_rates(element)
-        if "photoexcitation" in transitions_types:
-            rates_matrix += nlte.photoexcitation_rates(
+        if "pe" in transitions_types:
+            rates_matrix += nlte.pe_rates(
                 element,
                 nlte.Sun.wavelengths,
                 nlte.Sun.spectral_flux_density,
@@ -56,14 +62,20 @@ def calculate_b_factors(
                 temperatures[i],
                 wavelengths_step,
             )
-        if "photoionization" in transitions_types:
-            rates_matrix += nlte.photoionization_rates(
+        if "pi" in transitions_types:
+            rates_matrix += nlte.pi_rates(
                 element,
                 nlte.Sun.wavelengths,
                 nlte.Sun.spectral_flux_density,
                 optical_depth,
                 temperatures[i],
                 wavelengths_step,
+            )
+        if "rr" in transitions_types:
+            rates_matrix += nlte.rr_rates(
+                element,
+                temperatures[i],
+                electron_number_densities[i],
             )
         population_nlte_2 = nlte.nlte_population(
             element,

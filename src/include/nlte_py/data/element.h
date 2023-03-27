@@ -29,11 +29,27 @@ class PyElement : public nlte::Element {
     );
   }
 
+  const double atomic_number() override {
+    PYBIND11_OVERRIDE_PURE(
+      const double,
+      nlte::Element,
+      atomic_number
+    );
+  }
+
   const double mass() override {
     PYBIND11_OVERRIDE_PURE(
       const double,
       nlte::Element,
       mass
+    );
+  }
+
+  const double number_of_ion_electrons_before_recombination() override {
+    PYBIND11_OVERRIDE_PURE(
+      const double,
+      nlte::Element,
+      number_of_ion_electrons_before_recombination
     );
   }
 };
