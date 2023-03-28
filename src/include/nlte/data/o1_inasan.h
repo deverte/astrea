@@ -10,7 +10,7 @@
 namespace nlte {
 
 
-class Oxygen1 : public Element {
+class O1Inasan : public Element {
  public:
   const std::vector<Level>& all_levels() override;
 
@@ -31,27 +31,27 @@ class Oxygen1 : public Element {
 };
 
 
-inline const std::vector<Level>& Oxygen1::all_levels() {
+inline const std::vector<Level>& O1Inasan::all_levels() {
   return all_levels_;
 }
 
 
-inline const double Oxygen1::atomic_number() {
+inline const double O1Inasan::atomic_number() {
   return atomic_number_;
 }
 
 
-inline const double Oxygen1::mass() {
+inline const double O1Inasan::mass() {
   return mass_;
 }
 
 
-inline const double Oxygen1::number_of_ion_electrons_before_recombination() {
+inline const double O1Inasan::number_of_ion_electrons_before_recombination() {
   return number_of_ion_electrons_before_recombination_;
 }
 
 
-inline const std::vector<Level> Oxygen1::all_levels_{
+inline const std::vector<Level> O1Inasan::all_levels_{
   {
     .term = "12P3P4",
     .limit_term = "22P4S",

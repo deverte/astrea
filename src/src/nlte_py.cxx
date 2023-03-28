@@ -4,20 +4,20 @@
 
 
 PYBIND11_MODULE(nlte, m) {
-  nlte_py::col_regemorter_rates(m);
-  nlte_py::dr_rates(m);
+  nlte_py::ce_inasan_o1_rates(m);
+  nlte_py::ce_regemorter_rates(m);
+  nlte_py::dr_badnell_rates(m);
   nlte_py::lte_population(m);
   nlte_py::nlte_population(m);
-  nlte_py::oxygen_1_col_rates(m);
-  nlte_py::oxygen_1_rbb_doppler_rates(m);
-  nlte_py::oxygen_1_rbb_voigt_rates(m);
-  nlte_py::oxygen_1_rbf_rates(m);
-  nlte_py::oxygen_1_spontaneous_emission_rates(m);
-  nlte_py::pe_rates(m);
-  nlte_py::pi_rates(m);
-  nlte_py::rr_rates(m);
+  nlte_py::pe_tasitsiomi_rates(m);
+  nlte_py::pi_tasitsiomi_rates(m);
+  nlte_py::rbb_doppler_inasan_o1_rates(m);
+  nlte_py::rbb_voigt_inasan_o1_rates(m);
+  nlte_py::rbf_inasan_o1_rates(m);
+  nlte_py::rr_badnell_rates(m);
+  nlte_py::se_nist_o1_rates(m);
 
   nlte_py::Element(m);
-  nlte_py::Oxygen1(m);
-  nlte_py::Sun(m);
+  nlte_py::O1Inasan(m);
+  nlte_py::SunGueymard(m);
 }

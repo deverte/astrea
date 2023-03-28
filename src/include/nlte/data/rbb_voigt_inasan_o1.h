@@ -11,7 +11,7 @@ namespace nlte {
 /**
  * Radiative bound-bound transition using Voigt profile.
  */
-class RbbVoigtTransition {
+class RbbVoigtInasanO1Transition {
  public:
   const std::string initial;
   const std::string final;
@@ -22,22 +22,24 @@ class RbbVoigtTransition {
 };
 
 
-class OxygenRbbVoigt {
+class RbbVoigtInasanO1 {
  public:
-  static const std::vector<RbbVoigtTransition>& transitions();
+  static const std::vector<RbbVoigtInasanO1Transition>& transitions();
 
  private:
-  static const std::vector<RbbVoigtTransition> transitions_;
+  static const std::vector<RbbVoigtInasanO1Transition> transitions_;
 
 };
 
 
-inline const std::vector<RbbVoigtTransition>& OxygenRbbVoigt::transitions() {
+inline const std::vector<RbbVoigtInasanO1Transition>&
+RbbVoigtInasanO1::transitions() {
   return transitions_;
 }
 
 
-inline const std::vector<RbbVoigtTransition> OxygenRbbVoigt::transitions_{
+inline const std::vector<RbbVoigtInasanO1Transition>
+RbbVoigtInasanO1::transitions_{
   {
     .initial = "12P3P4",
     .final = "13S3S",

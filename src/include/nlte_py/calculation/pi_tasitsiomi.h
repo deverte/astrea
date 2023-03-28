@@ -13,8 +13,8 @@ namespace py = pybind11;
 namespace nlte_py {
 
 
-inline void rr_rates(py::module_& m) {
-  m.def("rr_rates", &nlte::rr_rates);
+inline void pi_tasitsiomi_rates(py::module_& m) {
+  m.def("pi_tasitsiomi_rates", &nlte::pi_tasitsiomi_rates);
 }
 
 

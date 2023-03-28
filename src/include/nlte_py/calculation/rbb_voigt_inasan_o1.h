@@ -13,8 +13,8 @@ namespace py = pybind11;
 namespace nlte_py {
 
 
-inline void dr_rates(py::module_& m) {
-  m.def("dr_rates", &nlte::dr_rates);
+inline void rbb_voigt_inasan_o1_rates(py::module_& m) {
+  m.def("rbb_voigt_inasan_o1_rates", &nlte::rbb_voigt_inasan_o1_rates);
 }
 
 

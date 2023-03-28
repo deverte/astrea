@@ -6,7 +6,7 @@
 #include <Eigen/Dense>
 
 #include "../data/element.h"
-#include "../data/rr.h"
+#include "../data/rr_badnell.h"
 
 
 namespace nlte {
@@ -15,7 +15,7 @@ namespace nlte {
 /**
  * Formula
  */
-Eigen::MatrixXd rr_rates(
+Eigen::MatrixXd rr_badnell_rates(
   std::shared_ptr<Element> element,
   double temperature /* K */,
   double electron_number_density /* cm^{-3} */
@@ -36,7 +36,7 @@ Eigen::MatrixXd rr_rates(
   auto T_2 = 0.0; // K
   auto alpha_RR = 0.0; // cm^3 * s^{-1}
 
-  for (auto fit : RR::fit()) {
+  for (auto fit : RRBadnell::fit()) {
     if (fit.Z == Z && fit.N == N) {
       A = fit.A;
       T_0 = fit.T0;

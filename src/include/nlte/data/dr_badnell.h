@@ -7,7 +7,7 @@
 /**
  * http://amdpp.phys.strath.ac.uk/tamoc/DR/
  */
-class DRFit {
+class DRBadnellFit {
  public:
   const double Z; // Nuclear charge
   const double N; // Isoelectronic sequence N (where N=1,2 ... is the number of
@@ -20,21 +20,21 @@ class DRFit {
 };
 
 
-class DR {
+class DRBadnell {
  public:
-  static const std::vector<DRFit>& fit();
+  static const std::vector<DRBadnellFit>& fit();
 
  private:
-  static const std::vector<DRFit> fit_;
+  static const std::vector<DRBadnellFit> fit_;
 };
 
 
-inline const std::vector<DRFit>& DR::fit() {
+inline const std::vector<DRBadnellFit>& DRBadnell::fit() {
   return fit_;
 }
 
 
-inline const std::vector<DRFit> DR::fit_{
+inline const std::vector<DRBadnellFit> DRBadnell::fit_{
   {
     .Z = 2.0,
     .N = 1.0,

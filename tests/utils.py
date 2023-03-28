@@ -21,62 +21,62 @@ def calculate_b_factors(
         population_lte = nlte.lte_population(element, temperatures[i])
 
         rates_matrix = np.zeros((len(element.keys), len(element.keys)))
-        if "col_regemorter" in transitions_types:
-            rates_matrix += nlte.col_regemorter_rates(
+        if "ce_inasan_o1" in transitions_types:
+            rates_matrix += nlte.ce_inasan_o1_rates(
+                element,
+                temperatures[i],
+                electron_number_densities[i],
+            )
+        if "ce_regemorter" in transitions_types:
+            rates_matrix += nlte.ce_regemorter_rates(
                 element,
                 temperatures[i],
                 electron_temperatures[i],
                 electron_number_densities[i],
             )
-        if "dr" in transitions_types:
-            rates_matrix += nlte.dr_rates(
+        if "dr_badnell" in transitions_types:
+            rates_matrix += nlte.dr_badnell_rates(
                 element,
                 temperatures[i],
                 electron_number_densities[i],
             )
-        if "oxygen_1_col" in transitions_types:
-            rates_matrix += nlte.oxygen_1_col_rates(
+        if "pe_tasitsiomi" in transitions_types:
+            rates_matrix += nlte.pe_tasitsiomi_rates(
                 element,
-                temperatures[i],
-                electron_number_densities[i],
-            )
-        if "oxygen_1_rbb_doppler" in transitions_types:
-            rates_matrix += nlte.oxygen_1_rbb_doppler_rates(element)
-        if "oxygen_1_rbb_voigt" in transitions_types:
-            rates_matrix += nlte.oxygen_1_rbb_voigt_rates(element)
-        if "oxygen_1_rbf" in transitions_types:
-            rates_matrix += nlte.oxygen_1_rbf_rates(
-                element,
-                nlte.Sun.wavelengths,
-                nlte.Sun.spectral_flux_density,
-                optical_depth,
-            )
-        if "oxygen_1_spontaneous_emission" in transitions_types:
-            rates_matrix += nlte.oxygen_1_spontaneous_emission_rates(element)
-        if "pe" in transitions_types:
-            rates_matrix += nlte.pe_rates(
-                element,
-                nlte.Sun.wavelengths,
-                nlte.Sun.spectral_flux_density,
+                nlte.SunGueymard.wavelengths,
+                nlte.SunGueymard.spectral_flux_density,
                 optical_depth,
                 temperatures[i],
                 wavelengths_step,
             )
-        if "pi" in transitions_types:
-            rates_matrix += nlte.pi_rates(
+        if "pi_tasitsiomi" in transitions_types:
+            rates_matrix += nlte.pi_tasitsiomi_rates(
                 element,
-                nlte.Sun.wavelengths,
-                nlte.Sun.spectral_flux_density,
+                nlte.SunGueymard.wavelengths,
+                nlte.SunGueymard.spectral_flux_density,
                 optical_depth,
                 temperatures[i],
                 wavelengths_step,
             )
-        if "rr" in transitions_types:
-            rates_matrix += nlte.rr_rates(
+        if "rbb_doppler_inasan_o1" in transitions_types:
+            rates_matrix += nlte.rbb_doppler_inasan_o1_rates(element)
+        if "rbb_voigt_inasan_o1" in transitions_types:
+            rates_matrix += nlte.rbb_voigt_inasan_o1_rates(element)
+        if "rbf_inasan_o1" in transitions_types:
+            rates_matrix += nlte.rbf_inasan_o1_rates(
+                element,
+                nlte.SunGueymard.wavelengths,
+                nlte.SunGueymard.spectral_flux_density,
+                optical_depth,
+            )
+        if "rr_badnell" in transitions_types:
+            rates_matrix += nlte.rr_badnell_rates(
                 element,
                 temperatures[i],
                 electron_number_densities[i],
             )
+        if "se_nist_o1" in transitions_types:
+            rates_matrix += nlte.se_nist_o1_rates(element)
         population_nlte_2 = nlte.nlte_population(
             element,
             population_nlte_2,

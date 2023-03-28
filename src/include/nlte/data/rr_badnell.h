@@ -12,7 +12,7 @@
  * 
  * Important: available new data at http://amdpp.phys.strath.ac.uk/tamoc/RR/
  */
-class RRFit {
+class RRBadnellFit {
  public:
   const double Z; // Nuclear charge
   const double N; // Number of ion electrons before recombination
@@ -25,21 +25,21 @@ class RRFit {
 };
 
 
-class RR {
+class RRBadnell {
  public:
-  static const std::vector<RRFit>& fit();
+  static const std::vector<RRBadnellFit>& fit();
 
  private:
-  static const std::vector<RRFit> fit_;
+  static const std::vector<RRBadnellFit> fit_;
 };
 
 
-inline const std::vector<RRFit>& RR::fit() {
+inline const std::vector<RRBadnellFit>& RRBadnell::fit() {
   return fit_;
 }
 
 
-inline const std::vector<RRFit> RR::fit_{
+inline const std::vector<RRBadnellFit> RRBadnell::fit_{
   {
     .Z = 1,
     .N = 0,

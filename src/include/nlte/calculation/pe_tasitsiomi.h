@@ -7,7 +7,7 @@
 
 #include <Eigen/Dense>
 
-#include "./oxygen_1_spontaneous_emission.h"
+#include "./se_nist_o1.h"
 #include "../data/constants.h"
 #include "../data/element.h"
 #include "../interpolation/linear_interpolant.h"
@@ -19,7 +19,7 @@ namespace nlte {
 /**
  * Formula
  */
-Eigen::MatrixXd pi_rates(
+Eigen::MatrixXd pe_tasitsiomi_rates(
   std::shared_ptr<Element> element,
   std::vector<double> wavelengths /* nm */,
   std::vector<double> spectral_flux_densities /* W * m^{-2} * nm^{-1} */,
@@ -27,7 +27,7 @@ Eigen::MatrixXd pi_rates(
   double temperature /* K */,
   double wavelengths_step
 ) {
-  Eigen::MatrixXd A = oxygen_1_spontaneous_emission_rates(element); // s^{-1}
+  Eigen::MatrixXd A = se_nist_o1_rates(element); // s^{-1}
   Eigen::MatrixXd P = // s^{-1}
   Eigen::MatrixXd::Zero(element->levels().size(), element->levels().size());
   Eigen::VectorXd g(element->levels().size()); // 1
@@ -70,12 +70,25 @@ Eigen::MatrixXd pi_rates(
     for (int j = 0; j < element->levels().size(); j++) {
       auto& final = element->levels()[j];
 
-      if (final.term == initial.limit_term) {
-        LinearInterpolant F; // W * m^{-2} * nm^{-1}
-        F.data_points(wavelengths, spectral_flux_densities);
+      LinearInterpolant F; // W * m^{-2} * nm^{-1}
+      F.data_points(wavelengths, spectral_flux_densities);
+
+      auto P_ij = 0.0;
+      for (
+        double lambda = lambda_infty; // nm
+        lambda < lambda_0;
+        lambda += delta_lambda
+      ) {
+        auto nu = c / (lambda * nm_to_cm); // s^{-1}
+        auto nu_0 = c / (lambda_0 * nm_to_cm); // s^{-1}
+
+        auto f_ij = // 1
+          + A(j, i)
+          * g(j) / g(i)
+          * std::pow(lambda * nm_to_angstrom, 2.0) / 6.6702e15
+        ;
 
         auto delta_nu_L = A(j, i) / (2.0 * pi); // s^{-1}
-        auto delta_lambda_L = c / delta_nu_L; // cm
 
         auto delta_nu_D = // s^{-1}
           + c / (lambda_0 * nm_to_cm)
@@ -83,71 +96,52 @@ Eigen::MatrixXd pi_rates(
             2.0 * k_B * T / ((m_i * u_to_eV_s2_cm_2) * std::pow(c, 2))
           )
         ;
-        auto delta_lambda_D = c / delta_nu_D; // cm
 
-        auto P_ij = 0.0;
-        for (
-          double lambda = // nm
-            lambda_0 - (delta_lambda_L + delta_lambda_D) / 2.0
-          ;
-          lambda < lambda_0 + (delta_lambda_L + delta_lambda_D) / 2.0;
-          lambda += delta_lambda
-        ) {
-          auto nu = c / (lambda * nm_to_cm); // s^{-1}
-          auto nu_0 = c / (lambda_0 * nm_to_cm); // s^{-1}
+        // TODO: Check formula
+        auto u = (nu - nu_0) / delta_nu_D; // 1
 
-          auto f_ij = // 1
-            + A(j, i)
-            * g(j) / g(i)
-            * std::pow(lambda * nm_to_angstrom, 2.0) / 6.6702e15
-          ;
+        auto alpha = delta_nu_L / (2.0 * delta_nu_D); // 1
 
-          // TODO: Check formula
-          auto u = (nu - nu_0) / delta_nu_D; // 1
+        auto z = // 1
+          (std::pow(u, 2.0) - zeta_0) / (std::pow(u, 2.0) + zeta_1)
+        ;
 
-          auto alpha = delta_nu_L / (2.0 * delta_nu_D); // 1
-
-          auto z = // 1
-            (std::pow(u, 2.0) - zeta_0) / (std::pow(u, 2.0) + zeta_1)
-          ;
-
-          auto q = 0.0; // 1
-          if (z > 0.0) {
-            q =
-              + z
-              * (1.0 + chi / std::pow(u, 2.0))
-              * alpha / (pi * (std::pow(u, 2.0) + 1))
-              * (kappa_0 + z * (kappa_1 + z * (kappa_2 + kappa_3 * z)))
-            ;
-          }
-
-          auto H = // 1
-            std::sqrt(pi) * (q + std::exp(-std::pow(u, 2.0)) / epsilon)
-          ;
-
-          auto sigma = // m^2
-            + f_ij
-            * std::sqrt(pi)
-            / (4.0 * pi * epsilon_0)
-            * (std::pow(e * statC_to_C, 2.0) * lambda * nm_to_m)
-            / (m_e * eV_to_J * std::pow(c, 2.0))
-            * std::sqrt(
-              (m_i * u_to_eV_s2_cm_2) * std::pow(c, 2.0) / (2.0 * k_B * T)
-            )
-            * H
-          ;
-
-          P_ij += // s^{-1}
-            + F(lambda)
-            * lambda / (hbar * c)
-            * std::exp(-tau)
-            * sigma
-            * (delta_lambda * nm_to_cm)
+        auto q = 0.0; // 1
+        if (z > 0.0) {
+          q =
+            + z
+            * (1.0 + chi / std::pow(u, 2.0))
+            * alpha / (pi * (std::pow(u, 2.0) + 1))
+            * (kappa_0 + z * (kappa_1 + z * (kappa_2 + kappa_3 * z)))
           ;
         }
 
-        P(i, j) = P_ij;
+        auto H = // 1
+          std::sqrt(pi) * (q + std::exp(-std::pow(u, 2.0)) / epsilon)
+        ;
+
+        auto sigma = // m^2
+          + f_ij
+          * std::sqrt(pi)
+          / (4.0 * pi * epsilon_0)
+          * (std::pow(e * statC_to_C, 2.0) * lambda * nm_to_m)
+          / (m_e * eV_to_J * std::pow(c, 2.0))
+          * std::sqrt(
+            (m_i * u_to_eV_s2_cm_2) * std::pow(c, 2.0) / (2.0 * k_B * T)
+          )
+          * H
+        ;
+
+        P_ij += // s^{-1}
+          + F(lambda)
+          * lambda / (hbar * c)
+          * std::exp(-tau)
+          * sigma
+          * (delta_lambda * nm_to_cm)
+        ;
       }
+
+      P(i, j) = P_ij;
     }
   }
 

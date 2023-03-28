@@ -11,7 +11,7 @@ namespace nlte {
 /**
  * Radiative bound-free transition.
  */
-class RbfTransition {
+class RbfInasanO1Transition {
  public:
   const std::string initial;
   const int start_index;
@@ -19,16 +19,16 @@ class RbfTransition {
 };
 
 
-class OxygenRbf {
+class RbfInasanO1 {
  public:
-  static const std::vector<RbfTransition>& transitions();
+  static const std::vector<RbfInasanO1Transition>& transitions();
 
   static const std::vector<double>& frequencies();
 
   static const std::vector<double>& photoionization_cross_sections();
 
  private:
-  static const std::vector<RbfTransition> transitions_;
+  static const std::vector<RbfInasanO1Transition> transitions_;
 
   static const std::vector<double> frequencies_;
 
@@ -36,22 +36,22 @@ class OxygenRbf {
 };
 
 
-inline const std::vector<RbfTransition>& OxygenRbf::transitions() {
+inline const std::vector<RbfInasanO1Transition>& RbfInasanO1::transitions() {
   return transitions_;
 }
 
 
-inline const std::vector<double>& OxygenRbf::frequencies() {
+inline const std::vector<double>& RbfInasanO1::frequencies() {
   return frequencies_;
 }
 
 
-inline const std::vector<double>& OxygenRbf::photoionization_cross_sections() {
+inline const std::vector<double>& RbfInasanO1::photoionization_cross_sections() {
   return photoionization_cross_sections_;
 }
 
 
-inline const std::vector<RbfTransition> OxygenRbf::transitions_{
+inline const std::vector<RbfInasanO1Transition> RbfInasanO1::transitions_{
   {
     .initial = "12P1S4",
     .start_index = 1,
@@ -311,7 +311,7 @@ inline const std::vector<RbfTransition> OxygenRbf::transitions_{
 
 
 // s^{-1}
-inline const std::vector<double> OxygenRbf::frequencies_{
+inline const std::vector<double> RbfInasanO1::frequencies_{
   0.3000271E+16,  0.3006535E+16,  0.3009617E+16,  0.3012666E+16,  0.3015684E+16,
   0.3018670E+16,  0.3021624E+16,  0.3024548E+16,  0.3027442E+16,  0.3030305E+16,
   0.3033139E+16,  0.3033170E+16,  0.3036041E+16,  0.3038881E+16,  0.3041692E+16,
@@ -6164,7 +6164,7 @@ inline const std::vector<double> OxygenRbf::frequencies_{
 
 
 // cm^2
-inline const std::vector<double> OxygenRbf::photoionization_cross_sections_{
+inline const std::vector<double> RbfInasanO1::photoionization_cross_sections_{
   0.2481000E-19,  0.9265000E-20,  0.2603000E-20,
   0.1016000E-21,  0.9151000E-20,  0.4913000E-19,  0.1771000E-18,  0.5979000E-18,
   0.2357000E-17,  0.1737000E-16,  0.1376000E-15,  0.1324000E-15,  0.1390000E-16,

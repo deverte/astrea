@@ -13,8 +13,8 @@ namespace py = pybind11;
 namespace nlte_py {
 
 
-inline void col_regemorter_rates(py::module_& m) {
-  m.def("col_regemorter_rates", &nlte::col_regemorter_rates);
+inline void rbb_doppler_inasan_o1_rates(py::module_& m) {
+  m.def("rbb_doppler_inasan_o1_rates", &nlte::rbb_doppler_inasan_o1_rates);
 }
 
 

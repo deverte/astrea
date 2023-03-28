@@ -11,7 +11,7 @@ namespace nlte {
 /**
  * Radiative bound-bound transition using Doppler profile.
  */
-class RbbDopplerTransition {
+class RbbDopplerInasanO1Transition {
  public:
   const std::string initial;
   const std::string final;
@@ -19,22 +19,22 @@ class RbbDopplerTransition {
 };
 
 
-class OxygenRbbDoppler {
+class RbbDopplerInasanO1 {
  public:
-  static const std::vector<RbbDopplerTransition>& transitions();
+  static const std::vector<RbbDopplerInasanO1Transition>& transitions();
 
  private:
-  static const std::vector<RbbDopplerTransition> transitions_;
+  static const std::vector<RbbDopplerInasanO1Transition> transitions_;
 };
 
 
-inline const std::vector<RbbDopplerTransition>&
-OxygenRbbDoppler::transitions() {
+inline const std::vector<RbbDopplerInasanO1Transition>&
+RbbDopplerInasanO1::transitions() {
   return transitions_;
 }
 
 
-inline const std::vector<RbbDopplerTransition> OxygenRbbDoppler::transitions_{
+inline const std::vector<RbbDopplerInasanO1Transition> RbbDopplerInasanO1::transitions_{
   // {
   //   .initial = "12P3P4",
   //   .final = "13S3S",

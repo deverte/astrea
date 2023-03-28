@@ -9,7 +9,7 @@
 
 #include "../data/constants.h"
 #include "../data/element.h"
-#include "../data/oxygen_1_rbb_voigt.h"
+#include "../data/rbb_doppler_inasan_o1.h"
 
 
 namespace nlte {
@@ -18,7 +18,7 @@ namespace nlte {
 /**
  * INASAN
  */
-Eigen::MatrixXd oxygen_1_rbb_voigt_rates(std::shared_ptr<Element> element) {
+Eigen::MatrixXd rbb_doppler_inasan_o1_rates(std::shared_ptr<Element> element) {
   Eigen::MatrixXd P = // s^{-1}
   Eigen::MatrixXd::Zero(element->levels().size(), element->levels().size());
   Eigen::VectorXd E(element->levels().size()); // eV
@@ -37,7 +37,7 @@ Eigen::MatrixXd oxygen_1_rbb_voigt_rates(std::shared_ptr<Element> element) {
     auto& initial = element->levels()[i];
     for (int j = 0; j < element->levels().size(); j++) {
       auto& final = element->levels()[j];
-      for (auto& transition : OxygenRbbVoigt::transitions()) {
+      for (auto& transition : RbbDopplerInasanO1::transitions()) {
         if (
           transition.initial == initial.term && transition.final == final.term
         ) {

@@ -12,7 +12,7 @@ namespace nlte {
 /**
  * Collisional transition.
  */
-class SpontaneousEmissionTransition {
+class SENistO1Transition {
  public:
   const std::string initial;
   const std::string final;
@@ -22,23 +22,21 @@ class SpontaneousEmissionTransition {
 };
 
 
-class OxygenSpontaneousEmission {
+class SENistO1 {
  public:
-  static const std::vector<SpontaneousEmissionTransition>& transitions();
+  static const std::vector<SENistO1Transition>& transitions();
 
  private:
-  static const std::vector<SpontaneousEmissionTransition> transitions_;
+  static const std::vector<SENistO1Transition> transitions_;
 };
 
 
-inline const std::vector<SpontaneousEmissionTransition>&
-OxygenSpontaneousEmission::transitions() {
+inline const std::vector<SENistO1Transition>& SENistO1::transitions() {
   return transitions_;
 }
 
 
-inline const std::vector<SpontaneousEmissionTransition>
-OxygenSpontaneousEmission::transitions_{
+inline const std::vector<SENistO1Transition> SENistO1::transitions_{
   {
     .initial = "14D3D",
     .final = "12P3P4",

@@ -13,8 +13,8 @@ namespace py = pybind11;
 namespace nlte_py {
 
 
-inline void oxygen_1_rbf_rates(py::module_& m) {
-  m.def("oxygen_1_rbf_rates", &nlte::oxygen_1_rbf_rates);
+inline void rr_badnell_rates(py::module_& m) {
+  m.def("rr_badnell_rates", &nlte::rr_badnell_rates);
 }
 
 

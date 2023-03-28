@@ -11,7 +11,7 @@ namespace nlte {
 /**
  * Collisional transition.
  */
-class ColTransition {
+class CEInasanO1Transition {
  public:
   const std::string initial;
   const std::string final;
@@ -20,21 +20,21 @@ class ColTransition {
 };
 
 
-class OxygenCol {
+class CEInasanO1 {
  public:
-  static const std::vector<ColTransition>& transitions();
+  static const std::vector<CEInasanO1Transition>& transitions();
 
  private:
-  static const std::vector<ColTransition> transitions_;
+  static const std::vector<CEInasanO1Transition> transitions_;
 };
 
 
-inline const std::vector<ColTransition>& OxygenCol::transitions() {
+inline const std::vector<CEInasanO1Transition>& CEInasanO1::transitions() {
   return transitions_;
 }
 
 
-inline const std::vector<ColTransition> OxygenCol::transitions_{
+inline const std::vector<CEInasanO1Transition> CEInasanO1::transitions_{
   {
     .initial = "12P3P4",
     .final = "12P1S4",
