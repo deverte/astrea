@@ -6,6 +6,8 @@
 PYBIND11_MODULE(nlte, m) {
   nlte_py::ce_inasan_o1_rates(m);
   nlte_py::ce_regemorter_rates(m);
+  nlte_py::cti_arnaud_rates(m);
+  nlte_py::ctr_arnaud_rates(m);
   nlte_py::dr_badnell_rates(m);
   nlte_py::lte_population(m);
   nlte_py::nlte_population(m);

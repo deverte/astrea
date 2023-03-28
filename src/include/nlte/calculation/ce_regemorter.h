@@ -14,7 +14,7 @@ namespace nlte {
 
 
 /**
- * Regemorter formula
+ * Collisional excitation / de-excitation (Regemorter formula)
  */
 Eigen::MatrixXd ce_regemorter_rates(
   std::shared_ptr<Element> element,

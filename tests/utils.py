@@ -7,9 +7,9 @@ import nlte
 def calculate_b_factors(
     element,
     population_nlte_1,
-    temperatures,
-    electron_temperatures,
-    electron_number_densities,
+    temperatures = None,
+    electron_temperatures = None,
+    electron_number_densities = None,
     optical_depth = 0.0,
     delta_time = 60.0,
     wavelengths_step = 0.5,
@@ -32,6 +32,18 @@ def calculate_b_factors(
                 element,
                 temperatures[i],
                 electron_temperatures[i],
+                electron_number_densities[i],
+            )
+        if "cti_arnaud" in transitions_types:
+            rates_matrix += nlte.cti_arnaud_rates(
+                element,
+                temperatures[i],
+                electron_number_densities[i],
+            )
+        if "ctr_arnaud" in transitions_types:
+            rates_matrix += nlte.ctr_arnaud_rates(
+                element,
+                temperatures[i],
                 electron_number_densities[i],
             )
         if "dr_badnell" in transitions_types:

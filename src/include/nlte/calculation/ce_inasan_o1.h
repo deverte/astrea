@@ -14,7 +14,7 @@ namespace nlte {
 
 
 /**
- * INASAN
+ * Collisional excitation (INASAN)
  */
 Eigen::MatrixXd ce_inasan_o1_rates(
   std::shared_ptr<Element> element,

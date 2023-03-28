@@ -27,7 +27,7 @@ class O1Inasan : public Element {
 
   const double mass_ = 16.0; // u
 
-  const double number_of_ion_electrons_before_recombination_ = 7.0; // 1
+  const double number_of_ion_electrons_before_recombination_ = 6.0; // 1
 };
 
 

@@ -5,6 +5,7 @@
 
 
 /**
+ * Dielectronic recombination.
  * http://amdpp.phys.strath.ac.uk/tamoc/DR/
  */
 class DRBadnellFit {

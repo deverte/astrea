@@ -16,7 +16,7 @@ namespace nlte {
 
 
 /**
- * INASAN
+ * Radiative bound-free transitions (INASAN)
  */
 Eigen::MatrixXd rbf_inasan_o1_rates(
   std::shared_ptr<Element> element,

@@ -10,7 +10,7 @@ namespace nlte {
 
 
 /**
- * Collisional transition.
+ * Spontaneous emission.
  */
 class SENistO1Transition {
  public:

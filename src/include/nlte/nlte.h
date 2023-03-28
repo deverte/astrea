@@ -3,6 +3,8 @@
 
 #include "./calculation/ce_inasan_o1.h"
 #include "./calculation/ce_regemorter.h"
+#include "./calculation/cti_arnaud.h"
+#include "./calculation/ctr_arnaud.h"
 #include "./calculation/dr_badnell.h"
 #include "./calculation/lte.h"
 #include "./calculation/nlte.h"

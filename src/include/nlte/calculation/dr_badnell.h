@@ -14,7 +14,7 @@ namespace nlte {
 
 
 /**
- * Formula
+ * Dielectronic recombination (Badnell formula)
  */
 Eigen::MatrixXd dr_badnell_rates(
   std::shared_ptr<Element> element,

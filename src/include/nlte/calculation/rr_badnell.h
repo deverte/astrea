@@ -13,7 +13,7 @@ namespace nlte {
 
 
 /**
- * Formula
+ * Radiative recombination (Badnell formula)
  */
 Eigen::MatrixXd rr_badnell_rates(
   std::shared_ptr<Element> element,

@@ -5,6 +5,7 @@
 
 
 /**
+ * Radiative recombination.
  * Title: Radiative recombination data for modelling dynamic finite-density plasmas
  * Author: Badnell N.R. 
  * Table: Fit coefficients for total groundstate RR rate coefficients

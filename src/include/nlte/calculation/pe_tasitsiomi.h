@@ -17,7 +17,7 @@ namespace nlte {
 
 
 /**
- * Formula
+ * Photoexcitation / photodeexcitation (Tasitsiomi formula for cross-sections)
  */
 Eigen::MatrixXd pe_tasitsiomi_rates(
   std::shared_ptr<Element> element,

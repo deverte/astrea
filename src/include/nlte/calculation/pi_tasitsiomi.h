@@ -17,7 +17,7 @@ namespace nlte {
 
 
 /**
- * Formula
+ * Photoionization (Tasitsiomi formula for cross-sections)
  */
 Eigen::MatrixXd pi_tasitsiomi_rates(
   std::shared_ptr<Element> element,
