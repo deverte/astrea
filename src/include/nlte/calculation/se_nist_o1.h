@@ -2,9 +2,12 @@
 
 
 #include <memory>
+#include <vector>
 
 #include <Eigen/Dense>
+#include <sigma/sum.h>
 
+#include "./transition_type.h"
 #include "../data/element.h"
 #include "../data/se_nist_o1.h"
 
@@ -15,43 +18,34 @@ namespace nlte {
 /**
  * Spontaneous emission rates (from NIST)
  */
-Eigen::MatrixXd se_nist_o1_rates(
+inline Eigen::MatrixXd se_nist_o1_rates(
   std::shared_ptr<Element> element
 ) {
   Eigen::MatrixXd P = // s^{-1}
-  Eigen::MatrixXd::Zero(element->levels().size(), element->levels().size());
-
+    Eigen::MatrixXd::Zero(element->levels().size(), element->levels().size());
   for (int i = 0; i < element->levels().size(); i++) {
     auto& initial = element->levels()[i];
     for (int j = 0; j < element->levels().size(); j++) {
       auto& final = element->levels()[j];
 
-      double sum_total_angular_momentum_quantum_numbers = 0.0;
+      std::vector<double> A;
+      std::vector<double> J;
       for (auto& transition : SENistO1::transitions()) {
         if (
           transition.initial == initial.term && transition.final == final.term
         ) {
-          sum_total_angular_momentum_quantum_numbers +=
-            + 2.0 * transition.initial_total_angular_momentum_quantum_number
-            + 1.0
-          ;
+          A.push_back(transition.rate);
+          J.push_back(transition.initial_total_angular_momentum_quantum_number);
         }
       }
 
-      for (auto& transition : SENistO1::transitions()) {
-        if (
-          transition.initial == initial.term && transition.final == final.term
-        ) {
-          P(i, j) +=
-            + transition.rate
-            * (
-              + 2.0 * transition.initial_total_angular_momentum_quantum_number
-              + 1.0
-            )
-            / sum_total_angular_momentum_quantum_numbers
-          ;
-        }
-      }
+      P(i, j) = sigma::sum(0, A.size(), [&](int k) {
+        return
+          + A[k]
+          * (2.0 * J[k] + 1.0)
+          / sigma::sum(0, J.size(), [&](int l) { return J[l]; })
+        ;
+      });
     }
   }
 

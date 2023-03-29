@@ -5,12 +5,14 @@
 #include <cmath>
 #include <memory>
 
+#include <boost/math/interpolators/barycentric_rational.hpp>
+#include <boost/math/quadrature/trapezoidal.hpp>
 #include <Eigen/Dense>
 
 #include "./se_nist_o1.h"
+#include "./transition_type.h"
 #include "../data/constants.h"
 #include "../data/element.h"
-#include "../interpolation/linear_interpolant.h"
 
 
 namespace nlte {
@@ -19,134 +21,200 @@ namespace nlte {
 /**
  * Photoionization (Tasitsiomi formula for cross-sections)
  */
-Eigen::MatrixXd pi_tasitsiomi_rates(
+inline Eigen::MatrixXd pi_tasitsiomi_rates(
   std::shared_ptr<Element> element,
   std::vector<double> wavelengths /* nm */,
   std::vector<double> spectral_flux_densities /* W * m^{-2} * nm^{-1} */,
   double optical_depth /* 1 */,
-  double temperature /* K */,
-  double wavelengths_step
+  double temperature /* K */
 ) {
-  Eigen::MatrixXd A = se_nist_o1_rates(element); // s^{-1}
-  Eigen::MatrixXd P = // s^{-1}
-  Eigen::MatrixXd::Zero(element->levels().size(), element->levels().size());
-  Eigen::VectorXd g(element->levels().size()); // 1
-  auto& c = SPEED_OF_LIGHT; // cm * s^{-1}
-  auto& e = ELEMENTARY_CHARGE; // statC
-  auto& tau = optical_depth; // 1
-  auto& T = temperature; // K
-  auto m_i = element->mass(); // u
-  auto m_e = ELECTRON_MASS; // cm^{-2} * eV * s^2
-  double& delta_lambda = wavelengths_step; // nm
-  double lambda_0 = // nm
-    *std::max_element(wavelengths.begin(), wavelengths.end());
-  double lambda_infty = // nm
-    *std::min_element(wavelengths.begin(), wavelengths.end());
+  auto cm_to_m = 1.0e-2;
+  auto cm_to_nm = 1.0e7;
   auto eV_to_J = 1.602177e-19;
-  auto hbar = REDUCED_PLANCK_CONSTANT * eV_to_J; // J * s = W * s^2
-  auto& k_B = BOLTZMANN_CONSTANT; // eV * K^{-1}
-  auto& pi = PI;
-  auto& epsilon_0 = VACUUM_PERMITTIVITY; // F * m^{-1}
-  auto zeta_0 = 0.855;
-  auto zeta_1 = 3.42;
-  auto chi = 21.0;
-  auto kappa_0 = 0.1117;
-  auto kappa_1 = 4.421;
-  auto kappa_2 = -9.207;
-  auto kappa_3 = 5.674;
-  auto epsilon = 1.77245385;
   auto nm_to_angstrom = 10.0;
   auto nm_to_cm = 1.0e-7;
-  auto nm_to_m = 1.0e-9;
-  auto u_to_eV_s2_cm_2 = 1.03642696526422e-12;
+  auto m_to_cm = 100.0;
   auto statC_to_C = 3.33564e-10;
+  auto u_to_eV_s2_cm_2 = 1.03642696526422e-12;
 
+  auto& c = SPEED_OF_LIGHT; // cm * s^{-1}
+  auto& e = ELEMENTARY_CHARGE; // statC
+  auto& epsilon_0 = VACUUM_PERMITTIVITY; // F * m^{-1}
+  auto hbar = REDUCED_PLANCK_CONSTANT * eV_to_J; // J * s = W * s^2
+  auto& k_B = BOLTZMANN_CONSTANT; // eV * K^{-1}
+  auto m_e = ELECTRON_MASS; // cm^{-2} * eV * s^2
+  auto& pi = PI; // 1
+
+  auto chi = 21.0; // 1
+  auto epsilon = 1.77245385; // 1
+  auto kappa_0 = 0.1117; // 1
+  auto kappa_1 = 4.421; // 1
+  auto kappa_2 = -9.207; // 1
+  auto kappa_3 = 5.674; // 1
+  auto zeta_0 = 0.855; // 1
+  auto zeta_1 = 3.42; // 1
+
+  Eigen::MatrixXd A = se_nist_o1_rates(element); // s^{-1}
+  double lambda_infty = // nm
+    *std::min_element(wavelengths.begin(), wavelengths.end());
+  auto m_i = element->mass(); // u
+  auto& T = temperature; // K
+  auto& tau = optical_depth; // 1
+  auto vec_F = spectral_flux_densities; // W * m^{-2} * nm^{-1}
+  auto vec_lambda = wavelengths; // nm
+
+  Eigen::VectorXd g(element->levels().size()); // 1
   for (int i = 0; i < element->levels().size(); i++) {
     g(i) = element->levels()[i].statistical_weight;
   }
 
+  Eigen::MatrixXd P = // s^{-1}
+    Eigen::MatrixXd::Zero(element->levels().size(), element->levels().size());
   for (int i = 0; i < element->levels().size(); i++) {
     auto& initial = element->levels()[i];
     for (int j = 0; j < element->levels().size(); j++) {
       auto& final = element->levels()[j];
 
-      if (final.term == initial.limit_term) {
-        LinearInterpolant F; // W * m^{-2} * nm^{-1}
-        F.data_points(wavelengths, spectral_flux_densities);
+      if (is_ionization(initial, final)) {
+        auto lambda_ion = [&]() { // nm
+          auto I = initial.ionization_energy; // eV
+          auto c_ = c * cm_to_nm; // nm * s^{-1}
+          auto I_ = I * eV_to_J; // J
 
-        auto delta_nu_L = A(j, i) / (2.0 * pi); // s^{-1}
-        auto delta_lambda_L = c / delta_nu_L; // cm
+          return c_ / (I_ / hbar);
+        };
 
-        auto delta_nu_D = // s^{-1}
-          + c / (lambda_0 * nm_to_cm)
-          * std::sqrt(
-            2.0 * k_B * T / ((m_i * u_to_eV_s2_cm_2) * std::pow(c, 2))
-          )
-        ;
-        auto delta_lambda_D = c / delta_nu_D; // cm
+        auto lambda_0 = [&]() { // nm
+          auto E = std::abs(final.energy - initial.energy); // eV
+          auto c_ = c * cm_to_nm; // nm * s^{-1}
+          auto E_ = E * eV_to_J; // J
 
-        auto P_ij = 0.0;
-        for (
-          double lambda = // nm
-            lambda_0 - (delta_lambda_L + delta_lambda_D) / 2.0
+          return c_ / (E_ / hbar);
+        };
+
+        boost::math::interpolators::barycentric_rational<double>
+        F(std::move(vec_lambda), std::move(vec_F)); // W * m^{-2} * nm^{-1}
+
+        auto f_ij = [&](double lambda /* nm */) { // 1
+          auto lambda_ = lambda * nm_to_angstrom; // angstrom
+          auto coefficient = 6.6702e15; // angstrom * s^{-1}
+
+          return
+            + A(j, i)                              // s^{-1}
+            * g(j) / g(i)                          // 1
+            * std::pow(lambda_, 2.0) / coefficient // s
           ;
-          lambda < lambda_0 + (delta_lambda_L + delta_lambda_D) / 2.0;
-          lambda += delta_lambda
-        ) {
-          auto nu = c / (lambda * nm_to_cm); // s^{-1}
-          auto nu_0 = c / (lambda_0 * nm_to_cm); // s^{-1}
+        };
 
-          auto f_ij = // 1
-            + A(j, i)
-            * g(j) / g(i)
-            * std::pow(lambda * nm_to_angstrom, 2.0) / 6.6702e15
+        auto delta_nu_L = [&]() { return A(j, i) / (2.0 * pi); }; // s^{-1}
+
+        auto delta_lambda_L = [&]() { // nm
+          auto c_ = c * cm_to_nm; // nm * s^{-1}
+
+          return c_ / delta_nu_L();
+        };
+
+        auto delta_nu_D = [&]() { // s^{-1}
+          auto lambda_0_ = lambda_0() * nm_to_cm; // cm
+          auto m_i_ = m_i * u_to_eV_s2_cm_2; // eV * s^2 * cm^{-2}
+
+          return
+            + c / lambda_0_ // s^{-1}
+            * std::sqrt(    // 1
+              2.0 * k_B * T / (m_i_ * std::pow(c, 2)) // 1
+            )
           ;
+        };
 
-          // TODO: Check formula
-          auto u = (nu - nu_0) / delta_nu_D; // 1
+        auto delta_lambda_D = [&]() { // nm
+          auto c_ = c * cm_to_nm; // nm * s^{-1}
 
-          auto alpha = delta_nu_L / (2.0 * delta_nu_D); // 1
+          return c_ / delta_nu_D();
+        };
 
-          auto z = // 1
-            (std::pow(u, 2.0) - zeta_0) / (std::pow(u, 2.0) + zeta_1)
+        auto u = [&](double lambda /* nm */) { // 1
+          auto lambda_ = lambda * nm_to_cm; // cm
+          auto lambda_0_ = lambda_0() * nm_to_cm; // cm
+          auto nu = c / lambda_; // s^{-1}
+          auto nu_0 = c / lambda_0_; // s^{-1}
+
+          return (nu - nu_0) / delta_nu_D();
+        };
+
+        auto z = [&](double lambda /* nm */) { // 1
+          return
+            + (std::pow(u(lambda), 2.0) - zeta_0) // 1
+            / (std::pow(u(lambda), 2.0) + zeta_1) // 1
           ;
+        };
 
-          auto q = 0.0; // 1
-          if (z > 0.0) {
-            q =
-              + z
-              * (1.0 + chi / std::pow(u, 2.0))
-              * alpha / (pi * (std::pow(u, 2.0) + 1))
-              * (kappa_0 + z * (kappa_1 + z * (kappa_2 + kappa_3 * z)))
+        auto alpha = [&]() { // 1
+          return delta_nu_L() / (2.0 * delta_nu_D());
+        };
+
+        auto q = [&](double lambda /* nm */) { // 1
+          if (z(lambda) > 0.0) {
+            return
+              + z(lambda)                              // 1
+              * (1.0 + chi / std::pow(u(lambda), 2.0)) // 1
+              * alpha()                                // 1
+              / (pi * (std::pow(u(lambda), 2.0) + 1))  // 1
+              * (                                      // 1
+                + kappa_0   // 1
+                + z(lambda) // 1
+                * (         // 1
+                  + kappa_1                         // 1
+                  + z(lambda)                       // 1
+                  * (kappa_2 + kappa_3 * z(lambda)) // 1
+                )
+              )
             ;
           }
+          return 0.0;
+        };
 
-          auto H = // 1
-            std::sqrt(pi) * (q + std::exp(-std::pow(u, 2.0)) / epsilon)
-          ;
-
-          auto sigma = // m^2
-            + f_ij
-            * std::sqrt(pi)
-            / (4.0 * pi * epsilon_0)
-            * (std::pow(e * statC_to_C, 2.0) * lambda * nm_to_m)
-            / (m_e * eV_to_J * std::pow(c, 2.0))
-            * std::sqrt(
-              (m_i * u_to_eV_s2_cm_2) * std::pow(c, 2.0) / (2.0 * k_B * T)
+        auto H = [&](double lambda /* nm */) { // 1
+          return
+            + std::sqrt(pi) // 1
+            * (             // 1
+              + q(lambda)                                     // 1
+              + std::exp(-std::pow(u(lambda), 2.0)) / epsilon // 1
             )
-            * H
+          ;
+        };
+
+        auto sigma = [&](double lambda /* nm */) {// m^2
+          auto epsilon_0_ = epsilon_0 / m_to_cm; // C^2 * J^{-1} * cm^{-1}
+          auto e_ = e * statC_to_C; // C
+          auto m_e_ = m_e * eV_to_J; // cm^{-2} * J * s^2
+
+          auto sigma_ = // cm^2
+            + 1.0                               // 1
+            / (4.0 * pi * epsilon_0_)           // C^{-2} * J * cm
+            * f_ij(lambda)                      // 1
+            * std::sqrt(pi) * std::pow(e_, 2.0) // C^2
+            / (m_e_ * c * delta_nu_D())         // cm * J^{-1}
+            * H(lambda)                         // 1
           ;
 
-          P_ij += // s^{-1}
-            + F(lambda)
-            * lambda / (hbar * c)
-            * std::exp(-tau)
-            * sigma
-            * (delta_lambda * nm_to_cm)
-          ;
-        }
+          return sigma_ * std::pow(cm_to_m, 2.0);
+        };
 
-        P(i, j) = P_ij;
+        P(i, j) = boost::math::quadrature::trapezoidal( // s^{-1}
+          [&](double lambda /* nm */) {
+            auto c_ = c * cm_to_nm; // nm * s^{-1}
+
+            return
+              + F(lambda)           // W * m^{-2} * nm^{-1}
+              * lambda / (hbar * c) // nm * W^{-1} * s^{-1} * nm^{-1}
+              * std::exp(-tau)      // 1
+              * sigma(lambda)       // m^2
+              // * dlambda          // nm
+            ;
+          },
+          lambda_infty,
+          lambda_ion()
+        );
       }
     }
   }

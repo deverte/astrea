@@ -4,3 +4,6 @@
 [submodule "src/include/eigen"]
 	path = src/include/eigen
 	url = https://gitlab.com/libeigen/eigen
+[submodule "src/include/boost/math"]
+	path = src/include/boost/math
+	url = https://github.com/boostorg/math

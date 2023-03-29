@@ -12,7 +12,6 @@ def calculate_b_factors(
     electron_number_densities = None,
     optical_depth = 0.0,
     delta_time = 60.0,
-    wavelengths_step = 0.5,
     transitions_types = [],
 ):
     b_factors = np.zeros((len(temperatures), len(element.keys)))
@@ -59,7 +58,6 @@ def calculate_b_factors(
                 nlte.SunGueymard.spectral_flux_density,
                 optical_depth,
                 temperatures[i],
-                wavelengths_step,
             )
         if "pi_tasitsiomi" in transitions_types:
             rates_matrix += nlte.pi_tasitsiomi_rates(
@@ -68,7 +66,6 @@ def calculate_b_factors(
                 nlte.SunGueymard.spectral_flux_density,
                 optical_depth,
                 temperatures[i],
-                wavelengths_step,
             )
         if "rbb_doppler_inasan_o1" in transitions_types:
             rates_matrix += nlte.rbb_doppler_inasan_o1_rates(element)

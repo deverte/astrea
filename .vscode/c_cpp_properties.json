@@ -6,6 +6,7 @@
                 "${workspaceFolder}/src/include",
                 "${workspaceFolder}/src/include/eigen",
                 "${workspaceFolder}/src/include/pybind11/include",
+                "${workspaceFolder}/src/include/boost/math/include",
                 "/usr/include/python3.10"
             ],
             "intelliSenseMode": "linux-gcc-x64",
