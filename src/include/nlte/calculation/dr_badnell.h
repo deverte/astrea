@@ -18,6 +18,12 @@ namespace nlte {
 /**
  * Dielectronic recombination
  * 
+ * A^{i+}(1s, ...) + e^- \rightarrow A^{(i - 1)+}_*(n_1 l_1; n_2 l_2)
+ * A^{(i - 1)+}(n_1 l_1; n_2 l_2) \rightarrow
+ *   A^{(i - 1)+}_*(n_3 l_3; n_2 l_2) + h \nu
+ * A^{(i - 1)+}_*(n_3 l_3; n_2 l_2) \rightarrow
+ *   A^{(i - 1)+}(n_3 l_3; n_4 l_4) + h \nu_1 + h \nu_2...
+ * 
  * formula: doi-10.1086%2F508465 (Badnell 2006)
  * data: doi-10.1086%2F508465 (Badnell 2006)
  * inverse process: photoionization - radiative recombination

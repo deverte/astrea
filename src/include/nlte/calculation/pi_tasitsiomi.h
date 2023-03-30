@@ -20,6 +20,9 @@ namespace nlte {
 
 /**
  * Photoionization
+ * (??? and inner shell ionization = auger ionization + autoionization)
+ * 
+ * A^i + h \nu \rightarrow A^{(i + 1)+} + e^- + \Delta E
  * 
  * formula: doi-10.1086%2F504460 (Tasitsiomi 2006 for cross-sections)
  * inverse process: radiative recombination + dielectronic recombination

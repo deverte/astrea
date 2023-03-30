@@ -16,6 +16,9 @@ namespace nlte {
 /**
  * Radiative recombination
  * 
+ * A^{i+} + e^- \rightarrow A^{(i - 1)+}_* + h \nu
+ * A^{(i - 1)+} \rightarrow A^{(i - 1)+} + h \nu_1 + h \nu_2 + h \nu_3...
+ * 
  * formula: doi-10.1086%2F192284 (Verner 1995)
  * data: doi-10.1086%2F508465 (Badnell 2006)
  * inverse process: photoionization - dielectronic recombination

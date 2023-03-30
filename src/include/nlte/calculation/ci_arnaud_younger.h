@@ -22,9 +22,12 @@ namespace nlte {
 /**
  * Collisional ionization
  * 
+ * A^{i+} + e^- \rightarrow A^{(i + 1)+} + 2 e^- - \Delta E_{A^{i+}}
+ * 
  * formula: doi-10.1016%2F0022-4073(81)90127-8 (Younger 1981)
  * data: bibcode-1985A&AS...60..425A (Arnaud 1985)
  * inverse process: three-body-recombination
+ * A^{(i + 1)+} + 2 e^- \rightarrow A^{i+} + e^-
  */
 Eigen::MatrixXd ci_arnaud_younger_rates(
   std::shared_ptr<Element> element,
