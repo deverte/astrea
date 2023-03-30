@@ -15,14 +15,18 @@ namespace nlte {
 
 
 /**
- * Charge transfer recombination (Arnaud formula)
+ * Charge transfer recombination
+ * 
+ * formula: bibcode-1985A&AS...60..425A (Arnaud 1985)
+ * data: bibcode-1985A&AS...60..425A (Arnaud 1985)
+ * inverse process: charge transfer ionization
  */
 inline Eigen::MatrixXd ctr_arnaud_rates(
   std::shared_ptr<Element> element,
   double temperature /* K */,
   double electron_number_density /* cm^{-3} */
 ) {
-  auto N = element->number_of_ion_electrons_before_recombination(); // 1
+  auto N = element->ionization_stage(); // 1
   auto& N_e = electron_number_density; // cm^{-3}
   Eigen::MatrixXd P = // s^{-1}
     Eigen::MatrixXd::Zero(element->levels().size(), element->levels().size());
@@ -38,7 +42,7 @@ inline Eigen::MatrixXd ctr_arnaud_rates(
   auto T_max = 0.0; // K
   auto T_min = 0.0; // K
   for (auto fit : CTRArnaud::fit()) {
-    if (fit.atomic_number == Z && fit.ionization_stage == Z - N) {
+    if (fit.atomic_number == Z && fit.ionization_stage == N) {
       if (fit.temperatures_range.size() == 1) {
         T_min =
           fit.temperatures_range[0] - std::sqrt(fit.temperatures_range[0]);
@@ -82,7 +86,7 @@ inline Eigen::MatrixXd ctr_arnaud_rates(
   P = N_e * q;
 
   return P;
-};
+}
 
 
 }

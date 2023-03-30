@@ -9,7 +9,9 @@ namespace nlte {
 
 
 /**
- * Radiative bound-free transition.
+ * Radiative bound-free transition
+ * 
+ * data: INASAN
  */
 class RbfInasanO1Transition {
  public:

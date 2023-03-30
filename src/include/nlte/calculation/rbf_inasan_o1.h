@@ -17,7 +17,10 @@ namespace nlte {
 
 
 /**
- * Radiative bound-free transitions (INASAN)
+ * Radiative bound-free transitions
+ * 
+ * data: INASAN
+ * inverse process: this
  */
 inline Eigen::MatrixXd rbf_inasan_o1_rates(
   std::shared_ptr<Element> element,
@@ -83,7 +86,7 @@ inline Eigen::MatrixXd rbf_inasan_o1_rates(
   }
 
   return P;
-};
+}
 
 
 }

@@ -37,7 +37,7 @@ inline Eigen::MatrixXd nlte_transition_operator(
   }
 
   return R;
-};
+}
 
 
 inline Eigen::VectorXd nlte_population(

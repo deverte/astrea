@@ -16,14 +16,18 @@ namespace nlte {
 
 
 /**
- * Dielectronic recombination (Badnell formula)
+ * Dielectronic recombination
+ * 
+ * formula: doi-10.1086%2F508465 (Badnell 2006)
+ * data: doi-10.1086%2F508465 (Badnell 2006)
+ * inverse process: photoionization - radiative recombination
  */
 inline Eigen::MatrixXd dr_badnell_rates(
   std::shared_ptr<Element> element,
   double temperature /* K */,
   double electron_number_density /* cm^{-3} */
 ) {
-  auto N = element->number_of_ion_electrons_before_recombination(); // 1
+  auto N = element->ionization_stage(); // 1
   auto& N_e = electron_number_density; // cm^{-3}
   auto& T = temperature; // K
   auto Z = element->atomic_number(); // 1
@@ -31,7 +35,7 @@ inline Eigen::MatrixXd dr_badnell_rates(
   std::vector<double> C; // cm^3 * s^{-1} * K^{3/2}
   std::vector<double> E; // K
   for (auto fit : DRBadnell::fit()) {
-    if (fit.Z == Z && fit.N == N) {
+    if (fit.Z == Z && fit.N == Z - N - 1.0) {
       C = fit.C;
       E = fit.E;
 
@@ -61,7 +65,7 @@ inline Eigen::MatrixXd dr_badnell_rates(
   P = N_e * q;
 
   return P;
-};
+}
 
 
 }

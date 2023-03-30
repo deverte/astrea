@@ -18,7 +18,10 @@ namespace nlte {
 
 
 /**
- * Collisional excitation (INASAN)
+ * Collisional excitation / de-excitation
+ * 
+ * data: INASAN
+ * inverse process: this
  */
 inline Eigen::MatrixXd ce_inasan_o1_rates(
   std::shared_ptr<Element> element,
@@ -56,7 +59,7 @@ inline Eigen::MatrixXd ce_inasan_o1_rates(
   P = N_e * q;
 
   return P;
-};
+}
 
 
 }

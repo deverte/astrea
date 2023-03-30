@@ -13,8 +13,8 @@ namespace py = pybind11;
 namespace nlte_py {
 
 
-inline void rr_badnell_rates(py::module_& m) {
-  m.def("rr_badnell_rates", &nlte::rr_badnell_rates);
+inline void rr_badnell_verner_rates(py::module_& m) {
+  m.def("rr_badnell_verner_rates", &nlte::rr_badnell_verner_rates);
 }
 
 

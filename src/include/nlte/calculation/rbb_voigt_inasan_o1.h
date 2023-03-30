@@ -17,7 +17,10 @@ namespace nlte {
 
 
 /**
- * Radiative bound-bound transitions using Voigt profiles (INASAN)
+ * Radiative bound-bound transitions using Voigt profiles
+ * 
+ * data: INASAN
+ * inverse process: this
  */
 inline Eigen::MatrixXd
 rbb_voigt_inasan_o1_rates(std::shared_ptr<Element> element) {
@@ -55,7 +58,7 @@ rbb_voigt_inasan_o1_rates(std::shared_ptr<Element> element) {
   }
 
   return P;
-};
+}
 
 
 }

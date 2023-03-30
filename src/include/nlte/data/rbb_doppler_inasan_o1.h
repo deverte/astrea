@@ -9,7 +9,9 @@ namespace nlte {
 
 
 /**
- * Radiative bound-bound transition using Doppler profile.
+ * Radiative bound-bound transition using Doppler profile
+ * 
+ * data: INASAN
  */
 class RbbDopplerInasanO1Transition {
  public:

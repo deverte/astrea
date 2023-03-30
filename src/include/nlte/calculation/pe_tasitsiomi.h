@@ -19,7 +19,10 @@ namespace nlte {
 
 
 /**
- * Photoexcitation / photodeexcitation (Tasitsiomi formula for cross-sections)
+ * Photoexcitation / photo-de-excitation
+ * 
+ * formula: doi-10.1086%2F504460 (Tasitsiomi 2006 for cross-sections)
+ * inverse process: this
  */
 inline Eigen::MatrixXd pe_tasitsiomi_rates(
   std::shared_ptr<Element> element,
@@ -212,7 +215,7 @@ inline Eigen::MatrixXd pe_tasitsiomi_rates(
   }
 
   return P;
-};
+}
 
 
 }

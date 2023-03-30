@@ -15,7 +15,10 @@ namespace nlte {
 
 
 /**
- * Collisional excitation / de-excitation (Regemorter formula)
+ * Collisional excitation / de-excitation
+ * 
+ * formula: doi-10.1086%2F147445 (Regemorter 1961)
+ * inverse process: this
  */
 inline Eigen::MatrixXd ce_regemorter_rates(
   std::shared_ptr<Element> element,
@@ -84,7 +87,7 @@ inline Eigen::MatrixXd ce_regemorter_rates(
   P = N_e * q;
 
   return P;
-};
+}
 
 
 }

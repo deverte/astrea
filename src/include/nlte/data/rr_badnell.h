@@ -5,13 +5,12 @@
 
 
 /**
- * Radiative recombination.
- * Title: Radiative recombination data for modelling dynamic finite-density plasmas
- * Author: Badnell N.R. 
- * Table: Fit coefficients for total groundstate RR rate coefficients
- * https://iopscience.iop.org/article/10.1086/508465/fulltext/
+ * Radiative recombination
  * 
- * Important: available new data at http://amdpp.phys.strath.ac.uk/tamoc/RR/
+ * data: doi-10.1086%2F508465 (Badnell 2006)
+ * urls:
+ *   - https://iopscience.iop.org/article/10.1086/508465/fulltext/
+ *   - http://amdpp.phys.strath.ac.uk/tamoc/RR/ (NEW!!!)
  */
 class RRBadnellFit {
  public:

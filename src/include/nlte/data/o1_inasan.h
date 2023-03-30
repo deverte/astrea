@@ -10,24 +10,29 @@
 namespace nlte {
 
 
+/**
+ * Oxygen 1
+ * 
+ * data: INASAN
+ */
 class O1Inasan : public Element {
  public:
   const std::vector<Level>& all_levels() override;
 
   const double atomic_number() override;
 
-  const double mass() override;
+  const double ionization_stage() override;
 
-  const double number_of_ion_electrons_before_recombination() override;
+  const double mass() override;
 
  private:
   static const std::vector<Level> all_levels_;
 
   const double atomic_number_ = 8.0; // 1
 
-  const double mass_ = 16.0; // u
+  const double ionization_stage_ = 1.0; // 1
 
-  const double number_of_ion_electrons_before_recombination_ = 6.0; // 1
+  const double mass_ = 16.0; // u
 };
 
 
@@ -41,13 +46,13 @@ inline const double O1Inasan::atomic_number() {
 }
 
 
-inline const double O1Inasan::mass() {
-  return mass_;
+inline const double O1Inasan::ionization_stage() {
+  return ionization_stage_;
 }
 
 
-inline const double O1Inasan::number_of_ion_electrons_before_recombination() {
-  return number_of_ion_electrons_before_recombination_;
+inline const double O1Inasan::mass() {
+  return mass_;
 }
 
 

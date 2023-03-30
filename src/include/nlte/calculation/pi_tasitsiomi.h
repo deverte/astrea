@@ -19,7 +19,10 @@ namespace nlte {
 
 
 /**
- * Photoionization (Tasitsiomi formula for cross-sections)
+ * Photoionization
+ * 
+ * formula: doi-10.1086%2F504460 (Tasitsiomi 2006 for cross-sections)
+ * inverse process: radiative recombination + dielectronic recombination
  */
 inline Eigen::MatrixXd pi_tasitsiomi_rates(
   std::shared_ptr<Element> element,
@@ -220,7 +223,7 @@ inline Eigen::MatrixXd pi_tasitsiomi_rates(
   }
 
   return P;
-};
+}
 
 
 }

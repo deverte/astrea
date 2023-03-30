@@ -37,19 +37,19 @@ class PyElement : public nlte::Element {
     );
   }
 
+  const double ionization_stage() override {
+    PYBIND11_OVERRIDE_PURE(
+      const double,
+      nlte::Element,
+      ionization_stage
+    );
+  }
+
   const double mass() override {
     PYBIND11_OVERRIDE_PURE(
       const double,
       nlte::Element,
       mass
-    );
-  }
-
-  const double number_of_ion_electrons_before_recombination() override {
-    PYBIND11_OVERRIDE_PURE(
-      const double,
-      nlte::Element,
-      number_of_ion_electrons_before_recombination
     );
   }
 };

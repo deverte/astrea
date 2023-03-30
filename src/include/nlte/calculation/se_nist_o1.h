@@ -16,7 +16,10 @@ namespace nlte {
 
 
 /**
- * Spontaneous emission rates (from NIST)
+ * Spontaneous emission rates
+ * 
+ * data: NIST
+ * inverse process: ?
  */
 inline Eigen::MatrixXd se_nist_o1_rates(
   std::shared_ptr<Element> element
@@ -50,7 +53,7 @@ inline Eigen::MatrixXd se_nist_o1_rates(
   }
 
   return P;
-};
+}
 
 
 }

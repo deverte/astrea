@@ -9,7 +9,7 @@ namespace nlte {
 
 
 /**
- * Collisional excitation / de-excitation.
+ * Collisional excitation / de-excitation
  */
 class CEInasanO1Transition {
  public:

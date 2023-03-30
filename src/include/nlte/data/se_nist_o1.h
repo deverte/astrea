@@ -10,7 +10,9 @@ namespace nlte {
 
 
 /**
- * Spontaneous emission.
+ * Spontaneous emission
+ * 
+ * data: NIST
  */
 class SENistO1Transition {
  public:

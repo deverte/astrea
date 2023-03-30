@@ -17,7 +17,10 @@ namespace nlte {
 
 
 /**
- * Radiative bound-bound transitions using Doppler profile (INASAN)
+ * Radiative bound-bound transitions using Doppler profile
+ * 
+ * data: INASAN
+ * inverse process: this
  */
 inline Eigen::MatrixXd
 rbb_doppler_inasan_o1_rates(std::shared_ptr<Element> element) {
@@ -55,7 +58,7 @@ rbb_doppler_inasan_o1_rates(std::shared_ptr<Element> element) {
   }
 
   return P;
-};
+}
 
 
 }

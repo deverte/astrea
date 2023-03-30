@@ -3,6 +3,7 @@
 
 #include "./calculation/ce_inasan_o1.h"
 #include "./calculation/ce_regemorter.h"
+#include "./calculation/ci_arnaud_younger.h"
 #include "./calculation/cti_arnaud.h"
 #include "./calculation/ctr_arnaud.h"
 #include "./calculation/dr_badnell.h"
@@ -13,7 +14,8 @@
 #include "./calculation/rbb_doppler_inasan_o1.h"
 #include "./calculation/rbb_voigt_inasan_o1.h"
 #include "./calculation/rbf_inasan_o1.h"
-#include "./calculation/rr_badnell.h"
+#include "./calculation/rr_badnell_verner.h"
+#include "./calculation/rr_seaton.h"
 #include "./calculation/se_nist_o1.h"
 #include "./data/element.h"
 #include "./data/o1_inasan.h"

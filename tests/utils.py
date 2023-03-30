@@ -33,6 +33,12 @@ def calculate_b_factors(
                 electron_temperatures[i],
                 electron_number_densities[i],
             )
+        if "ci_arnaud_younger" in transitions_types:
+            rates_matrix += nlte.ci_arnaud_younger_rates(
+                element,
+                temperatures[i],
+                electron_number_densities[i],
+            )
         if "cti_arnaud" in transitions_types:
             rates_matrix += nlte.cti_arnaud_rates(
                 element,
@@ -79,9 +85,15 @@ def calculate_b_factors(
                 optical_depth,
             )
         if "rr_badnell" in transitions_types:
-            rates_matrix += nlte.rr_badnell_rates(
+            rates_matrix += nlte.rr_badnell_verner_rates(
                 element,
                 temperatures[i],
+                electron_number_densities[i],
+            )
+        if "rr_seaton" in transitions_types:
+            rates_matrix += nlte.rr_seaton_rates(
+                element,
+                electron_temperatures[i],
                 electron_number_densities[i],
             )
         if "se_nist_o1" in transitions_types:

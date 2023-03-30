@@ -8,8 +8,9 @@ namespace nlte {
 
 
 /**
- * Sun spectrum.
- * C. Gueymard, ""THE SUN�S TOTAL AND SPECTRAL IRRADIANCE FOR SOLAR ENERGY APPLICATIONS AND SOLAR RADIATION MODELS"", submitted to Solar Energy, 2003."
+ * Sun spectrum
+ * 
+ * data: https://www.nrel.gov/grid/solar-resource/spectra.html
  */
 class SunGueymard {
  public:

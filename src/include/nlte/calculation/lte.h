@@ -41,7 +41,7 @@ inline Eigen::VectorXd lte_population(
   }
 
   return n;
-};
+}
 
 
 }

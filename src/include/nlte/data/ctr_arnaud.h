@@ -8,9 +8,9 @@ namespace nlte {
 
 
 /**
- * Charge transfer recombination.
- * Arnaud, M. ; Rothenflug, R. Astronomy and Astrophysics Supplement,
- * Vol.60, NO. 3/JUN, P. 425, 1985 (Sect. 4, Tables IIIA, IIIB). 
+ * Charge transfer recombination
+ * 
+ * data: bibcode-1985A&AS...60..425A
  */
 class CTRArnaudFit {
  public:

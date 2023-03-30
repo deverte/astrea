@@ -9,8 +9,11 @@ namespace nlte {
 
 /**
  * Collisional ionization
- * Arnaud, M. ; Rothenflug, R. Astronomy and Astrophysics Supplement,
- * Vol.60, NO. 3/JUN, P. 425, 1985 (Sect. 4, Table I).
+ * 
+ * data: bibcode-1985A&AS...60..425A
+ * urls:
+ *   - https://www.pa.uky.edu/~verner/dima/col//ci.txt
+ *   - https://www.pa.uky.edu/~verner/dima/col//ci.dat
  */
 class CIArnaudFit {
  public:

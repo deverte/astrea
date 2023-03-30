@@ -5,8 +5,10 @@
 
 
 /**
- * Dielectronic recombination.
- * http://amdpp.phys.strath.ac.uk/tamoc/DR/
+ * Dielectronic recombination
+ * 
+ * data: doi-10.1086%2F508465 (Badnell 2006)
+ * urls: http://amdpp.phys.strath.ac.uk/tamoc/DR/
  */
 class DRBadnellFit {
  public:

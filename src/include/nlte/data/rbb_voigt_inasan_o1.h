@@ -9,7 +9,9 @@ namespace nlte {
 
 
 /**
- * Radiative bound-bound transition using Voigt profile.
+ * Radiative bound-bound transition using Voigt profile
+ * 
+ * data: INASAN
  */
 class RbbVoigtInasanO1Transition {
  public:
