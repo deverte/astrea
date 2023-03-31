@@ -1,0 +1,531 @@
+#pragma once
+
+
+#include <string>
+#include <vector>
+
+#include "./element.h"
+
+
+namespace lss {
+
+
+/**
+ * Oxygen 1
+ * 
+ * data: INASAN
+ */
+class O1Inasan : public Element {
+ public:
+  const std::vector<Level>& all_levels() override;
+
+  const double atomic_number() override;
+
+  const double ionization_stage() override;
+
+  const double mass() override;
+
+ private:
+  static const std::vector<Level> all_levels_;
+
+  const double atomic_number_ = 8.0; // 1
+
+  const double ionization_stage_ = 1.0; // 1
+
+  const double mass_ = 16.0; // u
+};
+
+
+inline const std::vector<Level>& O1Inasan::all_levels() {
+  return all_levels_;
+}
+
+
+inline const double O1Inasan::atomic_number() {
+  return atomic_number_;
+}
+
+
+inline const double O1Inasan::ionization_stage() {
+  return ionization_stage_;
+}
+
+
+inline const double O1Inasan::mass() {
+  return mass_;
+}
+
+
+inline const std::vector<Level> O1Inasan::all_levels_{
+  {
+    .term = "12P3P4",
+    .limit_term = "22P4S",
+    .ground_state_term = "12P3P4",
+    .principal_quantum_number = 2.0,
+    .statistical_weight = 9.0,
+    .energy = 0.0,
+    .ionization_energy = 13.608386755871116,
+  },
+  {
+    .term = "12P1D4",
+    .limit_term = "22P4S",
+    .ground_state_term = "12P3P4",
+    .principal_quantum_number = 2.0,
+    .statistical_weight = 5.0,
+    .energy = 1.957696455240094,
+    .ionization_energy = 11.650690300631023,
+  },
+  {
+    .term = "12P1S4",
+    .limit_term = "22P4S",
+    .ground_state_term = "12P3P4",
+    .principal_quantum_number = 2.0,
+    .statistical_weight = 1.0,
+    .energy = 4.180078536263556,
+    .ionization_energy = 9.42830821960756,
+  },
+  {
+    .term = "13S5S",
+    .limit_term = "22P4S",
+    .ground_state_term = "12P3P4",
+    .principal_quantum_number = 3.0,
+    .statistical_weight = 5.0,
+    .energy = 9.136423134698713,
+    .ionization_energy = 4.471963621172404,
+  },
+  {
+    .term = "13S3S",
+    .limit_term = "22P4S",
+    .ground_state_term = "12P3P4",
+    .principal_quantum_number = 3.0,
+    .statistical_weight = 3.0,
+    .energy = 9.511695728174285,
+    .ionization_energy = 4.096691027696832,
+  },
+  {
+    .term = "13P5P",
+    .limit_term = "22P4S",
+    .ground_state_term = "12P3P4",
+    .principal_quantum_number = 3.0,
+    .statistical_weight = 15.0,
+    .energy = 10.730970127241436,
+    .ionization_energy = 2.877416628629681,
+  },
+  {
+    .term = "13P3P",
+    .limit_term = "22P4S",
+    .ground_state_term = "12P3P4",
+    .principal_quantum_number = 3.0,
+    .statistical_weight = 9.0,
+    .energy = 10.979172553249883,
+    .ionization_energy = 2.6292142026212324,
+  },
+  {
+    .term = "14S5S",
+    .limit_term = "22P4S",
+    .ground_state_term = "12P3P4",
+    .principal_quantum_number = 4.0,
+    .statistical_weight = 5.0,
+    .energy = 11.827937490009205,
+    .ionization_energy = 1.7804492658619115,
+  },
+  {
+    .term = "14S3S",
+    .limit_term = "22P4S",
+    .ground_state_term = "12P3P4",
+    .principal_quantum_number = 4.0,
+    .statistical_weight = 3.0,
+    .energy = 11.920717472062318,
+    .ionization_energy = 1.6876692838087988,
+  },
+  {
+    .term = "13D5D",
+    .limit_term = "22P4S",
+    .ground_state_term = "12P3P4",
+    .principal_quantum_number = 3.0,
+    .statistical_weight = 25.0,
+    .energy = 12.068965235675442,
+    .ionization_energy = 1.5394215201956742,
+  },
+  {
+    .term = "13D3D",
+    .limit_term = "22P4S",
+    .ground_state_term = "12P3P4",
+    .principal_quantum_number = 3.0,
+    .statistical_weight = 15.0,
+    .energy = 12.077362460737287,
+    .ionization_energy = 1.53102429513383,
+  },
+  {
+    .term = "14P5P",
+    .limit_term = "22P4S",
+    .ground_state_term = "12P3P4",
+    .principal_quantum_number = 4.0,
+    .statistical_weight = 15.0,
+    .energy = 12.276430053087264,
+    .ionization_energy = 1.3319567027838533,
+  },
+  {
+    .term = "14P3P",
+    .limit_term = "22P4S",
+    .ground_state_term = "12P3P4",
+    .principal_quantum_number = 4.0,
+    .statistical_weight = 9.0,
+    .energy = 12.3492070926824,
+    .ionization_energy = 1.259179663188716,
+  },
+  {
+    .term = "13S3DP",
+    .limit_term = "22P4S",
+    .ground_state_term = "12P3P4",
+    .principal_quantum_number = 3.0,
+    .statistical_weight = 15.0,
+    .energy = 12.530521421716308,
+    .ionization_energy = 1.0778653341548088,
+  },
+  {
+    .term = "15S5S",
+    .limit_term = "22P4S",
+    .ground_state_term = "12P3P4",
+    .principal_quantum_number = 5.0,
+    .statistical_weight = 5.0,
+    .energy = 12.651188831211638,
+    .ionization_energy = 0.9571979246594786,
+  },
+  {
+    .term = "15S3S",
+    .limit_term = "22P4S",
+    .ground_state_term = "12P3P4",
+    .principal_quantum_number = 5.0,
+    .statistical_weight = 3.0,
+    .energy = 12.687801028595084,
+    .ionization_energy = 0.920585727276032,
+  },
+  {
+    .term = "14D5D",
+    .limit_term = "22P4S",
+    .ground_state_term = "12P3P4",
+    .principal_quantum_number = 4.0,
+    .statistical_weight = 25.0,
+    .energy = 12.74403618329108,
+    .ionization_energy = 0.8643505725800377,
+  },
+  {
+    .term = "14D3D",
+    .limit_term = "22P4S",
+    .ground_state_term = "12P3P4",
+    .principal_quantum_number = 4.0,
+    .statistical_weight = 15.0,
+    .energy = 12.749349854538917,
+    .ionization_energy = 0.8590369013321998,
+  },
+  {
+    .term = "14F5F",
+    .limit_term = "22P4S",
+    .ground_state_term = "12P3P4",
+    .principal_quantum_number = 4.0,
+    .statistical_weight = 35.0,
+    .energy = 12.756767712140066,
+    .ionization_energy = 0.8516190437310512,
+  },
+  {
+    .term = "14F3F",
+    .limit_term = "22P4S",
+    .ground_state_term = "12P3P4",
+    .principal_quantum_number = 4.0,
+    .statistical_weight = 21.0,
+    .energy = 12.756779374722893,
+    .ionization_energy = 0.8516073811482247,
+  },
+  {
+    .term = "15P5P",
+    .limit_term = "22P4S",
+    .ground_state_term = "12P3P4",
+    .principal_quantum_number = 5.0,
+    .statistical_weight = 15.0,
+    .energy = 12.83835227638649,
+    .ionization_energy = 0.7700344794846281,
+  },
+  {
+    .term = "15P3P",
+    .limit_term = "22P4S",
+    .ground_state_term = "12P3P4",
+    .principal_quantum_number = 5.0,
+    .statistical_weight = 9.0,
+    .energy = 12.868573006170879,
+    .ionization_energy = 0.7398137497002377,
+  },
+  {
+    .term = "16S5S",
+    .limit_term = "22P4S",
+    .ground_state_term = "12P3P4",
+    .principal_quantum_number = 6.0,
+    .statistical_weight = 5.0,
+    .energy = 13.01106648450271,
+    .ionization_energy = 0.5973202713684066,
+  },
+  {
+    .term = "16S3S",
+    .limit_term = "22P4S",
+    .ground_state_term = "12P3P4",
+    .principal_quantum_number = 6.0,
+    .statistical_weight = 3.0,
+    .energy = 13.029158872567638,
+    .ionization_energy = 0.5792278833034789,
+  },
+  {
+    .term = "15D5D",
+    .limit_term = "22P4S",
+    .ground_state_term = "12P3P4",
+    .principal_quantum_number = 5.0,
+    .statistical_weight = 25.0,
+    .energy = 13.056454403253069,
+    .ionization_energy = 0.5519323526180488,
+  },
+  {
+    .term = "15D3D",
+    .limit_term = "22P4S",
+    .ground_state_term = "12P3P4",
+    .principal_quantum_number = 5.0,
+    .statistical_weight = 15.0,
+    .energy = 13.059383241739576,
+    .ionization_energy = 0.5490035141315397,
+  },
+  {
+    .term = "15F5F",
+    .limit_term = "22P4S",
+    .ground_state_term = "12P3P4",
+    .principal_quantum_number = 5.0,
+    .statistical_weight = 35.0,
+    .energy = 13.063429744413634,
+    .ionization_energy = 0.5449570114574833,
+  },
+  {
+    .term = "15F3F",
+    .limit_term = "22P4S",
+    .ground_state_term = "12P3P4",
+    .principal_quantum_number = 5.0,
+    .statistical_weight = 21.0,
+    .energy = 13.063439545946009,
+    .ionization_energy = 0.5449472099251078,
+  },
+  {
+    .term = "16P5P",
+    .limit_term = "22P4S",
+    .ground_state_term = "12P3P4",
+    .principal_quantum_number = 6.0,
+    .statistical_weight = 15.0,
+    .energy = 13.106457065415203,
+    .ionization_energy = 0.5019296904559141,
+  },
+  {
+    .term = "16P3P",
+    .limit_term = "22P4S",
+    .ground_state_term = "12P3P4",
+    .principal_quantum_number = 6.0,
+    .statistical_weight = 9.0,
+    .energy = 13.121750144105015,
+    .ionization_energy = 0.48663661176610246,
+  },
+  {
+    .term = "17S5S",
+    .limit_term = "22P4S",
+    .ground_state_term = "12P3P4",
+    .principal_quantum_number = 7.0,
+    .statistical_weight = 5.0,
+    .energy = 13.200272188543195,
+    .ionization_energy = 0.4081145673279212,
+  },
+  {
+    .term = "17S3S",
+    .limit_term = "22P4S",
+    .ground_state_term = "12P3P4",
+    .principal_quantum_number = 7.0,
+    .statistical_weight = 3.0,
+    .energy = 13.21051080722766,
+    .ionization_energy = 0.3978759486434576,
+  },
+  {
+    .term = "16D5D",
+    .limit_term = "22P4S",
+    .ground_state_term = "12P3P4",
+    .principal_quantum_number = 6.0,
+    .statistical_weight = 25.0,
+    .energy = 13.22582635086425,
+    .ionization_energy = 0.38256040500686794,
+  },
+  {
+    .term = "16D3D",
+    .limit_term = "22P4S",
+    .ground_state_term = "12P3P4",
+    .principal_quantum_number = 6.0,
+    .statistical_weight = 15.0,
+    .energy = 13.22760438192251,
+    .ionization_energy = 0.3807823739486054,
+  },
+  {
+    .term = "16F5F",
+    .limit_term = "22P4S",
+    .ground_state_term = "12P3P4",
+    .principal_quantum_number = 6.0,
+    .statistical_weight = 35.0,
+    .energy = 13.230004342956173,
+    .ionization_energy = 0.3783824129149434,
+  },
+  {
+    .term = "16F3F",
+    .limit_term = "22P4S",
+    .ground_state_term = "12P3P4",
+    .principal_quantum_number = 6.0,
+    .statistical_weight = 21.0,
+    .energy = 13.230009429827406,
+    .ionization_energy = 0.3783773260437105,
+  },
+  {
+    .term = "17P5P",
+    .limit_term = "22P4S",
+    .ground_state_term = "12P3P4",
+    .principal_quantum_number = 7.0,
+    .statistical_weight = 15.0,
+    .energy = 13.25690653856094,
+    .ionization_energy = 0.3514802173101766,
+  },
+  {
+    .term = "17P3P",
+    .limit_term = "22P4S",
+    .ground_state_term = "12P3P4",
+    .principal_quantum_number = 7.0,
+    .statistical_weight = 9.0,
+    .energy = 13.266159453941839,
+    .ionization_energy = 0.34222730192927775,
+  },
+  {
+    .term = "18S5S",
+    .limit_term = "22P4S",
+    .ground_state_term = "12P3P4",
+    .principal_quantum_number = 8.0,
+    .statistical_weight = 5.0,
+    .energy = 13.311942523330966,
+    .ionization_energy = 0.29644423254015007,
+  },
+  {
+    .term = "18S3S",
+    .limit_term = "22P4S",
+    .ground_state_term = "12P3P4",
+    .principal_quantum_number = 8.0,
+    .statistical_weight = 3.0,
+    .energy = 13.318289027951126,
+    .ionization_energy = 0.2900977279199914,
+  },
+  {
+    .term = "17D5D",
+    .limit_term = "22P4S",
+    .ground_state_term = "12P3P4",
+    .principal_quantum_number = 7.0,
+    .statistical_weight = 25.0,
+    .energy = 13.327744396671426,
+    .ionization_energy = 0.28064235919969205,
+  },
+  {
+    .term = "17D3D",
+    .limit_term = "22P4S",
+    .ground_state_term = "12P3P4",
+    .principal_quantum_number = 7.0,
+    .statistical_weight = 15.0,
+    .energy = 13.328896250423591,
+    .ionization_energy = 0.2794905054475252,
+  },
+  {
+    .term = "17F5F",
+    .limit_term = "22P4S",
+    .ground_state_term = "12P3P4",
+    .principal_quantum_number = 7.0,
+    .statistical_weight = 35.0,
+    .energy = 13.330429065338755,
+    .ionization_energy = 0.2779576905323607,
+  },
+  {
+    .term = "17F3F",
+    .limit_term = "22P4S",
+    .ground_state_term = "12P3P4",
+    .principal_quantum_number = 7.0,
+    .statistical_weight = 21.0,
+    .energy = 13.330429933828967,
+    .ionization_energy = 0.27795682204215016,
+  },
+  {
+    .term = "18P5P",
+    .limit_term = "22P4S",
+    .ground_state_term = "12P3P4",
+    .principal_quantum_number = 8.0,
+    .statistical_weight = 15.0,
+    .energy = 13.34758130861516,
+    .ionization_energy = 0.2608054472559561,
+  },
+  {
+    .term = "18P3P",
+    .limit_term = "22P4S",
+    .ground_state_term = "12P3P4",
+    .principal_quantum_number = 8.0,
+    .statistical_weight = 9.0,
+    .energy = 13.353373054774199,
+    .ionization_energy = 0.25501370109691707,
+  },
+  {
+    .term = "19S3S",
+    .limit_term = "22P4S",
+    .ground_state_term = "12P3P4",
+    .principal_quantum_number = 9.0,
+    .statistical_weight = 3.0,
+    .energy = 13.387568421735562,
+    .ionization_energy = 0.22081833413555446,
+  },
+  {
+    .term = "18D5D",
+    .limit_term = "22P4S",
+    .ground_state_term = "12P3P4",
+    .principal_quantum_number = 8.0,
+    .statistical_weight = 25.0,
+    .energy = 13.393777452626736,
+    .ionization_energy = 0.21460930324438102,
+  },
+  {
+    .term = "18D3D",
+    .limit_term = "22P4S",
+    .ground_state_term = "12P3P4",
+    .principal_quantum_number = 8.0,
+    .statistical_weight = 15.0,
+    .energy = 13.394759504135749,
+    .ionization_energy = 0.21362725173536795,
+  },
+  {
+    .term = "18F5F",
+    .limit_term = "22P4S",
+    .ground_state_term = "12P3P4",
+    .principal_quantum_number = 8.0,
+    .statistical_weight = 35.0,
+    .energy = 13.395773735274894,
+    .ionization_energy = 0.2126130205962224,
+  },
+  {
+    .term = "18F3F",
+    .limit_term = "22P4S",
+    .ground_state_term = "12P3P4",
+    .principal_quantum_number = 8.0,
+    .statistical_weight = 21.0,
+    .energy = 13.395783276260207,
+    .ionization_energy = 0.21260347961091,
+  },
+  {
+    .term = "22P4S",
+    .limit_term = "NONE",
+    .ground_state_term = "22P4S",
+    .principal_quantum_number = 2.0,
+    .statistical_weight = 4.0,
+    .energy = 0.0,
+    .ionization_energy = 35.12111507716314
+  },
+};
+
+
+}

@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import numpy as np
 
-import nlte
+import lss
 
 
 def calculate_b_factors(
@@ -17,88 +17,100 @@ def calculate_b_factors(
     b_factors = np.zeros((len(temperatures), len(element.keys)))
     population_nlte_2 = population_nlte_1
     for i, _ in enumerate(temperatures):
-        population_lte = nlte.lte_population(element, temperatures[i])
+        population_lte = lss.lte_population(element, temperatures[i])
 
         rates_matrix = np.zeros((len(element.keys), len(element.keys)))
         if "ce_inasan_o1" in transitions_types:
-            rates_matrix += nlte.ce_inasan_o1_rates(
+            rates_matrix += lss.ce_inasan_o1_rates(
                 element,
                 temperatures[i],
                 electron_number_densities[i],
             )
         if "ce_regemorter" in transitions_types:
-            rates_matrix += nlte.ce_regemorter_rates(
+            rates_matrix += lss.ce_regemorter_rates(
                 element,
                 temperatures[i],
                 electron_temperatures[i],
                 electron_number_densities[i],
             )
         if "ci_arnaud_younger" in transitions_types:
-            rates_matrix += nlte.ci_arnaud_younger_rates(
+            rates_matrix += lss.ci_arnaud_younger_rates(
                 element,
                 temperatures[i],
                 electron_number_densities[i],
             )
+        if "ci_hahn" in transitions_types:
+            rates_matrix += lss.ci_hahn_rates(
+                element,
+                electron_temperatures[i],
+                electron_number_densities[i],
+            )
         if "cti_arnaud" in transitions_types:
-            rates_matrix += nlte.cti_arnaud_rates(
+            rates_matrix += lss.cti_arnaud_rates(
                 element,
                 temperatures[i],
                 electron_number_densities[i],
             )
         if "ctr_arnaud" in transitions_types:
-            rates_matrix += nlte.ctr_arnaud_rates(
+            rates_matrix += lss.ctr_arnaud_rates(
                 element,
                 temperatures[i],
                 electron_number_densities[i],
             )
         if "dr_badnell" in transitions_types:
-            rates_matrix += nlte.dr_badnell_rates(
+            rates_matrix += lss.dr_badnell_rates(
                 element,
                 temperatures[i],
                 electron_number_densities[i],
             )
         if "pe_tasitsiomi" in transitions_types:
-            rates_matrix += nlte.pe_tasitsiomi_rates(
+            rates_matrix += lss.pe_tasitsiomi_rates(
                 element,
-                nlte.SunGueymard.wavelengths,
-                nlte.SunGueymard.spectral_flux_density,
+                lss.SunGueymard.wavelengths,
+                lss.SunGueymard.spectral_flux_density,
                 optical_depth,
                 temperatures[i],
             )
         if "pi_tasitsiomi" in transitions_types:
-            rates_matrix += nlte.pi_tasitsiomi_rates(
+            rates_matrix += lss.pi_tasitsiomi_rates(
                 element,
-                nlte.SunGueymard.wavelengths,
-                nlte.SunGueymard.spectral_flux_density,
+                lss.SunGueymard.wavelengths,
+                lss.SunGueymard.spectral_flux_density,
                 optical_depth,
                 temperatures[i],
             )
         if "rbb_doppler_inasan_o1" in transitions_types:
-            rates_matrix += nlte.rbb_doppler_inasan_o1_rates(element)
+            rates_matrix += lss.rbb_doppler_inasan_o1_rates(element)
         if "rbb_voigt_inasan_o1" in transitions_types:
-            rates_matrix += nlte.rbb_voigt_inasan_o1_rates(element)
+            rates_matrix += lss.rbb_voigt_inasan_o1_rates(element)
         if "rbf_inasan_o1" in transitions_types:
-            rates_matrix += nlte.rbf_inasan_o1_rates(
+            rates_matrix += lss.rbf_inasan_o1_rates(
                 element,
-                nlte.SunGueymard.wavelengths,
-                nlte.SunGueymard.spectral_flux_density,
+                lss.SunGueymard.wavelengths,
+                lss.SunGueymard.spectral_flux_density,
                 optical_depth,
             )
         if "rr_badnell" in transitions_types:
-            rates_matrix += nlte.rr_badnell_verner_rates(
+            rates_matrix += lss.rr_badnell_verner_rates(
                 element,
                 temperatures[i],
                 electron_number_densities[i],
             )
         if "rr_seaton" in transitions_types:
-            rates_matrix += nlte.rr_seaton_rates(
+            rates_matrix += lss.rr_seaton_rates(
                 element,
                 electron_temperatures[i],
                 electron_number_densities[i],
             )
         if "se_nist_o1" in transitions_types:
-            rates_matrix += nlte.se_nist_o1_rates(element)
-        population_nlte_2 = nlte.nlte_population(
+            rates_matrix += lss.se_nist_o1_rates(element)
+        if "tbr_hahn" in transitions_types:
+            rates_matrix += lss.tbr_hahn_rates(
+                element,
+                electron_temperatures[i],
+                electron_number_densities[i],
+            )
+        population_nlte_2 = lss.nlte_population(
             element,
             population_nlte_2,
             delta_time,

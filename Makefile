@@ -8,7 +8,7 @@ build:
 	cd build;\
 		cmake ../src;\
 		make;\
-		cp nlte* ../tests;
+		cp lss* ../tests;
 
 
 .PHONY: run
