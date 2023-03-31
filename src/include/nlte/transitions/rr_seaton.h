@@ -6,9 +6,9 @@
 
 #include <Eigen/Dense>
 
-#include "./transition_type.h"
-#include "../data/constants.h"
-#include "../data/element.h"
+#include "./helpers/transition_type.h"
+#include "../data/elements/element.h"
+#include "../physics/constants.h"
 
 
 namespace nlte {

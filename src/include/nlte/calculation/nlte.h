@@ -5,9 +5,9 @@
 #include <vector>
 
 #include <Eigen/Dense>
-#include <sigma/sum.h>
+#include <fm/fm.h>
 
-#include "../data/element.h"
+#include "../data/elements/element.h"
 
 
 namespace nlte {
@@ -23,7 +23,7 @@ inline Eigen::MatrixXd nlte_transition_operator(
   for (int i = 0; i < R.rows(); i++) {
     for (int j = 0; j < R.cols(); j++) {
       if (i == j) {
-        R(i, j) = sigma::sum(0, R.cols(), [&](int k) {
+        R(i, j) = fm::sum(0, R.cols(), [&](int k) {
           if (i != k) {
             return -P(i, k);
           }

@@ -5,11 +5,11 @@
 #include <vector>
 
 #include <Eigen/Dense>
-#include <sigma/sum.h>
+#include <fm/fm.h>
 
-#include "./transition_type.h"
-#include "../data/element.h"
-#include "../data/se_nist_o1.h"
+#include "./helpers/transition_type.h"
+#include "../data/elements/element.h"
+#include "../data/transitions/se_nist_o1.h"
 
 
 namespace nlte {
@@ -42,11 +42,11 @@ inline Eigen::MatrixXd se_nist_o1_rates(
         }
       }
 
-      P(i, j) = sigma::sum(0, A.size(), [&](int k) {
+      P(i, j) = fm::sum(0, A.size(), [&](int k) {
         return
           + A[k]
           * (2.0 * J[k] + 1.0)
-          / sigma::sum(0, J.size(), [&](int l) { return J[l]; })
+          / fm::sum(0, J.size(), [&](int l) { return J[l]; })
         ;
       });
     }

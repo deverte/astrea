@@ -8,12 +8,12 @@
 
 #include <boost/math/quadrature/trapezoidal.hpp>
 #include <Eigen/Dense>
-#include <sigma/sum.h>
+#include <fm/fm.h>
 
-#include "./transition_type.h"
-#include "../data/constants.h"
-#include "../data/ci_arnaud.h"
-#include "../data/element.h"
+#include "./helpers/transition_type.h"
+#include "../data/elements/element.h"
+#include "../data/transitions/ci_arnaud.h"
+#include "../physics/constants.h"
 
 
 namespace nlte {
@@ -112,7 +112,7 @@ Eigen::MatrixXd ci_arnaud_younger_rates(
 
         C_DI(i, j) =
           + constant / std::pow(k_B * T, 3.0 / 2.0) // cm^3 * s^{-1} // or k * T^{3/2} ?
-          * sigma::sum(0, k_max, [&](int k) {       // 1
+          * fm::sum(0, k_max, [&](int k) {       // 1
             return
               + std::exp(-x(k)) / x(k) // 1
               * F(k)                   // 1

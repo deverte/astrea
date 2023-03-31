@@ -7,23 +7,23 @@
 
 #include <Eigen/Dense>
 
-#include "./transition_type.h"
-#include "../data/constants.h"
-#include "../data/element.h"
-#include "../data/rbb_doppler_inasan_o1.h"
+#include "./helpers/transition_type.h"
+#include "../data/elements/element.h"
+#include "../data/transitions/rbb_voigt_inasan_o1.h"
+#include "../physics/constants.h"
 
 
 namespace nlte {
 
 
 /**
- * Radiative bound-bound transitions using Doppler profile
+ * Radiative bound-bound transitions using Voigt profiles
  * 
  * data: INASAN
  * inverse process: this
  */
 inline Eigen::MatrixXd
-rbb_doppler_inasan_o1_rates(std::shared_ptr<Element> element) {
+rbb_voigt_inasan_o1_rates(std::shared_ptr<Element> element) {
   auto& c = SPEED_OF_LIGHT; // cm * s^{-1}
   auto& hbar = REDUCED_PLANCK_CONSTANT; // eV * s
 
@@ -40,7 +40,7 @@ rbb_doppler_inasan_o1_rates(std::shared_ptr<Element> element) {
     auto& initial = element->levels()[i];
     for (int j = 0; j < element->levels().size(); j++) {
       auto& final = element->levels()[j];
-      for (auto& transition : RbbDopplerInasanO1::transitions()) {
+      for (auto& transition : RbbVoigtInasanO1::transitions()) {
         if (
           transition.initial == initial.term &&
           transition.final == final.term

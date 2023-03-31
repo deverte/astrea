@@ -9,10 +9,10 @@
 #include <boost/math/quadrature/trapezoidal.hpp>
 #include <Eigen/Dense>
 
+#include "./helpers/transition_type.h"
 #include "./se_nist_o1.h"
-#include "./transition_type.h"
-#include "../data/constants.h"
-#include "../data/element.h"
+#include "../data/elements/element.h"
+#include "../physics/constants.h"
 
 
 namespace nlte {

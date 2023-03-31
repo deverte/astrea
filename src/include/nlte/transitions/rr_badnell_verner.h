@@ -5,9 +5,9 @@
 
 #include <Eigen/Dense>
 
-#include "./transition_type.h"
-#include "../data/element.h"
-#include "../data/rr_badnell.h"
+#include "./helpers/transition_type.h"
+#include "../data/elements/element.h"
+#include "../data/transitions/rr_badnell.h"
 
 
 namespace nlte {

@@ -9,9 +9,9 @@
 // #include <boost/math/interpolators/pchip.hpp>
 #include <Eigen/Dense>
 
-#include "./transition_type.h"
-#include "../data/element.h"
-#include "../data/ce_inasan_o1.h"
+#include "./helpers/transition_type.h"
+#include "../data/elements/element.h"
+#include "../data/transitions/ce_inasan_o1.h"
 
 
 namespace nlte {

@@ -7,10 +7,10 @@
 #include <boost/math/interpolators/barycentric_rational.hpp>
 #include <Eigen/Dense>
 
-#include "./transition_type.h"
-#include "../data/constants.h"
-#include "../data/element.h"
-#include "../data/rbf_inasan_o1.h"
+#include "./helpers/transition_type.h"
+#include "../data/elements/element.h"
+#include "../data/transitions/rbf_inasan_o1.h"
+#include "../physics/constants.h"
 
 
 namespace nlte {

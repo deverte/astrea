@@ -4,7 +4,7 @@
 #include <functional>
 
 
-namespace sigma {
+namespace fm {
 
 
 inline double

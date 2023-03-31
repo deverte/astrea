@@ -5,11 +5,11 @@
 #include <memory>
 
 #include <Eigen/Dense>
-#include <sigma/sum.h>
+#include <fm/fm.h>
 
-#include "./transition_type.h"
-#include "../data/element.h"
-#include "../data/dr_badnell.h"
+#include "./helpers/transition_type.h"
+#include "../data/elements/element.h"
+#include "../data/transitions/dr_badnell.h"
 
 
 namespace nlte {
@@ -49,7 +49,7 @@ inline Eigen::MatrixXd dr_badnell_rates(
     }
   }
 
-  auto alpha_DR = sigma::sum(0, C.size(), [&](int i) { // cm^3 * s^{-1}
+  auto alpha_DR = fm::sum(0, C.size(), [&](int i) { // cm^3 * s^{-1}
     return std::pow(T, -3.0 / 2.0) * C[i] * std::exp(-E[i] / T);
   });
 

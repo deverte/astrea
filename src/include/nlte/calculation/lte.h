@@ -5,10 +5,10 @@
 #include <memory>
 
 #include <Eigen/Dense>
-#include <sigma/sum.h>
+#include <fm/fm.h>
 
-#include "../data/constants.h"
-#include "../data/element.h"
+#include "../data/elements/element.h"
+#include "../physics/constants.h"
 
 
 namespace nlte {
@@ -34,7 +34,7 @@ inline Eigen::VectorXd lte_population(
     n(i) =
       + g(i)
       * std::exp(-E(i) / (k * T))
-      / sigma::sum(0, E.size(), [&](int j) {
+      / fm::sum(0, E.size(), [&](int j) {
         return g(j) * std::exp(-E(j) / (k * T));
       })
     ;
