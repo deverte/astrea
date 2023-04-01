@@ -39,6 +39,9 @@ inline Eigen::MatrixXd rbf_inasan_o1_rates(
   auto vec_F = spectral_flux_densities; // W * m^{-2} * nm^{-1}
   auto vec_lambda = wavelengths; // nm
 
+  boost::math::interpolators::barycentric_rational<double>
+  F(std::move(vec_lambda), std::move(vec_F)); // W * m^{-2} * nm^{-1}
+
   Eigen::MatrixXd P = // s^{-1}
     Eigen::MatrixXd::Zero(element->levels().size(), element->levels().size());
   for (int i = 0; i < element->levels().size(); i++) {
@@ -50,8 +53,6 @@ inline Eigen::MatrixXd rbf_inasan_o1_rates(
           transition.initial == initial.term &&
           final.term == initial.limit_term
         ) {
-          boost::math::interpolators::barycentric_rational<double>
-          F(std::move(vec_lambda), std::move(vec_F)); // W * m^{-2} * nm^{-1}
 
           auto P_ij = 0.0;
           for (

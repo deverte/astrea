@@ -66,6 +66,9 @@ inline Eigen::MatrixXd pe_tasitsiomi_rates(
   auto vec_F = spectral_flux_densities; // W * m^{-2} * nm^{-1}
   auto vec_lambda = wavelengths; // nm
 
+  boost::math::interpolators::barycentric_rational<double>
+  F(std::move(vec_lambda), std::move(vec_F)); // W * m^{-2} * nm^{-1}
+
   Eigen::VectorXd g(element->levels().size()); // 1
   for (int i = 0; i < element->levels().size(); i++) {
     g(i) = element->levels()[i].statistical_weight;
@@ -87,8 +90,6 @@ inline Eigen::MatrixXd pe_tasitsiomi_rates(
           return c_ / (E_ / hbar);
         };
 
-        boost::math::interpolators::barycentric_rational<double>
-        F(std::move(vec_lambda), std::move(vec_F)); // W * m^{-2} * nm^{-1}
 
         auto f_ij = [&](double lambda /* nm */) { // 1
           auto lambda_ = lambda * nm_to_angstrom; // angstrom

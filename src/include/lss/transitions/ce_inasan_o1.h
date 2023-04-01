@@ -49,6 +49,9 @@ inline Eigen::MatrixXd ce_inasan_o1_rates(
           q_ij(std::move(vec_T), std::move(vec_q)); // cm^3 * s^{-1}
 
           q(i, j) = q_ij(T);
+
+          vec_T = q_ij.return_x();
+          vec_q = q_ij.return_y();
         }
       }
     }

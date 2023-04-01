@@ -69,6 +69,9 @@ inline Eigen::MatrixXd pi_tasitsiomi_rates(
   auto vec_F = spectral_flux_densities; // W * m^{-2} * nm^{-1}
   auto vec_lambda = wavelengths; // nm
 
+  boost::math::interpolators::barycentric_rational<double>
+  F(std::move(vec_lambda), std::move(vec_F)); // W * m^{-2} * nm^{-1}
+
   Eigen::VectorXd g(element->levels().size()); // 1
   for (int i = 0; i < element->levels().size(); i++) {
     g(i) = element->levels()[i].statistical_weight;
@@ -82,24 +85,13 @@ inline Eigen::MatrixXd pi_tasitsiomi_rates(
       auto final = element->levels()[j];
 
       if (is_ionization(initial, final)) {
-        auto lambda_ion = [&]() { // nm
+        auto lambda_0 = [&]() { // nm
           auto I = initial.ionization_energy; // eV
           auto c_ = c * cm_to_nm; // nm * s^{-1}
           auto I_ = I * eV_to_J; // J
 
           return c_ / (I_ / hbar);
         };
-
-        auto lambda_0 = [&]() { // nm
-          auto E = std::abs(final.energy - initial.energy); // eV
-          auto c_ = c * cm_to_nm; // nm * s^{-1}
-          auto E_ = E * eV_to_J; // J
-
-          return c_ / (E_ / hbar);
-        };
-
-        boost::math::interpolators::barycentric_rational<double>
-        F(std::move(vec_lambda), std::move(vec_F)); // W * m^{-2} * nm^{-1}
 
         auto f_ij = [&](double lambda /* nm */) { // 1
           auto lambda_ = lambda * nm_to_angstrom; // angstrom
@@ -207,7 +199,7 @@ inline Eigen::MatrixXd pi_tasitsiomi_rates(
             ;
           },
           lambda_infty,
-          lambda_ion()
+          lambda_0()
         );
       }
     }
