@@ -48,10 +48,10 @@ inline Eigen::MatrixXd ce_regemorter_rates(
   Eigen::MatrixXd q = // cm^3 * s^{-1}
     Eigen::MatrixXd::Zero(element->levels().size(), element->levels().size());
   for (int alpha = 0; alpha < element->levels().size(); alpha++) {
-    auto& initial = element->levels()[alpha];
+    auto initial = element->levels()[alpha];
 
     for (int beta = 0; beta < element->levels().size(); beta++) {
-      auto& final = element->levels()[beta];
+      auto final = element->levels()[beta];
 
       if (is_excitation(initial, final)) {
         if (E(alpha) == E(beta)) {

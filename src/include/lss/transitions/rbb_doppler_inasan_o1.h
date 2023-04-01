@@ -37,10 +37,10 @@ rbb_doppler_inasan_o1_rates(std::shared_ptr<Element> element) {
   Eigen::MatrixXd P = // s^{-1}
     Eigen::MatrixXd::Zero(element->levels().size(), element->levels().size());
   for (int i = 0; i < element->levels().size(); i++) {
-    auto& initial = element->levels()[i];
+    auto initial = element->levels()[i];
     for (int j = 0; j < element->levels().size(); j++) {
-      auto& final = element->levels()[j];
-      for (auto& transition : RbbDopplerInasanO1::transitions()) {
+      auto final = element->levels()[j];
+      for (auto transition : RbbDopplerInasanO1::transitions()) {
         if (
           transition.initial == initial.term &&
           transition.final == final.term

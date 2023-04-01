@@ -77,9 +77,9 @@ inline Eigen::MatrixXd pi_tasitsiomi_rates(
   Eigen::MatrixXd P = // s^{-1}
     Eigen::MatrixXd::Zero(element->levels().size(), element->levels().size());
   for (int i = 0; i < element->levels().size(); i++) {
-    auto& initial = element->levels()[i];
+    auto initial = element->levels()[i];
     for (int j = 0; j < element->levels().size(); j++) {
-      auto& final = element->levels()[j];
+      auto final = element->levels()[j];
 
       if (is_ionization(initial, final)) {
         auto lambda_ion = [&]() { // nm
@@ -114,12 +114,6 @@ inline Eigen::MatrixXd pi_tasitsiomi_rates(
 
         auto delta_nu_L = [&]() { return A(j, i) / (2.0 * pi); }; // s^{-1}
 
-        auto delta_lambda_L = [&]() { // nm
-          auto c_ = c * cm_to_nm; // nm * s^{-1}
-
-          return c_ / delta_nu_L();
-        };
-
         auto delta_nu_D = [&]() { // s^{-1}
           auto lambda_0_ = lambda_0() * nm_to_cm; // cm
           auto m_i_ = m_i * u_to_eV_s2_cm_2; // eV * s^2 * cm^{-2}
@@ -130,12 +124,6 @@ inline Eigen::MatrixXd pi_tasitsiomi_rates(
               2.0 * k_B * T / (m_i_ * std::pow(c, 2)) // 1
             )
           ;
-        };
-
-        auto delta_lambda_D = [&]() { // nm
-          auto c_ = c * cm_to_nm; // nm * s^{-1}
-
-          return c_ / delta_nu_D();
         };
 
         auto u = [&](double lambda /* nm */) { // 1

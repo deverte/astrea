@@ -90,7 +90,7 @@ def calculate_b_factors(
                 lss.SunGueymard.spectral_flux_density,
                 optical_depth,
             )
-        if "rr_badnell" in transitions_types:
+        if "rr_badnell_verner" in transitions_types:
             rates_matrix += lss.rr_badnell_verner_rates(
                 element,
                 temperatures[i],

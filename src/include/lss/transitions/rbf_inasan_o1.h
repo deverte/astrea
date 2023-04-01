@@ -42,10 +42,10 @@ inline Eigen::MatrixXd rbf_inasan_o1_rates(
   Eigen::MatrixXd P = // s^{-1}
     Eigen::MatrixXd::Zero(element->levels().size(), element->levels().size());
   for (int i = 0; i < element->levels().size(); i++) {
-    auto& initial = element->levels()[i];
+    auto initial = element->levels()[i];
     for (int j = 0; j < element->levels().size(); j++) {
-      auto& final = element->levels()[j];
-      for (auto& transition : RbfInasanO1::transitions()) {
+      auto final = element->levels()[j];
+      for (auto transition : RbfInasanO1::transitions()) {
         if (
           transition.initial == initial.term &&
           final.term == initial.limit_term
@@ -59,7 +59,7 @@ inline Eigen::MatrixXd rbf_inasan_o1_rates(
             k < transition.finish_index - 2;
             k++
           ) {
-            auto& nu = RbfInasanO1::frequencies()[k]; // s^{-1}
+            auto nu = RbfInasanO1::frequencies()[k]; // s^{-1}
             auto lambda = c / nu * cm_to_nm; // nm
             auto sigma =
               + RbfInasanO1::photoionization_cross_sections()[k]

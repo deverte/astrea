@@ -69,9 +69,9 @@ inline Eigen::MatrixXd rr_badnell_verner_rates(
   Eigen::MatrixXd q = // cm^3 * s^{-1}
     Eigen::MatrixXd::Zero(element->levels().size(), element->levels().size());
   for (int i = 0; i < element->levels().size(); i++) {
-    auto& initial = element->levels()[i];
+    auto initial = element->levels()[i];
     for (int j = 0; j < element->levels().size(); j++) {
-      auto& final = element->levels()[j];
+      auto final = element->levels()[j];
 
       if (is_recombination(initial, final)) {
         q(i, j) = alpha_RR;

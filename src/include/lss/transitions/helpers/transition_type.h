@@ -8,6 +8,9 @@ namespace lss {
 
 
 inline bool is_ionization(Level& initial, Level& final) {
+  if (initial.term == final.term) {
+    return false;
+  }
   if (final.term == initial.limit_term) {
     return true;
   }
@@ -16,6 +19,9 @@ inline bool is_ionization(Level& initial, Level& final) {
 
 
 inline bool is_recombination(Level& initial, Level& final) {
+  if (initial.term == final.term) {
+    return false;
+  }
   if (
     initial.term == final.limit_term &&
     final.term == initial.ground_state_term
@@ -27,6 +33,9 @@ inline bool is_recombination(Level& initial, Level& final) {
 
 
 inline bool is_excitation(Level& initial, Level& final) {
+  if (initial.term == final.term) {
+    return false;
+  }
   return !(is_ionization(initial, final) || is_recombination(initial, final));
 }
 
