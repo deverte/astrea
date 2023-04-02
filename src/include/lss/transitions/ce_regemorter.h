@@ -5,6 +5,7 @@
 #include <memory>
 
 #include <Eigen/Dense>
+#include <fm/fm.h>
 
 #include "./helpers/transition_type.h"
 #include "../data/elements/element.h"
@@ -47,37 +48,29 @@ inline Eigen::MatrixXd ce_regemorter_rates(
 
   Eigen::MatrixXd q = // cm^3 * s^{-1}
     Eigen::MatrixXd::Zero(element->levels().size(), element->levels().size());
-  for (int alpha = 0; alpha < element->levels().size(); alpha++) {
-    auto initial = element->levels()[alpha];
+  for (int i = 0; i < element->levels().size(); i++) {
+    auto initial = element->levels()[i];
 
-    for (int beta = 0; beta < element->levels().size(); beta++) {
-      auto final = element->levels()[beta];
+    for (int j = 0; j < element->levels().size(); j++) {
+      auto final = element->levels()[j];
 
       if (is_excitation(initial, final)) {
-        if (E(alpha) == E(beta)) {
-          continue;
-        }
-        else if (E(alpha) > E(beta)) {
-          auto& i = beta;
-          auto& j = alpha;
-
-          q(j, i) =
+        q(i, j) = fm::cases({
+          {
             + 2.0 * std::sqrt(PI) * a_0 * hbar / m_e
             * std::sqrt(Ry / (k * T_e))
-            * gamma_ij / g(j)
-          ;
-        }
-        else if (E(alpha) < E(beta)) {
-          auto& i = alpha;
-          auto& j = beta;
-
-          q(i, j) =
+            * gamma_ij / g(i),
+            E(i) > E(j)
+          },
+          {
             + 2.0 * std::sqrt(PI) * a_0 * hbar / m_e
             * std::sqrt(Ry / (k * T_e))
             * gamma_ij / g(i)
-            * std::exp(- (E(j) - E(i)) / (k * T))
-          ;
-        }
+            * std::exp(-(E(j) - E(i)) / (k * T)),
+            E(i) < E(j)
+          },
+          {0.0, true},
+        });
       }
     }
   }

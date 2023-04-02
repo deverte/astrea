@@ -22,17 +22,18 @@ inline Eigen::MatrixXd nlte_transition_operator(
   Eigen::MatrixXd R = Eigen::MatrixXd::Zero(P.rows(), P.cols()); // s^{-1}
   for (int i = 0; i < R.rows(); i++) {
     for (int j = 0; j < R.cols(); j++) {
-      if (i == j) {
-        R(i, j) = fm::sum(0, R.cols(), [&](int k) {
-          if (i != k) {
-            return -P(i, k);
-          }
-          return 0.0;
-        });
-      }
-      else {
-        R(i, j) = P(j, i);
-      }
+      R(i, j) = fm::cases({
+        {
+          fm::sum(0, R.cols(), [&](int k) {
+            return fm::cases({
+              {-P(i, k), i != k},
+              {0.0, i == k},
+            });
+          }),
+          i == j
+        },
+        {P(j, i), i != j},
+      });
     }
   }
 

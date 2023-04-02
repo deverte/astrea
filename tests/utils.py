@@ -15,9 +15,10 @@ def calculate_b_factors(
     transitions_types = [],
 ):
     b_factors = np.zeros((len(temperatures), len(element.keys)))
-    population_nlte_2 = population_nlte_1
+    population_nlte_2 = [population_nlte_1]
     for i, _ in enumerate(temperatures):
         population_lte = lss.lte_population(element, temperatures[i])
+        print(population_nlte_2[0])
 
         rates_matrix = np.zeros((len(element.keys), len(element.keys)))
         if "ce_inasan_o1" in transitions_types:
@@ -110,11 +111,11 @@ def calculate_b_factors(
                 electron_temperatures[i],
                 electron_number_densities[i],
             )
-        population_nlte_2 = lss.nlte_population(
+        population_nlte_2[0] = lss.nlte_population(
             element,
-            population_nlte_2,
+            population_nlte_2[0],
             delta_time,
             rates_matrix,
         )
-        b_factors[i] = population_nlte_2 / population_lte
+        b_factors[i] = population_nlte_2[0] / population_lte
     return b_factors
