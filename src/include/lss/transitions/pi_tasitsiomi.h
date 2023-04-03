@@ -169,7 +169,7 @@ inline Eigen::MatrixXd pi_tasitsiomi_rates(
           ;
         };
 
-        auto sigma = [&](double lambda /* nm */) {// m^2
+        auto sigma = [&](double lambda /* nm */) { // m^2
           auto epsilon_0_ = epsilon_0 / m_to_cm; // C^2 * J^{-1} * cm^{-1}
           auto e_ = e * statC_to_C; // C
           auto m_e_ = m_e * eV_to_J; // cm^{-2} * J * s^2

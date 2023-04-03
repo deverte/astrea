@@ -18,7 +18,6 @@ def calculate_b_factors(
     population_nlte_2 = [population_nlte_1]
     for i, _ in enumerate(temperatures):
         population_lte = lss.lte_population(element, temperatures[i])
-        print(population_nlte_2[0])
 
         rates_matrix = np.zeros((len(element.keys), len(element.keys)))
         if "ce_inasan_o1" in transitions_types:
