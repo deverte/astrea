@@ -31,7 +31,7 @@ inline Eigen::MatrixXd cti_arnaud_rates(
 
   auto N = element->ionization_stage(); // 1
   auto& N_e = electron_number_density; // cm^{-3}
-  Eigen::MatrixXd P = // s^{-1}
+  Eigen::MatrixXd R_CTI = // s^{-1}
     Eigen::MatrixXd::Zero(element->levels().size(), element->levels().size());
   auto& T = temperature; // K
   auto T_4 = T / 1.0e4; // 1
@@ -66,18 +66,21 @@ inline Eigen::MatrixXd cti_arnaud_rates(
     }
   }
   if (T < T_min || T > T_max) {
-    return P;
+    return R_CTI;
   }
 
-  auto alpha = // cm^3 * s^{-1}
-    a * std::pow(T_4, b) * std::exp(-c * T_4) * std::exp(-delta_E / (k_B * T));
-  if (Z == 8.0) {
-    alpha =
-      a * std::exp(-delta_E / (k_B * T)) * (1.0 - 0.93 * std::exp(-c * T_4))
-    ;
-  }
+  auto C_CTI_iN = fm::cases({ // cm^3 * s^{-1}
+    {
+      a * std::pow(T_4, b) * std::exp(-c * T_4) * std::exp(-delta_E / (k_B * T)),
+      Z != 8.0
+    },
+    {
+      a * std::exp(-delta_E / (k_B * T)) * (1.0 - 0.93 * std::exp(-c * T_4)),
+      Z == 8.0
+    },
+  });
 
-  Eigen::MatrixXd q = // cm^3 * s^{-1}
+  Eigen::MatrixXd C_CTI = // cm^3 * s^{-1}
     Eigen::MatrixXd::Zero(element->levels().size(), element->levels().size());
   for (int i = 0; i < element->levels().size(); i++) {
     auto initial = element->levels()[i];
@@ -85,14 +88,14 @@ inline Eigen::MatrixXd cti_arnaud_rates(
       auto final = element->levels()[j];
 
       if (is_ionization(initial, final)) {
-        q(i, j) = alpha;
+        C_CTI(i, j) = C_CTI_iN;
       }
     }
   }
 
-  P = N_e * q;
+  R_CTI = N_e * C_CTI;
 
-  return P;
+  return R_CTI;
 }
 
 

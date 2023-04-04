@@ -42,7 +42,7 @@ inline Eigen::MatrixXd rbf_inasan_o1_rates(
   boost::math::interpolators::barycentric_rational<double>
   F(std::move(vec_lambda), std::move(vec_F)); // W * m^{-2} * nm^{-1}
 
-  Eigen::MatrixXd P = // s^{-1}
+  Eigen::MatrixXd R_PI_RR_DR = // s^{-1}
     Eigen::MatrixXd::Zero(element->levels().size(), element->levels().size());
   for (int i = 0; i < element->levels().size(); i++) {
     auto initial = element->levels()[i];
@@ -54,7 +54,7 @@ inline Eigen::MatrixXd rbf_inasan_o1_rates(
           final.term == initial.limit_term
         ) {
 
-          auto P_ij = 0.0;
+          auto R_ij = 0.0;
           for (
             int k = transition.start_index - 1;
             k < transition.finish_index - 2;
@@ -77,16 +77,16 @@ inline Eigen::MatrixXd rbf_inasan_o1_rates(
               )
               * cm_to_nm; // nm
 
-            P_ij += F(lambda) / (hbar * nu) * sigma * std::exp(-tau) * dlambda;
+            R_ij += F(lambda) / (hbar * nu) * sigma * std::exp(-tau) * dlambda;
           }
 
-          P(i, j) = P_ij;
+          R_PI_RR_DR(i, j) = R_ij;
         }
       }
     }
   }
 
-  return P;
+  return R_PI_RR_DR;
 }
 
 

@@ -50,7 +50,7 @@ Eigen::MatrixXd ci_arnaud_younger_rates(
       subshells.push_back(fit);
     }
   }
-  auto k_max = subshells.size(); // 1
+  auto K = subshells.size(); // 1
 
   auto f_1 = [&](double x /* 1 */) { // 1
     return
@@ -78,14 +78,14 @@ Eigen::MatrixXd ci_arnaud_younger_rates(
     ;
   };
 
-  Eigen::VectorXd A(k_max); // 1
-  Eigen::VectorXd B(k_max); // 1
-  Eigen::VectorXd C(k_max); // 1
-  Eigen::VectorXd D(k_max); // 1
-  Eigen::VectorXd F(k_max); // 1
-  Eigen::VectorXd I(k_max); // eV
-  Eigen::VectorXd x(k_max); // 1
-  for (int k = 0; k < k_max; k++) {
+  Eigen::VectorXd A(K); // 1
+  Eigen::VectorXd B(K); // 1
+  Eigen::VectorXd C(K); // 1
+  Eigen::VectorXd D(K); // 1
+  Eigen::VectorXd F(K); // 1
+  Eigen::VectorXd I(K); // eV
+  Eigen::VectorXd x(K); // 1
+  for (int k = 0; k < K; k++) {
     A(k) = subshells[k].A;
     B(k) = subshells[k].B;
     C(k) = subshells[k].C;
@@ -100,7 +100,7 @@ Eigen::MatrixXd ci_arnaud_younger_rates(
     ;
   }
 
-  Eigen::MatrixXd C_DI = // cm^3 * s^{-1}
+  Eigen::MatrixXd C_CI = // cm^3 * s^{-1}
     Eigen::MatrixXd::Zero(element->levels().size(), element->levels().size());
   for (int i = 0; i < element->levels().size(); i++) {
     auto initial = element->levels()[i];
@@ -110,9 +110,9 @@ Eigen::MatrixXd ci_arnaud_younger_rates(
       if (is_ionization(initial, final)) {
         auto constant = 6.69e-7; // eV^{3/2} * cm^3 * s^{-1}
 
-        C_DI(i, j) =
+        C_CI(i, j) =
           + constant / std::pow(k_B * T, 3.0 / 2.0) // cm^3 * s^{-1} // or k * T^{3/2} ?
-          * fm::sum(0, k_max, [&](int k) {       // 1
+          * fm::sum(0, K, [&](int k) {       // 1
             return
               + std::exp(-x(k)) / x(k) // 1
               * F(k)                   // 1
@@ -123,11 +123,11 @@ Eigen::MatrixXd ci_arnaud_younger_rates(
     }
   }
 
-  Eigen::MatrixXd P = // s^{-1}
+  Eigen::MatrixXd R_CI = // s^{-1}
     Eigen::MatrixXd::Zero(element->levels().size(), element->levels().size());
-  P = n_e * n_a * C_DI;
+  R_CI = n_e * n_a * C_CI;
 
-  return P;
+  return R_CI;
 }
 
 

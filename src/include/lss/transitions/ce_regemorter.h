@@ -29,7 +29,7 @@ inline Eigen::MatrixXd ce_regemorter_rates(
 ) {
   auto& a_0 = BOHR_RADIUS; // cm
   auto& hbar = REDUCED_PLANCK_CONSTANT; // eV * s
-  auto& k = BOLTZMANN_CONSTANT; // eV * K^{-1}
+  auto& k_B = BOLTZMANN_CONSTANT; // eV * K^{-1}
   auto& m_e = ELECTRON_MASS; // cm^{-2} * eV * s^2
   auto& Ry = RYDBERG_ENERGY; // eV
 
@@ -46,7 +46,7 @@ inline Eigen::MatrixXd ce_regemorter_rates(
     g(i) = element->levels()[i].statistical_weight;
   }
 
-  Eigen::MatrixXd q = // cm^3 * s^{-1}
+  Eigen::MatrixXd C_CE_CD = // cm^3 * s^{-1}
     Eigen::MatrixXd::Zero(element->levels().size(), element->levels().size());
   for (int i = 0; i < element->levels().size(); i++) {
     auto initial = element->levels()[i];
@@ -55,18 +55,18 @@ inline Eigen::MatrixXd ce_regemorter_rates(
       auto final = element->levels()[j];
 
       if (is_excitation(initial, final)) {
-        q(i, j) = fm::cases({
+        C_CE_CD(i, j) = fm::cases({
           {
             + 2.0 * std::sqrt(PI) * a_0 * hbar / m_e
-            * std::sqrt(Ry / (k * T_e))
+            * std::sqrt(Ry / (k_B * T_e))
             * gamma_ij / g(i),
             E(i) > E(j)
           },
           {
             + 2.0 * std::sqrt(PI) * a_0 * hbar / m_e
-            * std::sqrt(Ry / (k * T_e))
+            * std::sqrt(Ry / (k_B * T_e))
             * gamma_ij / g(i)
-            * std::exp(-(E(j) - E(i)) / (k * T)),
+            * std::exp(-(E(j) - E(i)) / (k_B * T)),
             E(i) < E(j)
           },
           {0.0, true},
@@ -75,11 +75,11 @@ inline Eigen::MatrixXd ce_regemorter_rates(
     }
   }
 
-  Eigen::MatrixXd P = // s^{-1}
+  Eigen::MatrixXd R_CE_CD = // s^{-1}
     Eigen::MatrixXd::Zero(element->levels().size(), element->levels().size());
-  P = N_e * q;
+  R_CE_CD = N_e * C_CE_CD;
 
-  return P;
+  return R_CE_CD;
 }
 
 

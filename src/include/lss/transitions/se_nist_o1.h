@@ -25,7 +25,7 @@ namespace lss {
 inline Eigen::MatrixXd se_nist_o1_rates(
   std::shared_ptr<Element> element
 ) {
-  Eigen::MatrixXd P = // s^{-1}
+  Eigen::MatrixXd R_SE = // s^{-1}
     Eigen::MatrixXd::Zero(element->levels().size(), element->levels().size());
   for (int i = 0; i < element->levels().size(); i++) {
     auto initial = element->levels()[i];
@@ -42,20 +42,21 @@ inline Eigen::MatrixXd se_nist_o1_rates(
           }
         }
 
-        Eigen::VectorXd A(transitions.size());
+        Eigen::VectorXd R(transitions.size());
         Eigen::VectorXd J(transitions.size());
-        for (int k = 0; k < A.size(); k++) {
-          A(k) = transitions[k].rate;
+        auto K = R.size();
+        for (int k = 0; k < R.size(); k++) {
+          R(k) = transitions[k].rate;
           J(k) = transitions[k].initial_total_angular_momentum_quantum_number;
         }
 
-        P(i, j) = fm::cases({
+        R_SE(i, j) = fm::cases({
           {
-            + fm::sum(0, A.size(), [&](int k) {
-              return A(k) * (2.0 * J(k) + 1.0);
+            + fm::sum(0, K, [&](int k) {
+              return R(k) * (2.0 * J(k) + 1.0);
             })
-            / fm::sum(0, J.size(), [&](int l) { return 2.0 * J(l) + 1.0; }),
-            (A.size() > 0) && (J.size() > 0)
+            / fm::sum(0, K, [&](int l) { return 2.0 * J(l) + 1.0; }),
+            K > 0
           },
           {0.0, true},
         });
@@ -63,7 +64,7 @@ inline Eigen::MatrixXd se_nist_o1_rates(
     }
   }
 
-  return P;
+  return R_SE;
 }
 
 

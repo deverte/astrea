@@ -34,7 +34,7 @@ rbb_doppler_inasan_o1_rates(std::shared_ptr<Element> element) {
     g(i) = element->levels()[i].statistical_weight;
   }
 
-  Eigen::MatrixXd P = // s^{-1}
+  Eigen::MatrixXd R_PE = // s^{-1}
     Eigen::MatrixXd::Zero(element->levels().size(), element->levels().size());
   for (int i = 0; i < element->levels().size(); i++) {
     auto initial = element->levels()[i];
@@ -49,7 +49,7 @@ rbb_doppler_inasan_o1_rates(std::shared_ptr<Element> element) {
 
           // 0.66702 Constant from
           // https://www.nist.gov/pml/atomic-spectroscopy-compendium-basic-ideas-notation-data-and-formulas/atomic-spectroscopy
-          P(i, j) =
+          R_PE(i, j) =
             + 0.66702 / std::pow(c / (std::abs(E(i) - E(j)) / hbar), 2)
             * (g(j) / g(i)) * f_ij;
         }
@@ -57,7 +57,7 @@ rbb_doppler_inasan_o1_rates(std::shared_ptr<Element> element) {
     }
   }
 
-  return P;
+  return R_PE;
 }
 
 

@@ -54,7 +54,7 @@ inline Eigen::MatrixXd rr_badnell_verner_rates(
     }
   }
 
-  auto alpha_RR = // cm^3 * s^{-1}
+  auto C_RR_Nj = // cm^3 * s^{-1}
     + A
     * std::pow(
       (
@@ -66,7 +66,7 @@ inline Eigen::MatrixXd rr_badnell_verner_rates(
     )
   ;
 
-  Eigen::MatrixXd q = // cm^3 * s^{-1}
+  Eigen::MatrixXd C_RR = // cm^3 * s^{-1}
     Eigen::MatrixXd::Zero(element->levels().size(), element->levels().size());
   for (int i = 0; i < element->levels().size(); i++) {
     auto initial = element->levels()[i];
@@ -74,16 +74,16 @@ inline Eigen::MatrixXd rr_badnell_verner_rates(
       auto final = element->levels()[j];
 
       if (is_recombination(initial, final)) {
-        q(i, j) = alpha_RR;
+        C_RR(i, j) = C_RR_Nj;
       }
     }
   }
 
-  Eigen::MatrixXd P = // s^{-1}
+  Eigen::MatrixXd R_RR = // s^{-1}
     Eigen::MatrixXd::Zero(element->levels().size(), element->levels().size());
-  P = N_e * q;
+  R_RR = N_e * C_RR;
 
-  return P;
+  return R_RR;
 }
 
 

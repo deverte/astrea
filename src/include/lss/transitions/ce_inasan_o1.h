@@ -31,7 +31,7 @@ inline Eigen::MatrixXd ce_inasan_o1_rates(
   auto& N_e = electron_number_density; // cm^{-3}
   auto& T = temperature; // K
 
-  Eigen::MatrixXd q = // cm^3 * s^{-1}
+  Eigen::MatrixXd C_CE_CD = // cm^3 * s^{-1}
     Eigen::MatrixXd::Zero(element->levels().size(), element->levels().size());
   for (int i = 0; i < element->levels().size(); i++) {
     auto initial = element->levels()[i];
@@ -46,22 +46,22 @@ inline Eigen::MatrixXd ce_inasan_o1_rates(
           auto vec_q = transition.collision_rate_coefficients;
 
           boost::math::interpolators::barycentric_rational<double>
-          q_ij(std::move(vec_T), std::move(vec_q)); // cm^3 * s^{-1}
+          C_CE_CD_ij(std::move(vec_T), std::move(vec_q)); // cm^3 * s^{-1}
 
-          q(i, j) = q_ij(T);
+          C_CE_CD(i, j) = C_CE_CD_ij(T);
 
-          vec_T = q_ij.return_x();
-          vec_q = q_ij.return_y();
+          vec_T = C_CE_CD_ij.return_x();
+          vec_q = C_CE_CD_ij.return_y();
         }
       }
     }
   }
 
-  Eigen::MatrixXd P = // s^{-1}
+  Eigen::MatrixXd R_CE_CD = // s^{-1}
     Eigen::MatrixXd::Zero(element->levels().size(), element->levels().size());
-  P = N_e * q;
+  R_CE_CD = N_e * C_CE_CD;
 
-  return P;
+  return R_CE_CD;
 }
 
 

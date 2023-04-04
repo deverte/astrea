@@ -18,7 +18,7 @@ inline Eigen::VectorXd lte_population(
   std::shared_ptr<Element> element,
   double temperature /* K */
 ) {
-  auto& k = BOLTZMANN_CONSTANT; // eV * K^{-1}
+  auto& k_B = BOLTZMANN_CONSTANT; // eV * K^{-1}
 
   auto& T = temperature; // K
 
@@ -28,14 +28,15 @@ inline Eigen::VectorXd lte_population(
     E(i) = element->levels()[i].energy;
     g(i) = element->levels()[i].statistical_weight;
   }
+  auto N = E.size();
 
   Eigen::VectorXd n(element->levels().size()); // 1
   for (int i = 0; i < E.size(); i++) {
     n(i) =
       + g(i)
-      * std::exp(-E(i) / (k * T))
-      / fm::sum(0, E.size(), [&](int j) {
-        return g(j) * std::exp(-E(j) / (k * T));
+      * std::exp(-E(i) / (k_B * T))
+      / fm::sum(0, N, [&](int j) {
+        return g(j) * std::exp(-E(j) / (k_B * T));
       })
     ;
   }

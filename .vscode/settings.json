@@ -76,7 +76,8 @@
         "regex": "cpp",
         "cfenv": "cpp",
         "typeindex": "cpp",
-        "valarray": "cpp"
+        "valarray": "cpp",
+        "shared_mutex": "cpp"
     },
     "mesonbuild.configureOnOpen": false
 }

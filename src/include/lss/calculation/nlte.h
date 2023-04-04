@@ -17,27 +17,28 @@ inline Eigen::MatrixXd nlte_transition_operator(
   std::shared_ptr<Element> element,
   Eigen::MatrixXd rates_matrix // s^{-1}
 ) {
-  auto& P = rates_matrix; // s^{-1}
+  auto& R = rates_matrix; // s^{-1}
 
-  Eigen::MatrixXd R = Eigen::MatrixXd::Zero(P.rows(), P.cols()); // s^{-1}
-  for (int i = 0; i < R.rows(); i++) {
-    for (int j = 0; j < R.cols(); j++) {
-      R(i, j) = fm::cases({
+  Eigen::MatrixXd Q = Eigen::MatrixXd::Zero(R.rows(), R.cols()); // s^{-1}
+  auto N = Q.cols(); // 1
+  for (int i = 0; i < Q.rows(); i++) {
+    for (int j = 0; j < Q.cols(); j++) {
+      Q(i, j) = fm::cases({
         {
-          fm::sum(0, R.cols(), [&](int k) {
+          - fm::sum(0, N, [&](int k) {
             return fm::cases({
-              {-P(i, k), i != k},
+              {R(i, k), i != k},
               {0.0, i == k},
             });
           }),
           i == j
         },
-        {P(j, i), i != j},
+        {R(j, i), i != j},
       });
     }
   }
 
-  return R;
+  return Q;
 }
 
 
@@ -47,15 +48,17 @@ inline Eigen::VectorXd nlte_population(
   double delta_time /* s */,
   Eigen::MatrixXd rates_matrix // s^{-1}
 ) {
-  auto R = nlte_transition_operator(
+  auto Q_tot = nlte_transition_operator(
     element,
     rates_matrix
   ); // s^{-1}
   auto& dt = delta_time; // s
-  auto I = Eigen::MatrixXd::Identity(R.rows(), R.cols()); // 1
+  auto I = Eigen::MatrixXd::Identity(Q_tot.rows(), Q_tot.cols()); // 1
   auto& n_t = population; // 1
 
-  auto n_t_plus_dt = (I - R * dt).inverse() * n_t; // 1
+  auto P = (I - Q_tot * dt).inverse(); // 1
+
+  auto n_t_plus_dt = P * n_t; // 1
 
   auto norm_n_t_plus_dt = n_t_plus_dt / n_t_plus_dt.sum();
 

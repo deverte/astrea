@@ -31,20 +31,25 @@ Eigen::MatrixXd rr_seaton_rates(
   auto& T_e = electron_temperature; // K
   auto Z = element->atomic_number(); // 1
 
+  auto D = 5.197e-14; // cm^3 * s^{-1}
+  auto E = 0.4288; // 1
+  auto F = 0.5; // 1 // or 0.4 * log(lambda) ?
+  auto G = 0.469; // 1
+
   auto lambda = 157890.0 * std::pow(Z, 2.0) / T_e; // 1
 
-  auto alpha = // cm^3 * s^{-1}
-    + 5.197e-14                   // cm^3 * s^{-1}
+  auto C_RR_Nj = // cm^3 * s^{-1}
+    + D                           // cm^3 * s^{-1}
     * Z                           // 1
     * std::pow(lambda, 1.0 / 2.0) // 1
     * (                           // 1
-      + 0.4288                               // 1
-      + 0.5 * std::log(lambda)               // 1 // or 0.4 * log(lambda) ?
-      + 0.469 * std::pow(lambda, -1.0 / 3.0) // 1
+      + E                                // 1
+      + F * std::log(lambda)             // 1
+      + G * std::pow(lambda, -1.0 / 3.0) // 1
     )
   ;
 
-  Eigen::MatrixXd q = // cm^3 * s^{-1}
+  Eigen::MatrixXd C_RR = // cm^3 * s^{-1}
     Eigen::MatrixXd::Zero(element->levels().size(), element->levels().size());
   for (int i = 0; i < element->levels().size(); i++) {
     auto initial = element->levels()[i];
@@ -52,16 +57,16 @@ Eigen::MatrixXd rr_seaton_rates(
       auto final = element->levels()[j];
 
       if (is_recombination(initial, final)) {
-        q(i, j) = alpha;
+        C_RR(i, j) = C_RR_Nj;
       }
     }
   }
 
-  Eigen::MatrixXd P = // s^{-1}
+  Eigen::MatrixXd R_RR = // s^{-1}
     Eigen::MatrixXd::Zero(element->levels().size(), element->levels().size());
-  P = n_e * q;
+  R_RR = n_e * C_RR;
 
-  return P;
+  return R_RR;
 }
 
 

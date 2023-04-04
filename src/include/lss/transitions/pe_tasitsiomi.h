@@ -59,7 +59,7 @@ inline Eigen::MatrixXd pe_tasitsiomi_rates(
   auto zeta_0 = 0.855; // 1
   auto zeta_1 = 3.42; // 1
 
-  Eigen::MatrixXd A = se_nist_o1_rates(element); // s^{-1}
+  Eigen::MatrixXd R_SE = se_nist_o1_rates(element); // s^{-1}
   auto m_i = element->mass(); // u
   auto& T = temperature; // K
   auto& tau = optical_depth; // 1
@@ -69,12 +69,14 @@ inline Eigen::MatrixXd pe_tasitsiomi_rates(
   boost::math::interpolators::barycentric_rational<double>
   F(std::move(vec_lambda), std::move(vec_F)); // W * m^{-2} * nm^{-1}
 
+  Eigen::VectorXd E(element->levels().size()); // eV
   Eigen::VectorXd g(element->levels().size()); // 1
   for (int i = 0; i < element->levels().size(); i++) {
+    E(i) = element->levels()[i].energy;
     g(i) = element->levels()[i].statistical_weight;
   }
 
-  Eigen::MatrixXd P = // s^{-1}
+  Eigen::MatrixXd R_PE_PD = // s^{-1}
     Eigen::MatrixXd::Zero(element->levels().size(), element->levels().size());
   for (int i = 0; i < element->levels().size(); i++) {
     auto initial = element->levels()[i];
@@ -83,26 +85,25 @@ inline Eigen::MatrixXd pe_tasitsiomi_rates(
 
       if (is_excitation(initial, final)) {
         auto lambda_0 = [&]() { // nm
-          auto E = std::abs(final.energy - initial.energy); // eV
           auto c_ = c * cm_to_nm; // nm * s^{-1}
-          auto E_ = E * eV_to_J; // J
+          auto E_ = E * eV_to_J;  // J
 
-          return c_ / (E_ / hbar);
+          return c_ * hbar / (E_(j) - E_(i));
         };
 
 
         auto f_ij = [&](double lambda /* nm */) { // 1
           auto lambda_ = lambda * nm_to_angstrom; // angstrom
-          auto coefficient = 6.6702e15; // angstrom * s^{-1}
+          auto Lambda = 6.6702e15; // angstrom * s^{-1}
 
           return
-            + A(j, i)                              // s^{-1}
-            * g(j) / g(i)                          // 1
-            * std::pow(lambda_, 2.0) / coefficient // s
+            + R_SE(i, j)                      // s^{-1}
+            * g(j) / g(i)                     // 1
+            * std::pow(lambda_, 2.0) / Lambda // s
           ;
         };
 
-        auto delta_nu_L = [&]() { return A(j, i) / (2.0 * pi); }; // s^{-1}
+        auto delta_nu_L = [&]() { return R_SE(i, j) / (2.0 * pi); }; // s^{-1}
 
         auto delta_nu_D = [&]() { // s^{-1}
           auto lambda_0_ = lambda_0() * nm_to_cm; // cm
@@ -116,19 +117,19 @@ inline Eigen::MatrixXd pe_tasitsiomi_rates(
           ;
         };
 
-        auto u = [&](double lambda /* nm */) { // 1
+        auto x = [&](double lambda /* nm */) { // 1
           auto lambda_ = lambda * nm_to_cm; // cm
           auto lambda_0_ = lambda_0() * nm_to_cm; // cm
-          auto nu = c / lambda_; // s^{-1}
-          auto nu_0 = c / lambda_0_; // s^{-1}
 
-          return (nu - nu_0) / delta_nu_D();
+          return
+            c * (lambda_0_ - lambda_) / (lambda_ * lambda_0_ * delta_nu_D())
+          ;
         };
 
         auto z = [&](double lambda /* nm */) { // 1
           return
-            + (std::pow(u(lambda), 2.0) - zeta_0) // 1
-            / (std::pow(u(lambda), 2.0) + zeta_1) // 1
+            + (std::pow(x(lambda), 2.0) - zeta_0) // 1
+            / (std::pow(x(lambda), 2.0) + zeta_1) // 1
           ;
         };
 
@@ -137,12 +138,12 @@ inline Eigen::MatrixXd pe_tasitsiomi_rates(
         };
 
         auto q = [&](double lambda /* nm */) { // 1
-          if (z(lambda) > 0.0) {
-            return
+          return fm::cases({
+            {
               + z(lambda)                              // 1
-              * (1.0 + chi / std::pow(u(lambda), 2.0)) // 1
+              * (1.0 + chi / std::pow(x(lambda), 2.0)) // 1
               * alpha()                                // 1
-              / (pi * (std::pow(u(lambda), 2.0) + 1))  // 1
+              / (pi * (std::pow(x(lambda), 2.0) + 1))  // 1
               * (                                      // 1
                 + kappa_0   // 1
                 + z(lambda) // 1
@@ -151,10 +152,11 @@ inline Eigen::MatrixXd pe_tasitsiomi_rates(
                   + z(lambda)                       // 1
                   * (kappa_2 + kappa_3 * z(lambda)) // 1
                 )
-              )
-            ;
-          }
-          return 0.0;
+              ),
+              z(lambda) > 0.0
+            },
+            {0.0, z(lambda) <= 0.0}
+          });
         };
 
         auto H = [&](double lambda /* nm */) { // 1
@@ -162,7 +164,7 @@ inline Eigen::MatrixXd pe_tasitsiomi_rates(
             + std::sqrt(pi) // 1
             * (             // 1
               + q(lambda)                                     // 1
-              + std::exp(-std::pow(u(lambda), 2.0)) / epsilon // 1
+              + std::exp(-std::pow(x(lambda), 2.0)) / epsilon // 1
             )
           ;
         };
@@ -184,7 +186,7 @@ inline Eigen::MatrixXd pe_tasitsiomi_rates(
           return sigma_ * std::pow(cm_to_m, 2.0);
         };
 
-        P(i, j) = boost::math::quadrature::trapezoidal( // s^{-1}
+        R_PE_PD(i, j) = boost::math::quadrature::trapezoidal( // s^{-1}
           [&](double lambda /* nm */) {
             auto c_ = c * cm_to_nm; // nm * s^{-1}
 
@@ -203,7 +205,7 @@ inline Eigen::MatrixXd pe_tasitsiomi_rates(
     }
   }
 
-  return P;
+  return R_PE_PD;
 }
 
 

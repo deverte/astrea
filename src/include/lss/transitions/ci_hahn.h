@@ -42,7 +42,7 @@ inline Eigen::MatrixXd ci_hahn_rates(
 
   auto x = [&](double n) { return I(Z, n) / (k_B * T_e); }; // 1
 
-  auto beta = [&](double Z, double n) { // cm^{-3} * s^{-1}
+  auto C_CI_ij = [&](double Z, double n) { // cm^{-3} * s^{-1}
     return fm::cases({
       {
         (
@@ -71,7 +71,7 @@ inline Eigen::MatrixXd ci_hahn_rates(
     });
   };
 
-  Eigen::MatrixXd q = // cm^3 * s^{-1}
+  Eigen::MatrixXd C_CI = // cm^3 * s^{-1}
     Eigen::MatrixXd::Zero(element->levels().size(), element->levels().size());
   for (int i = 0; i < element->levels().size(); i++) {
     auto initial = element->levels()[i];
@@ -79,16 +79,16 @@ inline Eigen::MatrixXd ci_hahn_rates(
       auto final = element->levels()[j];
 
       if (is_ionization(initial, final)) {
-        q(i, j) = beta(Z, n);
+        C_CI(i, j) = C_CI_ij(Z, n);
       }
     }
   }
 
-  Eigen::MatrixXd P = // s^{-1}
+  Eigen::MatrixXd R_CI = // s^{-1}
     Eigen::MatrixXd::Zero(element->levels().size(), element->levels().size());
-  P = q / N_e;
+  R_CI = C_CI / N_e;
 
-  return P;
+  return R_CI;
 }
 
 

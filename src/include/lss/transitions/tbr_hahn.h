@@ -51,7 +51,7 @@ inline Eigen::MatrixXd tbr_hahn_rates(
 
   auto x = [&](double n) { return I(Z, n) / (k_B * T_e); }; // 1
 
-  auto alpha = [&](double Z, double n) { // cm^{-3} * s^{-1}
+  auto C_TBR_Nj = [&](double Z, double n) { // cm^{-3} * s^{-1}
     return fm::cases({
       {
         (
@@ -72,12 +72,12 @@ inline Eigen::MatrixXd tbr_hahn_rates(
           * Gamma(Z, n)                                          // 1
           / (std::pow((k_B * T_e) / Ry, 2.0) * std::pow(Z, 2.0)) // 1
         ),
-        x(n) >= 1.0 /* && T > 1.0e4 */
+        x(n) < 1.0 /* && T > 1.0e4 */
       },
     });
   };
 
-  Eigen::MatrixXd q = // cm^3 * s^{-1}
+  Eigen::MatrixXd C_TBR = // cm^3 * s^{-1}
     Eigen::MatrixXd::Zero(element->levels().size(), element->levels().size());
   for (int i = 0; i < element->levels().size(); i++) {
     auto initial = element->levels()[i];
@@ -85,16 +85,16 @@ inline Eigen::MatrixXd tbr_hahn_rates(
       auto final = element->levels()[j];
 
       if (is_recombination(initial, final)) {
-        q(i, j) = alpha(Z, n);
+        C_TBR(i, j) = C_TBR_Nj(Z, n);
       }
     }
   }
 
-  Eigen::MatrixXd P = // s^{-1}
+  Eigen::MatrixXd R_TBR = // s^{-1}
     Eigen::MatrixXd::Zero(element->levels().size(), element->levels().size());
-  P = q / N_e;
+  R_TBR = C_TBR / N_e;
 
-  return P;
+  return R_TBR;
 }
 
 
