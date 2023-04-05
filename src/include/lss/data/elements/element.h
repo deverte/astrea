@@ -17,6 +17,7 @@ class Level {
   const double statistical_weight; // one
   const double energy; // eV
   const double ionization_energy; // eV
+  const double ionization_stage; // 1
 };
 
 
@@ -33,6 +34,8 @@ class Element {
   virtual const double ionization_stage() = 0;
 
   virtual const double mass() = 0;
+
+  virtual const int number_of_ionization_stages() = 0;
 
   std::vector<std::string> keys();
 

@@ -45,7 +45,7 @@ inline Eigen::MatrixXd pe_tasitsiomi_rates(
   auto& epsilon_0 = // F * m^{-1} = C * V^{-1} * m^{-1} = C^2 * J^{-1} * m^{-1}
     VACUUM_PERMITTIVITY
   ;
-  auto hbar = REDUCED_PLANCK_CONSTANT * eV_to_J; // J * s = W * s^2
+  auto h = PLANCK_CONSTANT * eV_to_J; // J * s = W * s^2
   auto& k_B = BOLTZMANN_CONSTANT; // eV * K^{-1}
   auto m_e = ELECTRON_MASS; // cm^{-2} * eV * s^2
   auto& pi = PI; // 1
@@ -88,7 +88,7 @@ inline Eigen::MatrixXd pe_tasitsiomi_rates(
           auto c_ = c * cm_to_nm; // nm * s^{-1}
           auto E_ = E * eV_to_J;  // J
 
-          return c_ * hbar / (E_(j) - E_(i));
+          return c_ * h / (E_(j) - E_(i));
         };
 
 
@@ -192,7 +192,7 @@ inline Eigen::MatrixXd pe_tasitsiomi_rates(
 
             return
               + F(lambda)           // W * m^{-2} * nm^{-1}
-              * lambda / (hbar * c) // nm * W^{-1} * s^{-1} * nm^{-1}
+              * lambda / (h * c) // nm * W^{-1} * s^{-1} * nm^{-1}
               * std::exp(-tau)      // 1
               * sigma(lambda)       // m^2
               // * dlambda          // nm

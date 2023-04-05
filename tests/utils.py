@@ -17,7 +17,12 @@ def calculate_b_factors(
     b_factors = np.zeros((len(temperatures), len(element.keys)))
     population_nlte_2 = [population_nlte_1]
     for i, _ in enumerate(temperatures):
-        population_lte = lss.lte_population(element, temperatures[i])
+        population_lte = lss.lte_population(
+            element,
+            temperatures[i],
+            electron_temperatures[i],
+            electron_number_densities[i],
+        )
 
         rates_matrix = np.zeros((len(element.keys), len(element.keys)))
         if "ce_inasan_o1" in transitions_types:
@@ -36,7 +41,7 @@ def calculate_b_factors(
         if "ci_arnaud_younger" in transitions_types:
             rates_matrix += lss.ci_arnaud_younger_rates(
                 element,
-                temperatures[i],
+                electron_temperatures[i],
                 electron_number_densities[i],
             )
         if "ci_hahn" in transitions_types:
