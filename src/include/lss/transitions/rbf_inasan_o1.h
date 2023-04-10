@@ -3,11 +3,11 @@
 
 #include <cmath>
 #include <memory>
+#include <vector>
 
 #include <boost/math/interpolators/barycentric_rational.hpp>
 #include <Eigen/Dense>
 
-#include "./helpers/transition_type.h"
 #include "../data/elements/element.h"
 #include "../data/transitions/rbf_inasan_o1.h"
 #include "../physics/constants.h"
@@ -23,7 +23,7 @@ namespace lss {
  * inverse process: this
  */
 inline Eigen::MatrixXd rbf_inasan_o1_rates(
-  std::shared_ptr<Element> element,
+  std::vector<std::shared_ptr<Element>> elements,
   std::vector<double> wavelengths /* nm */,
   std::vector<double> spectral_flux_densities /* W * m^{-2} * nm^{-1} */,
   double optical_depth /* 1 */
@@ -39,25 +39,30 @@ inline Eigen::MatrixXd rbf_inasan_o1_rates(
   auto vec_F = spectral_flux_densities; // W * m^{-2} * nm^{-1}
   auto vec_lambda = wavelengths; // nm
 
+  int S = elements.size();
+  Eigen::VectorXi L(S);
+  for (int s = 0; s <= S - 1; s++) {
+    L(s) = elements[s]->levels().size();
+  }
+  auto K = [&](int s) -> int {
+    return int(fm::sum(0, s - 1, [&](int z) { return L(z); }));
+  };
+
   boost::math::interpolators::barycentric_rational<double>
   F(std::move(vec_lambda), std::move(vec_F)); // W * m^{-2} * nm^{-1}
 
-  Eigen::MatrixXd R_PI_RR_DR = // s^{-1}
-    Eigen::MatrixXd::Zero(element->levels().size(), element->levels().size());
-  for (int i = 0; i < element->levels().size(); i++) {
-    auto initial = element->levels()[i];
-    for (int j = 0; j < element->levels().size(); j++) {
-      auto final = element->levels()[j];
+  Eigen::MatrixXd R_PI_RR_DR = Eigen::MatrixXd::Zero(K(S), K(S)); // s^{-1}
+  for (int s = 0; s <= S - 2; s++) {
+    for (int i = 0; i <= L(s) - 1; i++) {
+      auto initial = elements[s]->levels()[i];
+
       for (auto transition : RbfInasanO1::transitions()) {
-        if (
-          transition.initial == initial.term &&
-          final.term == initial.limit_term
-        ) {
+        if (transition.initial == initial.term) {
 
           auto R_ij = 0.0;
           for (
             int k = transition.start_index - 1;
-            k < transition.finish_index - 2;
+            k <= transition.finish_index - 3;
             k++
           ) {
             auto nu = RbfInasanO1::frequencies()[k]; // s^{-1}
@@ -80,7 +85,7 @@ inline Eigen::MatrixXd rbf_inasan_o1_rates(
             R_ij += F(lambda) / (hbar * nu) * sigma * std::exp(-tau) * dlambda;
           }
 
-          R_PI_RR_DR(i, j) = R_ij;
+          R_PI_RR_DR(i + K(s), L(s) + K(s)) = R_ij;
         }
       }
     }

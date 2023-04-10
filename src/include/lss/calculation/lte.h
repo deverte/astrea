@@ -3,6 +3,7 @@
 
 #include <cmath>
 #include <memory>
+#include <vector>
 
 #include <Eigen/Dense>
 #include <fm/fm.h>
@@ -15,7 +16,7 @@ namespace lss {
 
 
 inline Eigen::VectorXd lte_population(
-  std::shared_ptr<Element> element,
+  std::vector<std::shared_ptr<Element>> elements,
   double temperature, /* K */
   double electron_temperature, /* K */
   double electron_number_density /* cm^{-3} */
@@ -25,71 +26,73 @@ inline Eigen::VectorXd lte_population(
   auto& m_e = ELECTRON_MASS; // cm^{-2} * eV * s^2
   auto& pi = PI; // 1
 
-  auto I_s = element->levels()[0].ionization_energy; // eV
   auto& N_e = electron_number_density; // cm^{-3}
   auto& T = temperature; // K
   auto& T_e = electron_temperature; // K
 
-  Eigen::VectorXd E(element->levels().size()); // eV
-  Eigen::VectorXd g(element->levels().size()); // 1
-  Eigen::VectorXd s(element->levels().size()); // 1
-  for (int i = 0; i < element->levels().size(); i++) {
-    E(i) = element->levels()[i].energy;
-    g(i) = element->levels()[i].statistical_weight;
-    s(i) = element->levels()[i].ionization_stage;
+  int S = elements.size();
+  Eigen::VectorXd L(S);
+  for (int s = 0; s <= S - 1; s++) {
+    L(s) = elements[s]->levels().size();
   }
-  auto N = E.size(); // 1
+  auto K = [&](int s) -> int {
+    return int(fm::sum(0, s - 1, [&](int z) { return L(z); }));
+  };
 
-  auto lambda = // cm
+  Eigen::VectorXd I(S); // eV
+  Eigen::VectorXd E(K(S)); // eV
+  Eigen::VectorXd g(K(S)); // 1
+  for (int s = 0; s <= S - 1; s++) {
+    I(s) = elements[s]->levels()[0].ionization_energy;
+    for (int i = 0; i <= L(s) - 1; i++) {
+      E(i + K(s)) = elements[s]->levels()[i].energy;
+      g(i + K(s)) = elements[s]->levels()[i].statistical_weight;
+    }
+  }
+
+  auto tilde_lambda = // cm
     std::sqrt(std::pow(h, 2.0) / (2.0 * pi * m_e * k_B * T_e))
   ;
 
-  auto N_s_N_s_plus_1 = // 1
-    + N_e                                        // cm^{-3}
-    * fm::sum(0, N - 1, [&](auto j) {            // 1
-      return g(j) * std::exp(-E(j) / (k_B * T)); // 1
-    })
-    / fm::sum(N - 1, N, [&](auto j) {            // 1
-      return g(j) * std::exp(-E(j) / (k_B * T)); // 1
-    })
-    * std::pow(lambda, 3.0) / 2.0                // cm^3
-    * std::exp(I_s / (k_B * T_e))                // 1
-  ;
-
-  auto N_s = N_s_N_s_plus_1 / (1.0 + N_s_N_s_plus_1); // 1
-  auto N_s_plus_1 = 1.0 / (1.0 + N_s_N_s_plus_1);     // 1
-
-  Eigen::VectorXd n(element->levels().size()); // 1
-  if (s.reverse()(0) == 0.0) {
-    for (int i = 0; i < N; i++) {
-      n(i) =
-        + g(i)
-        * std::exp(-E(i) / (k_B * T))
-        / fm::sum(0, N, [&](int j) {
-          return g(j) * std::exp(-E(j) / (k_B * T));
-        })
-      ;
-    }
+  // Saha Equation
+  Eigen::VectorXd N(S); // 1
+  Eigen::VectorXd r(S - 1); // 1
+  for (int s = 0; s <= S - 2; s++) {
+    r(s) =
+      + N_e                                    // cm^{-3}
+      * fm::sum(0, L(s) - 1, [&](auto i) {     // 1
+        return g(i + K(s)) * std::exp(-E(i + K(s)) / (k_B * T)); // 1
+      })
+      / fm::sum(0, L(s + 1) - 1, [&](auto i) { // 1
+        return
+          + g(i + K(s))                        // 1
+          * std::exp(-E(i + K(s)) / (k_B * T)) // 1
+        ;
+      })
+      * std::pow(tilde_lambda, 3.0) / 2.0    // cm^3
+      * std::exp(I(s) / (k_B * T_e))         // 1
+    ;
   }
-  else if (s.reverse()(0) == 1.0) {
-    for (int i = 0; i < N - 1; i++) {
-      n(i) = // 1
-        + g(i)                                       // 1
-        * std::exp(-E(i) / (k_B * T))                // 1
-        / fm::sum(0, N - 1, [&](int j) {             // 1
-          return g(j) * std::exp(-E(j) / (k_B * T)); // 1
+  for (int s = 0; s <= S - 1; s++) {
+    N(s) =
+      + fm::prod(s, S - 2, [&](auto i) { return r(i); })
+      / fm::sum(0, S - 1, [&](auto k) {
+        return fm::prod(k, S - 2, [&](auto i) { return r(i);});
+      })
+    ;
+  }
+
+  // Boltzmann distribution
+  Eigen::VectorXd n(K(S)); // 1
+  for (int s = 0; s <= S - 1; s++) {
+    for (int i = 0; i <= L(s) - 1; i++) {
+      n(i + K(s)) = // 1
+        + g(i + K(s))                        // 1
+        * std::exp(-E(i + K(s)) / (k_B * T)) // 1
+        / fm::sum(0, L(s) - 1, [&](int j) {        // 1
+          return g(j + K(s)) * std::exp(-E(j + K(s)) / (k_B * T)); // 1
         })
-        * N_s                                        // 1
-      ;
-    }
-    for (int i = N - 1; i < N; i++) {
-      n(i) = // 1
-        + g(i)                                       // 1
-        * std::exp(-E(i) / (k_B * T))                // 1
-        / fm::sum(0, N - 1, [&](int j) {             // 1
-          return g(j) * std::exp(-E(j) / (k_B * T)); // 1
-        })
-        * N_s_plus_1                                 // 1
+        * N(s)                                    // 1
       ;
     }
   }

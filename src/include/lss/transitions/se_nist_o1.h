@@ -8,7 +8,6 @@
 #include <Eigen/Dense>
 #include <fm/fm.h>
 
-#include "./helpers/transition_type.h"
 #include "../data/elements/element.h"
 #include "../data/transitions/se_nist_o1.h"
 
@@ -23,42 +22,55 @@ namespace lss {
  * inverse process: ?
  */
 inline Eigen::MatrixXd se_nist_o1_rates(
-  std::shared_ptr<Element> element
+  std::vector<std::shared_ptr<Element>> elements
 ) {
-  Eigen::MatrixXd R_SE = // s^{-1}
-    Eigen::MatrixXd::Zero(element->levels().size(), element->levels().size());
-  for (int i = 0; i < element->levels().size(); i++) {
-    auto initial = element->levels()[i];
-    for (int j = 0; j < element->levels().size(); j++) {
-      auto final = element->levels()[j];
+  int S = elements.size();
+  Eigen::VectorXi L(S);
+  for (int s = 0; s <= S - 1; s++) {
+    L(s) = elements[s]->levels().size();
+  }
+  auto K = [&](int s) {
+    return int(fm::sum(0, s - 1, [&](int z) { return L(z); }));
+  };
 
-      if (is_excitation(initial, final)) {
+  Eigen::MatrixXd R_SE = Eigen::MatrixXd::Zero(K(S), K(S)); // s^{-1}
+  for (int s = 0; s <= S - 1; s++) {
+    for (int i = 0; i <= L(s) - 1; i++) {
+      for (int j = 0; j <= L(s) - 1; j++) {
+        auto initial = elements[s]->levels()[i];
+        auto final = elements[s]->levels()[j];
+
         std::vector<SENistO1Transition> transitions;
         for (auto transition : SENistO1::transitions()) {
           if (
-            transition.initial == initial.term && transition.final == final.term
+            (transition.initial == initial.term) &&
+            (transition.final == final.term)
           ) {
             transitions.push_back(transition);
           }
         }
 
-        Eigen::VectorXd R(transitions.size());
-        Eigen::VectorXd J(transitions.size());
-        auto K = R.size();
-        for (int k = 0; k < R.size(); k++) {
-          R(k) = transitions[k].rate;
-          J(k) = transitions[k].initial_total_angular_momentum_quantum_number;
+        int M = transitions.size();
+        Eigen::VectorXd R(M);
+        Eigen::VectorXd J(M);
+        for (int m = 0; m <= M - 1; m++) {
+          R(m) = transitions[m].rate;
+          J(m) = transitions[m].initial_total_angular_momentum_quantum_number;
         }
 
-        R_SE(i, j) = fm::cases({
+        R_SE(i + K(s), j + K(s)) = fm::cases({
+          {[&]() { return 0.0; }, (i == j) || (M <= 0)},
           {
-            + fm::sum(0, K, [&](int k) {
-              return R(k) * (2.0 * J(k) + 1.0);
-            })
-            / fm::sum(0, K, [&](int l) { return 2.0 * J(l) + 1.0; }),
-            K > 0
+            [&]() {
+              return
+                + fm::sum(0, M - 1, [&](int m) {
+                  return R(m) * (2.0 * J(m) + 1.0);
+                })
+                / fm::sum(0, M - 1, [&](int m) { return 2.0 * J(m) + 1.0; })
+              ;
+            },
+            (i != j) || (M > 0)
           },
-          {0.0, true},
         });
       }
     }

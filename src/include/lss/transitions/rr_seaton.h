@@ -3,10 +3,10 @@
 
 #include <cmath>
 #include <memory>
+#include <vector>
 
 #include <Eigen/Dense>
 
-#include "./helpers/transition_type.h"
 #include "../data/elements/element.h"
 #include "../physics/constants.h"
 
@@ -21,7 +21,7 @@ namespace lss {
  * inverse process: photoionization - dielectronic recombination
  */
 Eigen::MatrixXd rr_seaton_rates(
-  std::shared_ptr<Element> element,
+  std::vector<std::shared_ptr<Element>> elements,
   double electron_temperature /* K */,
   double electron_number_density /* cm^{-3} */
 ) {
@@ -29,12 +29,21 @@ Eigen::MatrixXd rr_seaton_rates(
 
   auto& n_e = electron_number_density; // cm^{-3}
   auto& T_e = electron_temperature; // K
-  auto Z = element->atomic_number(); // 1
+  auto Z = elements[0]->atomic_number(); // 1
 
   auto D = 5.197e-14; // cm^3 * s^{-1}
   auto E = 0.4288; // 1
   auto F = 0.5; // 1 // or 0.4 * log(lambda) ?
   auto G = 0.469; // 1
+
+  int S = elements.size();
+  Eigen::VectorXi L(S);
+  for (int s = 0; s <= S - 1; s++) {
+    L(s) = elements[s]->levels().size();
+  }
+  auto K = [&](int s) -> int {
+    return int(fm::sum(0, s - 1, [&](int z) { return L(z); }));
+  };
 
   auto lambda = 157890.0 * std::pow(Z, 2.0) / T_e; // 1
 
@@ -49,21 +58,14 @@ Eigen::MatrixXd rr_seaton_rates(
     )
   ;
 
-  Eigen::MatrixXd C_RR = // cm^3 * s^{-1}
-    Eigen::MatrixXd::Zero(element->levels().size(), element->levels().size());
-  for (int i = 0; i < element->levels().size(); i++) {
-    auto initial = element->levels()[i];
-    for (int j = 0; j < element->levels().size(); j++) {
-      auto final = element->levels()[j];
-
-      if (is_recombination(initial, final)) {
-        C_RR(i, j) = C_RR_Nj;
-      }
+  Eigen::MatrixXd C_RR = Eigen::MatrixXd::Zero(K(S), K(S)); // cm^3 * s^{-1}
+  for (int s = 0; s <= S - 2; s++) {
+    for (int j = 0; j <= L(s) - 1; j++) {
+      C_RR(L(s) + K(s), j + K(s)) = C_RR_Nj;
     }
   }
 
-  Eigen::MatrixXd R_RR = // s^{-1}
-    Eigen::MatrixXd::Zero(element->levels().size(), element->levels().size());
+  Eigen::MatrixXd R_RR = Eigen::MatrixXd::Zero(K(S), K(S)); // s^{-1}
   R_RR = n_e * C_RR;
 
   return R_RR;

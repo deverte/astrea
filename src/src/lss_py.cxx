@@ -9,6 +9,7 @@ PYBIND11_MODULE(lss, m) {
 
   lss_py::Element(m);
   lss_py::O1Inasan(m);
+  lss_py::O2Inasan(m);
   lss_py::SunGueymard(m);
 
   lss_py::ce_inasan_o1_rates(m);

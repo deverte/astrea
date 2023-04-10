@@ -3,11 +3,11 @@
 
 #include <cmath>
 #include <memory>
+#include <vector>
 
 #include <Eigen/Dense>
 #include <fm/fm.h>
 
-#include "./helpers/transition_type.h"
 #include "../data/elements/element.h"
 #include "../data/transitions/dr_badnell.h"
 
@@ -29,47 +29,47 @@ namespace lss {
  * inverse process: photoionization - radiative recombination
  */
 inline Eigen::MatrixXd dr_badnell_rates(
-  std::shared_ptr<Element> element,
+  std::vector<std::shared_ptr<Element>> elements,
   double temperature /* K */,
   double electron_number_density /* cm^{-3} */
 ) {
-  auto s = element->ionization_stage(); // 1
-  auto N = element->levels().size(); // 1
   auto& N_e = electron_number_density; // cm^{-3}
   auto& T = temperature; // K
-  auto Z = element->atomic_number(); // 1
+  auto Z = elements[0]->atomic_number(); // 1
 
-  std::vector<double> C; // cm^3 * s^{-1} * K^{3/2}
-  std::vector<double> E; // K
-  for (auto fit : DRBadnell::fit()) {
-    if (fit.Z == Z && fit.N == Z - s - 1.0) {
-      C = fit.C;
-      E = fit.E;
-
-      break;
-    }
+  int S = elements.size();
+  Eigen::VectorXi L(S);
+  for (int s = 0; s <= S - 1; s++) {
+    L(s) = elements[s]->levels().size();
   }
-  auto K = C.size();
+  auto K = [&](int s) -> int {
+    return int(fm::sum(0, s - 1, [&](int z) { return L(z); }));
+  };
 
-  auto C_DR_Nj = fm::sum(0, K, [&](int i) { // cm^3 * s^{-1}
-    return std::pow(T, -3.0 / 2.0) * C[i] * std::exp(-E[i] / T);
-  });
+  Eigen::MatrixXd C_DR = Eigen::MatrixXd::Zero(K(S), K(S)); // cm^3 * s^{-1}
+  for (int s = 0; s <= S - 2; s++) {
+    std::vector<double> C; // cm^3 * s^{-1} * K^{3/2}
+    std::vector<double> E; // K
+    for (auto fit : DRBadnell::fit()) {
+      if (fit.Z == Z && fit.N == Z - s - 1.0) {
+        C = fit.C;
+        E = fit.E;
 
-  Eigen::MatrixXd C_DR = // cm^3 * s^{-1}
-    Eigen::MatrixXd::Zero(element->levels().size(), element->levels().size());
-  for (int i = 0; i < element->levels().size(); i++) {
-    auto initial = element->levels()[i];
-    for (int j = 0; j < element->levels().size(); j++) {
-      auto final = element->levels()[j];
-
-      if (is_recombination(initial, final)) {
-        C_DR(i, j) = C_DR_Nj;
+        break;
       }
     }
+    auto M = C.size();
+
+    auto C_DR_Nj = fm::sum(0, M - 1, [&](int i) { // cm^3 * s^{-1}
+      return std::pow(T, -3.0 / 2.0) * C[i] * std::exp(-E[i] / T);
+    });
+
+    for (int j = 0; j <= L(s) - 1; j++) {
+      C_DR(L(s) + K(s), j + K(s)) = C_DR_Nj;
+    }
   }
 
-  Eigen::MatrixXd R_DR = // s^{-1}
-    Eigen::MatrixXd::Zero(element->levels().size(), element->levels().size());
+  Eigen::MatrixXd R_DR = Eigen::MatrixXd::Zero(K(S), K(S)); // s^{-1}
   R_DR = N_e * C_DR;
 
   return R_DR;

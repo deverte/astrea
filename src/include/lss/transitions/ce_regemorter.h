@@ -3,11 +3,11 @@
 
 #include <cmath>
 #include <memory>
+#include <vector>
 
 #include <Eigen/Dense>
 #include <fm/fm.h>
 
-#include "./helpers/transition_type.h"
 #include "../data/elements/element.h"
 #include "../physics/constants.h"
 
@@ -22,7 +22,7 @@ namespace lss {
  * inverse process: this
  */
 inline Eigen::MatrixXd ce_regemorter_rates(
-  std::shared_ptr<Element> element,
+  std::vector<std::shared_ptr<Element>> elements,
   double temperature /* K */,
   double electron_temperature /* K */,
   double electron_number_density /* cm^{-3} */
@@ -39,44 +39,57 @@ inline Eigen::MatrixXd ce_regemorter_rates(
   auto& T = temperature; // K
   auto& T_e = electron_temperature; // K
 
-  Eigen::VectorXd E(element->levels().size()); // eV
-  Eigen::VectorXd g(element->levels().size()); // 1
-  for (int i = 0; i < element->levels().size(); i++) {
-    E(i) = element->levels()[i].energy;
-    g(i) = element->levels()[i].statistical_weight;
+  int S = elements.size();
+  Eigen::VectorXi L(S);
+  for (int s = 0; s <= S - 1; s++) {
+    L(s) = elements[s]->levels().size();
+  }
+  auto K = [&](int s) -> int {
+    return int(fm::sum(0, s - 1, [&](int z) { return L(z); }));
+  };
+
+  Eigen::VectorXd E(K(S)); // eV
+  Eigen::VectorXd g(K(S)); // 1
+  for (int s = 0; s <= S - 1; s++) {
+    for (int i = 0; i <= L(s) - 1; i++) {
+      E(i + K(s)) = elements[s]->levels()[i].energy;
+      g(i + K(s)) = elements[s]->levels()[i].statistical_weight;
+    }
   }
 
-  Eigen::MatrixXd C_CE_CD = // cm^3 * s^{-1}
-    Eigen::MatrixXd::Zero(element->levels().size(), element->levels().size());
-  for (int i = 0; i < element->levels().size(); i++) {
-    auto initial = element->levels()[i];
-
-    for (int j = 0; j < element->levels().size(); j++) {
-      auto final = element->levels()[j];
-
-      if (is_excitation(initial, final)) {
-        C_CE_CD(i, j) = fm::cases({
+  Eigen::MatrixXd C_CE_CD = Eigen::MatrixXd::Zero(K(S), K(S)); // cm^3 * s^{-1}
+  for (int s = 0; s <= S - 1; s++) {
+    for (int i = 0; i <= L(s) - 1; i++) {
+      for (int j = 0; j <= L(s) - 1; j++) {
+        C_CE_CD(i + K(s), j + K(s)) = fm::cases({
           {
-            + 2.0 * std::sqrt(PI) * a_0 * hbar / m_e
-            * std::sqrt(Ry / (k_B * T_e))
-            * gamma_ij / g(i),
-            E(i) > E(j)
+            [&]() {
+              return
+                + 2.0 * std::sqrt(PI) * a_0 * hbar / m_e
+                * std::sqrt(Ry / (k_B * T_e))
+                * gamma_ij / g(i + K(s))
+              ;
+            },
+            E(i + K(s)) > E(j + K(s))
           },
           {
-            + 2.0 * std::sqrt(PI) * a_0 * hbar / m_e
-            * std::sqrt(Ry / (k_B * T_e))
-            * gamma_ij / g(i)
-            * std::exp(-(E(j) - E(i)) / (k_B * T)),
-            E(i) < E(j)
+            [&]() {
+              return
+                + 2.0 * std::sqrt(PI) * a_0 * hbar / m_e
+                * std::sqrt(Ry / (k_B * T_e))
+                * gamma_ij / g(i + K(s))
+                * std::exp(-(E(j + K(s)) - E(i + K(s))) / (k_B * T))
+              ;
+            },
+            E(i + K(s)) < E(j + K(s))
           },
-          {0.0, true},
+          {[]() { return 0.0; }, true},
         });
       }
     }
   }
 
-  Eigen::MatrixXd R_CE_CD = // s^{-1}
-    Eigen::MatrixXd::Zero(element->levels().size(), element->levels().size());
+  Eigen::MatrixXd R_CE_CD = Eigen::MatrixXd::Zero(K(S), K(S)); // s^{-1}
   R_CE_CD = N_e * C_CE_CD;
 
   return R_CE_CD;

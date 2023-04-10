@@ -14,26 +14,30 @@ namespace lss {
 
 
 inline Eigen::MatrixXd nlte_transition_operator(
-  std::shared_ptr<Element> element,
   Eigen::MatrixXd rates_matrix // s^{-1}
 ) {
   auto& R = rates_matrix; // s^{-1}
 
   Eigen::MatrixXd Q = Eigen::MatrixXd::Zero(R.rows(), R.cols()); // s^{-1}
-  auto N = Q.cols(); // 1
-  for (int i = 0; i < Q.rows(); i++) {
-    for (int j = 0; j < Q.cols(); j++) {
+  auto K = Q.cols(); // 1
+
+  for (int i = 0; i <= K - 1; i++) {
+    for (int j = 0; j <= K - 1; j++) {
       Q(i, j) = fm::cases({
         {
-          - fm::sum(0, N, [&](int k) {
-            return fm::cases({
-              {R(i, k), i != k},
-              {0.0, i == k},
-            });
-          }),
+          [&]() {
+            return
+              - fm::sum(0, K - 1, [&](int k) {
+                return fm::cases({
+                  {[&]() { return R(i, k); }, i != k},
+                  {[]() { return 0.0; }, i == k},
+                });
+              })
+            ;
+          },
           i == j
         },
-        {R(j, i), i != j},
+        {[&]() { return R(j, i); }, i != j},
       });
     }
   }
@@ -43,13 +47,11 @@ inline Eigen::MatrixXd nlte_transition_operator(
 
 
 inline Eigen::VectorXd nlte_population(
-  std::shared_ptr<Element> element,
   Eigen::VectorXd population /* 1 */,
   double delta_time /* s */,
   Eigen::MatrixXd rates_matrix // s^{-1}
 ) {
   auto Q_tot = nlte_transition_operator(
-    element,
     rates_matrix
   ); // s^{-1}
   auto& dt = delta_time; // s
