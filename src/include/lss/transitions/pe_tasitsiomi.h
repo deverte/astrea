@@ -30,7 +30,8 @@ inline Eigen::MatrixXd pe_tasitsiomi_rates(
   std::vector<double> wavelengths /* nm */,
   std::vector<double> spectral_flux_densities /* W * m^{-2} * nm^{-1} */,
   double optical_depth /* 1 */,
-  double temperature /* K */
+  double temperature /* K */,
+  Eigen::MatrixXd R_SE /* s^{-1} */
 ) {
   auto cm_to_m = 1.0e-2;
   auto cm_to_nm = 1.0e7;
@@ -69,7 +70,6 @@ inline Eigen::MatrixXd pe_tasitsiomi_rates(
     return int(fm::sum(0, s - 1, [&](int z) { return L(z); }));
   };
 
-  Eigen::MatrixXd R_SE = se_nist_o1_rates(elements); // s^{-1}
   auto m_i = elements[0]->mass(); // u
   auto& T = temperature; // K
   auto& tau = optical_depth; // 1
