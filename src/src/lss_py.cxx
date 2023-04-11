@@ -7,6 +7,7 @@ PYBIND11_MODULE(lss, m) {
   lss_py::lte_population(m);
   lss_py::nlte_population(m);
 
+  lss_py::Level(m);
   lss_py::Element(m);
   lss_py::O1Inasan(m);
   lss_py::O2Inasan(m);

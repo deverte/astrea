@@ -17,6 +17,51 @@ namespace py = pybind11;
 namespace lss_py {
 
 
+inline void Level(py::module_& m) {
+  py::class_<lss::Level> level(m, "Level");
+
+  level.def_readonly(
+    "term",
+    &lss::Level::term
+  );
+
+  // level.def_readonly(
+  //   "limit_term",
+  //   &lss::Level::limit_term
+  // );
+
+  // level.def_readonly(
+  //   "ground_state_term",
+  //   &lss::Level::ground_state_term
+  // );
+
+  // level.def_readonly(
+  //   "principal_quantum_number",
+  //   &lss::Level::principal_quantum_number
+  // );
+
+  // level.def_readonly(
+  //   "statistical_weight",
+  //   &lss::Level::statistical_weight
+  // );
+
+  level.def_readonly(
+    "energy",
+    &lss::Level::energy
+  );
+
+  // level.def_readonly(
+  //   "ionization_energy",
+  //   &lss::Level::ionization_energy
+  // );
+
+  // level.def_readonly(
+  //   "ionization_stage",
+  //   &lss::Level::ionization_stage
+  // );
+}
+
+
 class PyElement : public lss::Element {
  public:
   using lss::Element::Element;
@@ -79,6 +124,12 @@ inline void Element(py::module_& m) {
     "keys",
     py::overload_cast<>(&lss::Element::keys),
     py::overload_cast<std::vector<std::string>>(&lss::Element::keys)
+  );
+
+  element.def_property(
+    "levels",
+    &lss::Element::levels,
+    nullptr
   );
 }
 

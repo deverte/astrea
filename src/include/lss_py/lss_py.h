@@ -3,7 +3,7 @@
 
 #include "./calculation/lte.h"
 #include "./calculation/nlte.h"
-#include "./data/elements/helpers/element.h"
+#include "./data/elements/element.h"
 #include "./data/elements/o1_inasan.h"
 #include "./data/elements/o2_inasan.h"
 #include "./data/spectra/sun_gueymard.h"
