@@ -27,13 +27,10 @@ inline Eigen::MatrixXd ce_regemorter_rates(
   double electron_temperature /* K */,
   double electron_number_density /* cm^{-3} */
 ) {
-  auto& a_0 = BOHR_RADIUS; // cm
-  auto& hbar = REDUCED_PLANCK_CONSTANT; // eV * s
   auto& k_B = BOLTZMANN_CONSTANT; // eV * K^{-1}
-  auto& m_e = ELECTRON_MASS; // cm^{-2} * eV * s^2
-  auto& Ry = RYDBERG_ENERGY; // eV
 
   auto gamma_ij = 1.0; // effective electron collision strength.
+  auto zeta = 8.62913210858377e-6; // 
 
   auto& N_e = electron_number_density; // cm^{-3}
   auto& T = temperature; // K
@@ -65,8 +62,8 @@ inline Eigen::MatrixXd ce_regemorter_rates(
           {
             [&]() {
               return
-                + 2.0 * std::sqrt(PI) * a_0 * hbar / m_e
-                * std::sqrt(Ry / (k_B * T_e))
+                + zeta
+                * std::sqrt(1.0 / T_e)
                 * gamma_ij / g(i + K(s))
               ;
             },
@@ -75,8 +72,8 @@ inline Eigen::MatrixXd ce_regemorter_rates(
           {
             [&]() {
               return
-                + 2.0 * std::sqrt(PI) * a_0 * hbar / m_e
-                * std::sqrt(Ry / (k_B * T_e))
+                + zeta
+                * std::sqrt(1.0 / T_e)
                 * gamma_ij / g(i + K(s))
                 * std::exp(-(E(j + K(s)) - E(i + K(s))) / (k_B * T))
               ;

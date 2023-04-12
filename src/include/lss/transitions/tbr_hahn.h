@@ -39,11 +39,10 @@ inline Eigen::MatrixXd tbr_hahn_rates(
   auto Ry = RYDBERG_ENERGY; // eV
 
   auto Gamma = [](double Z, double n) { return 1.0; }; // 1, TODO: calculate Gaunt factor
-  auto n = elements[0]->atomic_number(); // 1
+  auto n = elements[0]->atomic_number(); // 1 // TODO: it is principal quantum number of electron, not atom
   auto& N_e = electron_number_density; // cm^{-3}
-  auto& N_Z = N_e; // cm^{-3}
+  auto& N_s = N_e; // cm^{-3} // TODO: different number
   auto& T_e = electron_temperature; // K
-  auto Z = [&](int s) { return n - s; }; // 1
 
   int S = elements.size();
   Eigen::VectorXi L(S);
@@ -54,38 +53,38 @@ inline Eigen::MatrixXd tbr_hahn_rates(
     return int(fm::sum(0, s - 1, [&](int z) { return L(z); }));
   };
 
-  auto I = [&](double Z, double n) { // eV
-    return std::pow(Z, 2.0) / std::pow(n, 2.0) * Ry;
+  auto I = [&](double s, double n) { // eV
+    return std::pow(s, 2.0) / std::pow(n, 2.0) * Ry;
   };
 
-  auto x = [&](double Z, double n) { return I(Z, n) / (k_B * T_e); }; // 1
+  auto x = [&](double s, double n) { return I(s, n) / (k_B * T_e); }; // 1
 
-  auto C_TBR_Nj = [&](double Z, double n) { // cm^{-3} * s^{-1}
+  auto C_TBR_Nj = [&](double s, double n) { // cm^{-3} * s^{-1}
     return fm::cases({
       {
         [&]() {
           return
             + 7.2e-32                                             // cm^6 * s^{-1}
             * std::pow(N_e, 2.0)                                  // cm^{-6}
-            * N_Z                                                 // cm^{-3}
+            * N_s                                                 // cm^{-3}
             * std::pow(n, 6.0)                                    // 1
-            * Gamma(Z, n) / (std::pow(Z, 4.0) * (k_B * T_e) / Ry) // 1
+            * Gamma(s, n) / (std::pow(s, 4.0) * (k_B * T_e) / Ry) // 1
           ;
         },
-        x(Z, n) >= 1.0 /* && T <= 1.0e4 */
+        x(s, n) >= 1.0 /* && T <= 1.0e4 */
       },
       {
         [&]() {
           return
             + 7.2e-32                                             // cm^6 * s^{-1}
             * std::pow(N_e, 2.0)                                   // cm^{-6}
-            * N_Z                                                  // cm^{-3}
+            * N_s                                                  // cm^{-3}
             * std::pow(n, 4.0)                                     // 1
-            * Gamma(Z, n)                                          // 1
-            / (std::pow((k_B * T_e) / Ry, 2.0) * std::pow(Z, 2.0)) // 1
+            * Gamma(s, n)                                          // 1
+            / (std::pow((k_B * T_e) / Ry, 2.0) * std::pow(s, 2.0)) // 1
           ;
         },
-        x(Z, n) < 1.0 /* && T > 1.0e4 */
+        x(s, n) < 1.0 /* && T > 1.0e4 */
       },
     });
   };
@@ -93,7 +92,7 @@ inline Eigen::MatrixXd tbr_hahn_rates(
   Eigen::MatrixXd C_TBR = Eigen::MatrixXd::Zero(K(S), K(S)); // cm^3 * s^{-1}
   for (int s = 0; s <= S - 2; s++) {
     for (int j = 0; j <= L(s) - 1; j++) {
-      C_TBR(L(s) + K(s), j + K(s)) = C_TBR_Nj(Z(s), n);
+      C_TBR(L(s) + K(s), j + K(s)) = C_TBR_Nj(s, n);
     }
   }
 
