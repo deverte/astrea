@@ -25,6 +25,113 @@ class Transition(Enum):
     TBR_HAHN = 16
 
 
+def calculate_rates_matrix(
+    elements,
+    temperature = None,
+    electron_temperature = None,
+    electron_number_density = None,
+    optical_depth = 0.0,
+    transitions_types = [],
+):
+    rates_matrix = np.zeros((
+        sum([len(el.keys) for el in elements]),
+        sum([len(el.keys) for el in elements])
+    ))
+    if Transition.CE_INASAN_O1 in transitions_types:
+        rates_matrix += lss.ce_inasan_o1_rates(
+            elements,
+            temperature,
+            electron_number_density,
+        )
+    if Transition.CE_REGEMORTER in transitions_types:
+        rates_matrix += lss.ce_regemorter_rates(
+            elements,
+            temperature,
+            electron_temperature,
+            electron_number_density,
+        )
+    if Transition.CI_ARNAUD_YOUNGER in transitions_types:
+        rates_matrix += lss.ci_arnaud_younger_rates(
+            elements,
+            electron_temperature,
+            electron_number_density,
+        )
+    if Transition.CI_HAHN in transitions_types:
+        rates_matrix += lss.ci_hahn_rates(
+            elements,
+            electron_temperature,
+            electron_number_density,
+        )
+    if Transition.CTI_ARNAUD in transitions_types:
+        rates_matrix += lss.cti_arnaud_rates(
+            elements,
+            temperature,
+            electron_number_density,
+        )
+    if Transition.CTR_ARNAUD in transitions_types:
+        rates_matrix += lss.ctr_arnaud_rates(
+            elements,
+            temperature,
+            electron_number_density,
+        )
+    if Transition.DR_BADNELL in transitions_types:
+        rates_matrix += lss.dr_badnell_rates(
+            elements,
+            temperature,
+            electron_number_density,
+        )
+    if Transition.PE_TASITSIOMI in transitions_types:
+        rates_matrix += lss.pe_tasitsiomi_rates(
+            elements,
+            lss.SunGueymard.wavelengths,
+            lss.SunGueymard.spectral_flux_density,
+            optical_depth,
+            temperature,
+            lss.se_nist_o1_rates(elements),
+        )
+    if Transition.PI_TASITSIOMI in transitions_types:
+        rates_matrix += lss.pi_tasitsiomi_rates(
+            elements,
+            lss.SunGueymard.wavelengths,
+            lss.SunGueymard.spectral_flux_density,
+            optical_depth,
+            temperature,
+            lss.se_nist_o1_rates(elements),
+        )
+    if Transition.RBB_DOPPLER_INASAN_O1 in transitions_types:
+        rates_matrix += lss.rbb_doppler_inasan_o1_rates(elements)
+    if Transition.RBB_VOIGT_INASAN_O1 in transitions_types:
+        rates_matrix += lss.rbb_voigt_inasan_o1_rates(elements)
+    if Transition.RBF_INASAN_O1 in transitions_types:
+        rates_matrix += lss.rbf_inasan_o1_rates(
+            elements,
+            lss.SunGueymard.wavelengths,
+            lss.SunGueymard.spectral_flux_density,
+            optical_depth,
+        )
+    if Transition.RBF_INASAN_O1 in transitions_types:
+        rates_matrix += lss.rr_badnell_verner_rates(
+            elements,
+            temperature,
+            electron_number_density,
+        )
+    if Transition.RR_BADNELL_VERNER in transitions_types:
+        rates_matrix += lss.rr_seaton_rates(
+            elements,
+            electron_temperature,
+            electron_number_density,
+        )
+    if Transition.SE_NIST_O1 in transitions_types:
+        rates_matrix += lss.se_nist_o1_rates(elements)
+    if Transition.TBR_HAHN in transitions_types:
+        rates_matrix += lss.tbr_hahn_rates(
+            elements,
+            electron_temperature,
+            electron_number_density,
+        )
+    return rates_matrix
+
+
 def calculate_populations_nlte(
     elements,
     population_nlte_1,
@@ -40,102 +147,14 @@ def calculate_populations_nlte(
     )
     population_nlte_2 = population_nlte_1
     for i, _ in enumerate(temperatures):
-        rates_matrix = np.zeros((
-            sum([len(el.keys) for el in elements]),
-            sum([len(el.keys) for el in elements])
-        ))
-        if Transition.CE_INASAN_O1 in transitions_types:
-            rates_matrix += lss.ce_inasan_o1_rates(
-                elements,
-                temperatures[i],
-                electron_number_densities[i],
-            )
-        if Transition.CE_REGEMORTER in transitions_types:
-            rates_matrix += lss.ce_regemorter_rates(
-                elements,
-                temperatures[i],
-                electron_temperatures[i],
-                electron_number_densities[i],
-            )
-        if Transition.CI_ARNAUD_YOUNGER in transitions_types:
-            rates_matrix += lss.ci_arnaud_younger_rates(
-                elements,
-                electron_temperatures[i],
-                electron_number_densities[i],
-            )
-        if Transition.CI_HAHN in transitions_types:
-            rates_matrix += lss.ci_hahn_rates(
-                elements,
-                electron_temperatures[i],
-                electron_number_densities[i],
-            )
-        if Transition.CTI_ARNAUD in transitions_types:
-            rates_matrix += lss.cti_arnaud_rates(
-                elements,
-                temperatures[i],
-                electron_number_densities[i],
-            )
-        if Transition.CTR_ARNAUD in transitions_types:
-            rates_matrix += lss.ctr_arnaud_rates(
-                elements,
-                temperatures[i],
-                electron_number_densities[i],
-            )
-        if Transition.DR_BADNELL in transitions_types:
-            rates_matrix += lss.dr_badnell_rates(
-                elements,
-                temperatures[i],
-                electron_number_densities[i],
-            )
-        if Transition.PE_TASITSIOMI in transitions_types:
-            rates_matrix += lss.pe_tasitsiomi_rates(
-                elements,
-                lss.SunGueymard.wavelengths,
-                lss.SunGueymard.spectral_flux_density,
-                optical_depth,
-                temperatures[i],
-                lss.se_nist_o1_rates(elements),
-            )
-        if Transition.PI_TASITSIOMI in transitions_types:
-            rates_matrix += lss.pi_tasitsiomi_rates(
-                elements,
-                lss.SunGueymard.wavelengths,
-                lss.SunGueymard.spectral_flux_density,
-                optical_depth,
-                temperatures[i],
-                lss.se_nist_o1_rates(elements),
-            )
-        if Transition.RBB_DOPPLER_INASAN_O1 in transitions_types:
-            rates_matrix += lss.rbb_doppler_inasan_o1_rates(elements)
-        if Transition.RBB_VOIGT_INASAN_O1 in transitions_types:
-            rates_matrix += lss.rbb_voigt_inasan_o1_rates(elements)
-        if Transition.RBF_INASAN_O1 in transitions_types:
-            rates_matrix += lss.rbf_inasan_o1_rates(
-                elements,
-                lss.SunGueymard.wavelengths,
-                lss.SunGueymard.spectral_flux_density,
-                optical_depth,
-            )
-        if Transition.RBF_INASAN_O1 in transitions_types:
-            rates_matrix += lss.rr_badnell_verner_rates(
-                elements,
-                temperatures[i],
-                electron_number_densities[i],
-            )
-        if Transition.RR_BADNELL_VERNER in transitions_types:
-            rates_matrix += lss.rr_seaton_rates(
-                elements,
-                electron_temperatures[i],
-                electron_number_densities[i],
-            )
-        if Transition.SE_NIST_O1 in transitions_types:
-            rates_matrix += lss.se_nist_o1_rates(elements)
-        if Transition.TBR_HAHN in transitions_types:
-            rates_matrix += lss.tbr_hahn_rates(
-                elements,
-                electron_temperatures[i],
-                electron_number_densities[i],
-            )
+        rates_matrix = calculate_rates_matrix(
+            elements,
+            temperature=temperatures[i],
+            electron_temperature=electron_temperatures[i],
+            electron_number_density=electron_number_densities[i],
+            optical_depth=optical_depth,
+            transitions_types=transitions_types,
+        )
         population_nlte_2 = lss.nlte_population(
             population_nlte_2,
             delta_time,
