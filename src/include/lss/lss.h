@@ -7,6 +7,7 @@
 #include "./data/elements/o1_inasan.h"
 #include "./data/elements/o2_inasan.h"
 #include "./data/spectra/black_body_planck.h"
+#include "./data/spectra/kelt_9_fossati.h"
 #include "./data/spectra/spectrum.h"
 #include "./data/spectra/sun_gueymard.h"
 #include "./transitions/ce_inasan_o1.h"

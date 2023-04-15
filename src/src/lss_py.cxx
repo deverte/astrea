@@ -14,6 +14,7 @@ PYBIND11_MODULE(lss, m) {
 
   lss_py::Spectrum(m);
   lss_py::BlackBodyPlanck(m);
+  lss_py::Kelt9Fossati(m);
   lss_py::SunGueymard(m);
 
   lss_py::ce_inasan_o1_rates(m);

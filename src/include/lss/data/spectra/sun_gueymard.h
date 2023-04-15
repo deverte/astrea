@@ -29,9 +29,9 @@ class SunGueymard : public Spectrum {
   double min_wavelength() override;
 
  private:
-  static std::vector<double> wavelengths_;
+  static std::vector<double> wavelengths_; // nm
 
-  static std::vector<double> spectral_flux_densities_;
+  static std::vector<double> spectral_flux_densities_; // W * m^{-2} * nm^{-1}
 
   std::shared_ptr<boost::math::interpolators::barycentric_rational<double>>
   interpolator_;
