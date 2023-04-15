@@ -6,13 +6,13 @@
 #include <memory>
 #include <vector>
 
-#include <boost/math/interpolators/barycentric_rational.hpp>
 #include <boost/math/quadrature/trapezoidal.hpp>
 #include <Eigen/Dense>
 #include <fm/fm.h>
 
 #include "./se_nist_o1.h"
 #include "../data/elements/element.h"
+#include "../data/spectra/spectrum.h"
 #include "../physics/constants.h"
 
 
@@ -27,8 +27,7 @@ namespace lss {
  */
 inline Eigen::MatrixXd pe_tasitsiomi_rates(
   std::vector<std::shared_ptr<Element>> elements,
-  std::vector<double> wavelengths /* nm */,
-  std::vector<double> spectral_flux_densities /* W * m^{-2} * nm^{-1} */,
+  std::shared_ptr<Spectrum> spectrum,
   double optical_depth /* 1 */,
   double temperature /* K */,
   Eigen::MatrixXd R_SE /* s^{-1} */
@@ -73,11 +72,10 @@ inline Eigen::MatrixXd pe_tasitsiomi_rates(
   auto m_i = elements[0]->mass(); // u
   auto& T = temperature; // K
   auto& tau = optical_depth; // 1
-  auto vec_F = spectral_flux_densities; // W * m^{-2} * nm^{-1}
-  auto vec_lambda = wavelengths; // nm
 
-  boost::math::interpolators::barycentric_rational<double>
-  F(std::move(vec_lambda), std::move(vec_F)); // W * m^{-2} * nm^{-1}
+  auto F = [&](double lambda /* nm */) {
+    return spectrum->operator()(lambda);
+  }; // W * m^{-2} * nm^{-1}
 
   Eigen::VectorXd E(K(S)); // eV
   Eigen::VectorXd g(K(S)); // 1
