@@ -26,6 +26,12 @@ inline void BlackBodyPlanck(py::module_& m) {
     nullptr,
     &lss::BlackBodyPlanck::temperature
   );
+
+  black_body_planck.def_property(
+    "total_area",
+    nullptr,
+    &lss::BlackBodyPlanck::total_area
+  );
 }
 
 
