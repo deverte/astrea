@@ -10,6 +10,8 @@
 #include "./spectrum.h"
 
 
+#include <iostream>
+
 namespace lss {
 
 
@@ -21,6 +23,8 @@ namespace lss {
 class SunGueymard : public Spectrum {
  public:
   SunGueymard();
+
+  virtual ~SunGueymard();
 
   double operator()(double wavelength) override;
 
@@ -34,7 +38,7 @@ class SunGueymard : public Spectrum {
   static std::vector<double> spectral_flux_densities_; // W * m^{-2} * nm^{-1}
 
   std::shared_ptr<boost::math::interpolators::barycentric_rational<double>>
-  interpolator_;
+  interpolant_;
 
   double max_wavelength_ = 0.0;
 
@@ -45,16 +49,22 @@ class SunGueymard : public Spectrum {
 inline SunGueymard::SunGueymard() {
   max_wavelength_ = *std::max_element(wavelengths_.begin(), wavelengths_.end());
   min_wavelength_ = *std::min_element(wavelengths_.begin(), wavelengths_.end());
-  interpolator_ =
+  interpolant_ =
     std::make_shared<boost::math::interpolators::barycentric_rational<double>>(
-      std::move(wavelengths_), std::move(spectral_flux_densities_)
+      std::move(wavelengths_), std::move(spectral_flux_densities_), 1
     )
   ;
 }
 
 
+inline SunGueymard::~SunGueymard() {
+  wavelengths_ = interpolant_->return_x();
+  spectral_flux_densities_ = interpolant_->return_y();
+}
+
+
 inline double SunGueymard::operator()(double wavelength) {
-  return interpolator_->operator()(wavelength);
+  return interpolant_->operator()(wavelength);
 }
 
 

@@ -43,14 +43,13 @@ BlackBodyPlanck::operator()(double wavelength /* nm */) {
   auto& c = SPEED_OF_LIGHT; // cm * s^{-1}
   auto& h = PLANCK_CONSTANT; // eV * s
   auto& k_B = BOLTZMANN_CONSTANT; // eV * K^{-1}
-  auto& pi = PI; // 1
 
   auto cm_to_nm = 10000000.0;
   auto eV_to_J = 1.602177e-19;
   auto nm_to_m = 1.0e-9;
 
-  auto E_e = total_area_; // W * m^{-2}
-  auto E_e_tot = total_area_temperature_; // W * m^{-2}
+  auto F = total_area_; // W * m^{-2}
+  auto B_lambda_tot = total_area_temperature_; // W * m^{-2}
   auto lambda = wavelength; // nm
   auto lambda_0 = min_wavelength_; // nm
   auto lambda_infty = max_wavelength_; // nm
@@ -65,12 +64,8 @@ BlackBodyPlanck::operator()(double wavelength /* nm */) {
     ;
   };
 
-  auto F = [&](double lambda, double T) { // W * m^{-2} * nm^{-1}
-    return pi * B(lambda, T); // W * m^{-2} * nm^{-1}
-  };
-
   auto E = [&](double lambda, double T) {
-    return F(lambda, T) * E_e / E_e_tot;
+    return F * B(lambda, T) / B_lambda_tot;
   };
 
   return E(lambda, T);
@@ -83,7 +78,6 @@ inline void BlackBodyPlanck::temperature(double value /* K */) {
   auto& c = SPEED_OF_LIGHT; // cm * s^{-1}
   auto& h = PLANCK_CONSTANT; // eV * s
   auto& k_B = BOLTZMANN_CONSTANT; // eV * K^{-1}
-  auto& pi = PI; // 1
 
   auto cm_to_nm = 10000000.0;
   auto eV_to_J = 1.602177e-19;
@@ -102,14 +96,10 @@ inline void BlackBodyPlanck::temperature(double value /* K */) {
     ;
   };
 
-  auto F = [&](double lambda, double T) { // W * m^{-2} * nm^{-1}
-    return pi * B(lambda, T); // W * m^{-2} * nm^{-1}
-  };
-
-  double E_e_tot = boost::math::quadrature::trapezoidal( // W * m^{-2}
+  double B_lambda_tot = boost::math::quadrature::trapezoidal( // W * m^{-2}
     [&](double lambda /* nm */) {
       return
-        + F(lambda, T) // W * m^{-2} * nm^{-1}
+        + B(lambda, T) // W * m^{-2} * nm^{-1}
         // * dlambda   // nm
       ;
     },
@@ -117,7 +107,7 @@ inline void BlackBodyPlanck::temperature(double value /* K */) {
     lambda_infty
   );
 
-  total_area_temperature_ = E_e_tot;
+  total_area_temperature_ = B_lambda_tot;
 }
 
 
