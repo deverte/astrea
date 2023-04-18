@@ -97,14 +97,6 @@ class PyElement : public lss::Element {
       mass
     );
   }
-  
-  const int number_of_ionization_stages() override {
-    PYBIND11_OVERRIDE_PURE(
-      const int,
-      lss::Element,
-      number_of_ionization_stages
-    );
-  }
 };
 
 

@@ -14,11 +14,12 @@ namespace lss {
  */
 class CTRArnaudFit {
  public:
-  const double recombination_with_element_atomic_number; // 1
+  const double ionizing_element_atomic_number; // 1
+  const double ionizing_element_ionization_stage; // 1
   const double atomic_number; // 1
   const double ionization_stage; // 1
   const std::vector<double> temperatures_range; // K
-  const double a; // cm^3 * s^{-1}
+  const double a; // 1.0e-9 * cm^3 * s^{-1}
   const double b; // 1
   const double c; // 1
   const double d; // 1
@@ -41,7 +42,8 @@ inline const std::vector<CTRArnaudFit>& CTRArnaud::fit() {
 
 inline const std::vector<CTRArnaudFit> CTRArnaud::fit_{
   {
-    .recombination_with_element_atomic_number = 1.0,
+    .ionizing_element_atomic_number = 1.0,
+    .ionizing_element_ionization_stage = 0.0,
     .atomic_number = 2.0,
     .ionization_stage = 1.0,
     .temperatures_range = {1.0e4},
@@ -51,7 +53,8 @@ inline const std::vector<CTRArnaudFit> CTRArnaud::fit_{
     .d = 0.0,
   },
   {
-    .recombination_with_element_atomic_number = 1.0,
+    .ionizing_element_atomic_number = 1.0,
+    .ionizing_element_ionization_stage = 0.0,
     .atomic_number = 2.0,
     .ionization_stage = 2.0,
     .temperatures_range = {1.0e4},
@@ -61,7 +64,8 @@ inline const std::vector<CTRArnaudFit> CTRArnaud::fit_{
     .d = 0.0,
   },
   {
-    .recombination_with_element_atomic_number = 1.0,
+    .ionizing_element_atomic_number = 1.0,
+    .ionizing_element_ionization_stage = 0.0,
     .atomic_number = 6.0,
     .ionization_stage = 1.0,
     .temperatures_range = {1.0e4},
@@ -71,7 +75,8 @@ inline const std::vector<CTRArnaudFit> CTRArnaud::fit_{
     .d = 0.0,
   },
   {
-    .recombination_with_element_atomic_number = 1.0,
+    .ionizing_element_atomic_number = 1.0,
+    .ionizing_element_ionization_stage = 0.0,
     .atomic_number = 6.0,
     .ionization_stage = 2.0,
     .temperatures_range = {5.0e3, 5.0e4},
@@ -81,7 +86,8 @@ inline const std::vector<CTRArnaudFit> CTRArnaud::fit_{
     .d = -4.2,
   },
   {
-    .recombination_with_element_atomic_number = 1.0,
+    .ionizing_element_atomic_number = 1.0,
+    .ionizing_element_ionization_stage = 0.0,
     .atomic_number = 6.0,
     .ionization_stage = 3.0,
     .temperatures_range = {5.0e3, 5.0e4}, // 1.6e-9
@@ -91,7 +97,8 @@ inline const std::vector<CTRArnaudFit> CTRArnaud::fit_{
     .d = 0.0,
   },
   {
-    .recombination_with_element_atomic_number = 1.0,
+    .ionizing_element_atomic_number = 1.0,
+    .ionizing_element_ionization_stage = 0.0,
     .atomic_number = 6.0,
     .ionization_stage = 4.0,
     .temperatures_range = {1.0e3, 1.0e4},
@@ -101,7 +108,8 @@ inline const std::vector<CTRArnaudFit> CTRArnaud::fit_{
     .d = 0.0,
   },
   {
-    .recombination_with_element_atomic_number = 1.0,
+    .ionizing_element_atomic_number = 1.0,
+    .ionizing_element_ionization_stage = 0.0,
     .atomic_number = 7.0,
     .ionization_stage = 1.0,
     .temperatures_range = {1.0e2, 1.0e5},
@@ -111,7 +119,8 @@ inline const std::vector<CTRArnaudFit> CTRArnaud::fit_{
     .d = -8.8,
   },
   {
-    .recombination_with_element_atomic_number = 1.0,
+    .ionizing_element_atomic_number = 1.0,
+    .ionizing_element_ionization_stage = 0.0,
     .atomic_number = 7.0,
     .ionization_stage = 2.0,
     .temperatures_range = {5.0e3, 5.0e4},
@@ -121,7 +130,8 @@ inline const std::vector<CTRArnaudFit> CTRArnaud::fit_{
     .d = 0.0,
   },
   {
-    .recombination_with_element_atomic_number = 1.0,
+    .ionizing_element_atomic_number = 1.0,
+    .ionizing_element_ionization_stage = 0.0,
     .atomic_number = 7.0,
     .ionization_stage = 3.0,
     .temperatures_range = {5.0e3, 5.0e4},
@@ -131,7 +141,8 @@ inline const std::vector<CTRArnaudFit> CTRArnaud::fit_{
     .d = 0.0,
   },
   {
-    .recombination_with_element_atomic_number = 1.0,
+    .ionizing_element_atomic_number = 1.0,
+    .ionizing_element_ionization_stage = 0.0,
     .atomic_number = 7.0,
     .ionization_stage = 4.0,
     .temperatures_range = {1.0e3, 3.0e4},
@@ -141,7 +152,8 @@ inline const std::vector<CTRArnaudFit> CTRArnaud::fit_{
     .d = -35.6,
   },
   {
-    .recombination_with_element_atomic_number = 1.0,
+    .ionizing_element_atomic_number = 1.0,
+    .ionizing_element_ionization_stage = 0.0,
     .atomic_number = 8.0,
     .ionization_stage = 1.0,
     .temperatures_range = {1.0e2, 3.0e4},
@@ -151,7 +163,8 @@ inline const std::vector<CTRArnaudFit> CTRArnaud::fit_{
     .d = -9.3,
   },
   {
-    .recombination_with_element_atomic_number = 1.0,
+    .ionizing_element_atomic_number = 1.0,
+    .ionizing_element_ionization_stage = 0.0,
     .atomic_number = 8.0,
     .ionization_stage = 2.0,
     .temperatures_range = {5.0e3, 5.0e4},
@@ -161,7 +174,8 @@ inline const std::vector<CTRArnaudFit> CTRArnaud::fit_{
     .d = 0.0,
   },
   {
-    .recombination_with_element_atomic_number = 1.0,
+    .ionizing_element_atomic_number = 1.0,
+    .ionizing_element_ionization_stage = 0.0,
     .atomic_number = 8.0,
     .ionization_stage = 3.0,
     .temperatures_range = {5.0e3, 5.0e4},
@@ -171,7 +185,8 @@ inline const std::vector<CTRArnaudFit> CTRArnaud::fit_{
     .d = 0.0,
   },
   {
-    .recombination_with_element_atomic_number = 1.0,
+    .ionizing_element_atomic_number = 1.0,
+    .ionizing_element_ionization_stage = 0.0,
     .atomic_number = 8.0,
     .ionization_stage = 4.0,
     .temperatures_range = {1.0e3, 3.0e4},
@@ -181,7 +196,8 @@ inline const std::vector<CTRArnaudFit> CTRArnaud::fit_{
     .d = 0.0,
   },
   {
-    .recombination_with_element_atomic_number = 1.0,
+    .ionizing_element_atomic_number = 1.0,
+    .ionizing_element_ionization_stage = 0.0,
     .atomic_number = 10.0,
     .ionization_stage = 2.0,
     .temperatures_range = {1.0e4},
@@ -191,7 +207,8 @@ inline const std::vector<CTRArnaudFit> CTRArnaud::fit_{
     .d = 0.0,
   },
   {
-    .recombination_with_element_atomic_number = 1.0,
+    .ionizing_element_atomic_number = 1.0,
+    .ionizing_element_ionization_stage = 0.0,
     .atomic_number = 10.0,
     .ionization_stage = 3.0,
     .temperatures_range = {5.0e3, 5.0e4},
@@ -201,7 +218,8 @@ inline const std::vector<CTRArnaudFit> CTRArnaud::fit_{
     .d = 0.0,
   },
   {
-    .recombination_with_element_atomic_number = 1.0,
+    .ionizing_element_atomic_number = 1.0,
+    .ionizing_element_ionization_stage = 0.0,
     .atomic_number = 10.0,
     .ionization_stage = 4.0,
     .temperatures_range = {1.0e3, 3.0e4},
@@ -211,7 +229,8 @@ inline const std::vector<CTRArnaudFit> CTRArnaud::fit_{
     .d = -5.3,
   },
   {
-    .recombination_with_element_atomic_number = 1.0,
+    .ionizing_element_atomic_number = 1.0,
+    .ionizing_element_ionization_stage = 0.0,
     .atomic_number = 12.0,
     .ionization_stage = 2.0,
     .temperatures_range = {1.0e3, 3.0e4},
@@ -221,7 +240,8 @@ inline const std::vector<CTRArnaudFit> CTRArnaud::fit_{
     .d = 0.0,
   },
   {
-    .recombination_with_element_atomic_number = 1.0,
+    .ionizing_element_atomic_number = 1.0,
+    .ionizing_element_ionization_stage = 0.0,
     .atomic_number = 12.0,
     .ionization_stage = 3.0,
     .temperatures_range = {1.0e3, 3.0e4},
@@ -231,7 +251,8 @@ inline const std::vector<CTRArnaudFit> CTRArnaud::fit_{
     .d = -8.0,
   },
   {
-    .recombination_with_element_atomic_number = 1.0,
+    .ionizing_element_atomic_number = 1.0,
+    .ionizing_element_ionization_stage = 0.0,
     .atomic_number = 12.0,
     .ionization_stage = 4.0,
     .temperatures_range = {1.0e3, 3.0e4},
@@ -241,7 +262,8 @@ inline const std::vector<CTRArnaudFit> CTRArnaud::fit_{
     .d = -5.3,
   },
   {
-    .recombination_with_element_atomic_number = 1.0,
+    .ionizing_element_atomic_number = 1.0,
+    .ionizing_element_ionization_stage = 0.0,
     .atomic_number = 14.0,
     .ionization_stage = 2.0,
     .temperatures_range = {3.0e2, 1.0e5},
@@ -251,7 +273,8 @@ inline const std::vector<CTRArnaudFit> CTRArnaud::fit_{
     .d = 0.0,
   },
   {
-    .recombination_with_element_atomic_number = 1.0,
+    .ionizing_element_atomic_number = 1.0,
+    .ionizing_element_ionization_stage = 0.0,
     .atomic_number = 14.0,
     .ionization_stage = 3.0,
     .temperatures_range = {1.0e3, 3.0e4},
@@ -261,7 +284,8 @@ inline const std::vector<CTRArnaudFit> CTRArnaud::fit_{
     .d = 0.0,
   },
   {
-    .recombination_with_element_atomic_number = 1.0,
+    .ionizing_element_atomic_number = 1.0,
+    .ionizing_element_ionization_stage = 0.0,
     .atomic_number = 14.0,
     .ionization_stage = 4.0,
     .temperatures_range = {1.0e3, 3.0e4},
@@ -271,7 +295,8 @@ inline const std::vector<CTRArnaudFit> CTRArnaud::fit_{
     .d = 0.0,
   },
   {
-    .recombination_with_element_atomic_number = 1.0,
+    .ionizing_element_atomic_number = 1.0,
+    .ionizing_element_ionization_stage = 0.0,
     .atomic_number = 16.0,
     .ionization_stage = 1.0,
     .temperatures_range = {1.0e4},
@@ -281,7 +306,8 @@ inline const std::vector<CTRArnaudFit> CTRArnaud::fit_{
     .d = 0.0,
   },
   {
-    .recombination_with_element_atomic_number = 1.0,
+    .ionizing_element_atomic_number = 1.0,
+    .ionizing_element_ionization_stage = 0.0,
     .atomic_number = 16.0,
     .ionization_stage = 2.0,
     .temperatures_range = {1.0e3, 3.0e4},
@@ -291,7 +317,8 @@ inline const std::vector<CTRArnaudFit> CTRArnaud::fit_{
     .d = 0.0,
   },
   {
-    .recombination_with_element_atomic_number = 1.0,
+    .ionizing_element_atomic_number = 1.0,
+    .ionizing_element_ionization_stage = 0.0,
     .atomic_number = 16.0,
     .ionization_stage = 3.0,
     .temperatures_range = {1.0e3, 3.0e4},
@@ -301,7 +328,8 @@ inline const std::vector<CTRArnaudFit> CTRArnaud::fit_{
     .d = -5.8,
   },
   {
-    .recombination_with_element_atomic_number = 1.0,
+    .ionizing_element_atomic_number = 1.0,
+    .ionizing_element_ionization_stage = 0.0,
     .atomic_number = 16.0,
     .ionization_stage = 4.0,
     .temperatures_range = {1.0e3, 3.0e4},
@@ -311,7 +339,8 @@ inline const std::vector<CTRArnaudFit> CTRArnaud::fit_{
     .d = -5.8,
   },
   {
-    .recombination_with_element_atomic_number = 1.0,
+    .ionizing_element_atomic_number = 1.0,
+    .ionizing_element_ionization_stage = 0.0,
     .atomic_number = 18.0,
     .ionization_stage = 2.0,
     .temperatures_range = {1.0e3, 3.0e4},
@@ -321,7 +350,8 @@ inline const std::vector<CTRArnaudFit> CTRArnaud::fit_{
     .d = 0.0,
   },
   {
-    .recombination_with_element_atomic_number = 1.0,
+    .ionizing_element_atomic_number = 1.0,
+    .ionizing_element_ionization_stage = 0.0,
     .atomic_number = 18.0,
     .ionization_stage = 3.0,
     .temperatures_range = {1.0e3, 3.0e4},
@@ -331,7 +361,8 @@ inline const std::vector<CTRArnaudFit> CTRArnaud::fit_{
     .d = 0.0,
   },
   {
-    .recombination_with_element_atomic_number = 1.0,
+    .ionizing_element_atomic_number = 1.0,
+    .ionizing_element_ionization_stage = 0.0,
     .atomic_number = 18.0,
     .ionization_stage = 4.0,
     .temperatures_range = {1.0e3, 3.0e4},
@@ -341,7 +372,8 @@ inline const std::vector<CTRArnaudFit> CTRArnaud::fit_{
     .d = 0.0,
   },
   {
-    .recombination_with_element_atomic_number = 2.0,
+    .ionizing_element_atomic_number = 2.0,
+    .ionizing_element_ionization_stage = 0.0,
     .atomic_number = 6.0,
     .ionization_stage = 2.0,
     .temperatures_range = {1.0e4},
@@ -351,7 +383,8 @@ inline const std::vector<CTRArnaudFit> CTRArnaud::fit_{
     .d = 0.0,
   },
   {
-    .recombination_with_element_atomic_number = 2.0,
+    .ionizing_element_atomic_number = 2.0,
+    .ionizing_element_ionization_stage = 0.0,
     .atomic_number = 6.0,
     .ionization_stage = 3.0,
     .temperatures_range = {1.0e3, 3.0e4},
@@ -361,7 +394,8 @@ inline const std::vector<CTRArnaudFit> CTRArnaud::fit_{
     .d = 0.0,
   },
   {
-    .recombination_with_element_atomic_number = 2.0,
+    .ionizing_element_atomic_number = 2.0,
+    .ionizing_element_ionization_stage = 0.0,
     .atomic_number = 6.0,
     .ionization_stage = 4.0,
     .temperatures_range = {1.0e3, 3.0e4},
@@ -371,7 +405,8 @@ inline const std::vector<CTRArnaudFit> CTRArnaud::fit_{
     .d = 0.0,
   },
   {
-    .recombination_with_element_atomic_number = 2.0,
+    .ionizing_element_atomic_number = 2.0,
+    .ionizing_element_ionization_stage = 0.0,
     .atomic_number = 7.0,
     .ionization_stage = 2.0,
     .temperatures_range = {1.0e3, 3.0e4},
@@ -381,7 +416,8 @@ inline const std::vector<CTRArnaudFit> CTRArnaud::fit_{
     .d = -4.5,
   },
   {
-    .recombination_with_element_atomic_number = 2.0,
+    .ionizing_element_atomic_number = 2.0,
+    .ionizing_element_ionization_stage = 0.0,
     .atomic_number = 7.0,
     .ionization_stage = 3.0,
     .temperatures_range = {1.0e3, 3.0e4},
@@ -391,7 +427,8 @@ inline const std::vector<CTRArnaudFit> CTRArnaud::fit_{
     .d = 0.0,
   },
   {
-    .recombination_with_element_atomic_number = 2.0,
+    .ionizing_element_atomic_number = 2.0,
+    .ionizing_element_ionization_stage = 0.0,
     .atomic_number = 7.0,
     .ionization_stage = 3.0,
     .temperatures_range = {1.0e3, 3.0e4},
@@ -401,7 +438,8 @@ inline const std::vector<CTRArnaudFit> CTRArnaud::fit_{
     .d = -3.7,
   },
   {
-    .recombination_with_element_atomic_number = 2.0,
+    .ionizing_element_atomic_number = 2.0,
+    .ionizing_element_ionization_stage = 0.0,
     .atomic_number = 8.0,
     .ionization_stage = 2.0,
     .temperatures_range = {5.0e3, 5.0e4},
@@ -411,7 +449,8 @@ inline const std::vector<CTRArnaudFit> CTRArnaud::fit_{
     .d = 0.0,
   },
   {
-    .recombination_with_element_atomic_number = 2.0,
+    .ionizing_element_atomic_number = 2.0,
+    .ionizing_element_ionization_stage = 0.0,
     .atomic_number = 8.0,
     .ionization_stage = 3.0,
     .temperatures_range = {1.0e3, 3.0e4},
@@ -421,7 +460,8 @@ inline const std::vector<CTRArnaudFit> CTRArnaud::fit_{
     .d = -5.8,
   },
   {
-    .recombination_with_element_atomic_number = 2.0,
+    .ionizing_element_atomic_number = 2.0,
+    .ionizing_element_ionization_stage = 0.0,
     .atomic_number = 8.0,
     .ionization_stage = 4.0,
     .temperatures_range = {1.0e3, 3.0e4},
@@ -431,7 +471,8 @@ inline const std::vector<CTRArnaudFit> CTRArnaud::fit_{
     .d = -5.5,
   },
   {
-    .recombination_with_element_atomic_number = 2.0,
+    .ionizing_element_atomic_number = 2.0,
+    .ionizing_element_ionization_stage = 0.0,
     .atomic_number = 10.0,
     .ionization_stage = 2.0,
     .temperatures_range = {1.0e3, 3.0e4},
@@ -441,7 +482,8 @@ inline const std::vector<CTRArnaudFit> CTRArnaud::fit_{
     .d = 0.0,
   },
   {
-    .recombination_with_element_atomic_number = 2.0,
+    .ionizing_element_atomic_number = 2.0,
+    .ionizing_element_ionization_stage = 0.0,
     .atomic_number = 10.0,
     .ionization_stage = 3.0,
     .temperatures_range = {1.0e3, 3.0e4},
@@ -451,7 +493,8 @@ inline const std::vector<CTRArnaudFit> CTRArnaud::fit_{
     .d = 0.0,
   },
   {
-    .recombination_with_element_atomic_number = 2.0,
+    .ionizing_element_atomic_number = 2.0,
+    .ionizing_element_ionization_stage = 0.0,
     .atomic_number = 10.0,
     .ionization_stage = 4.0,
     .temperatures_range = {1.0e3, 3.0e4},
@@ -461,7 +504,8 @@ inline const std::vector<CTRArnaudFit> CTRArnaud::fit_{
     .d = -5.3,
   },
   {
-    .recombination_with_element_atomic_number = 2.0,
+    .ionizing_element_atomic_number = 2.0,
+    .ionizing_element_ionization_stage = 0.0,
     .atomic_number = 12.0,
     .ionization_stage = 3.0,
     .temperatures_range = {1.0e3, 3.0e4},
@@ -471,7 +515,8 @@ inline const std::vector<CTRArnaudFit> CTRArnaud::fit_{
     .d = -5.8,
   },
   {
-    .recombination_with_element_atomic_number = 2.0,
+    .ionizing_element_atomic_number = 2.0,
+    .ionizing_element_ionization_stage = 0.0,
     .atomic_number = 12.0,
     .ionization_stage = 4.0,
     .temperatures_range = {1.0e3, 3.0e4},
@@ -481,7 +526,8 @@ inline const std::vector<CTRArnaudFit> CTRArnaud::fit_{
     .d = -1.85,
   },
   {
-    .recombination_with_element_atomic_number = 2.0,
+    .ionizing_element_atomic_number = 2.0,
+    .ionizing_element_ionization_stage = 0.0,
     .atomic_number = 14.0,
     .ionization_stage = 3.0,
     .temperatures_range = {1.0e3, 3.0e4},
@@ -491,7 +537,8 @@ inline const std::vector<CTRArnaudFit> CTRArnaud::fit_{
     .d = 0.0,
   },
   {
-    .recombination_with_element_atomic_number = 2.0,
+    .ionizing_element_atomic_number = 2.0,
+    .ionizing_element_ionization_stage = 0.0,
     .atomic_number = 14.0,
     .ionization_stage = 4.0,
     .temperatures_range = {1.0e3, 3.0e4},
@@ -501,7 +548,8 @@ inline const std::vector<CTRArnaudFit> CTRArnaud::fit_{
     .d = 0.0,
   },
   {
-    .recombination_with_element_atomic_number = 2.0,
+    .ionizing_element_atomic_number = 2.0,
+    .ionizing_element_ionization_stage = 0.0,
     .atomic_number = 16.0,
     .ionization_stage = 3.0,
     .temperatures_range = {1.0e3, 3.0e4},
@@ -511,7 +559,8 @@ inline const std::vector<CTRArnaudFit> CTRArnaud::fit_{
     .d = 0.0,
   },
   {
-    .recombination_with_element_atomic_number = 2.0,
+    .ionizing_element_atomic_number = 2.0,
+    .ionizing_element_ionization_stage = 0.0,
     .atomic_number = 16.0,
     .ionization_stage = 4.0,
     .temperatures_range = {1.0e3, 3.0e4},
@@ -521,7 +570,8 @@ inline const std::vector<CTRArnaudFit> CTRArnaud::fit_{
     .d = -5.25,
   },
   {
-    .recombination_with_element_atomic_number = 2.0,
+    .ionizing_element_atomic_number = 2.0,
+    .ionizing_element_ionization_stage = 0.0,
     .atomic_number = 18.0,
     .ionization_stage = 2.0,
     .temperatures_range = {1.0e3, 3.0e4},
@@ -531,7 +581,8 @@ inline const std::vector<CTRArnaudFit> CTRArnaud::fit_{
     .d = 0.0,
   },
   {
-    .recombination_with_element_atomic_number = 2.0,
+    .ionizing_element_atomic_number = 2.0,
+    .ionizing_element_ionization_stage = 0.0,
     .atomic_number = 18.0,
     .ionization_stage = 3.0,
     .temperatures_range = {1.0e3, 3.0e4},
@@ -541,7 +592,8 @@ inline const std::vector<CTRArnaudFit> CTRArnaud::fit_{
     .d = 0.0,
   },
   {
-    .recombination_with_element_atomic_number = 2.0,
+    .ionizing_element_atomic_number = 2.0,
+    .ionizing_element_ionization_stage = 0.0,
     .atomic_number = 18.0,
     .ionization_stage = 4.0,
     .temperatures_range = {1.0e3, 3.0e4},

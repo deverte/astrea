@@ -9,6 +9,10 @@ PYBIND11_MODULE(lss, m) {
 
   lss_py::Level(m);
   lss_py::Element(m);
+  lss_py::H1(m);
+  lss_py::H2(m);
+  lss_py::He1(m);
+  lss_py::He2(m);
   lss_py::O1Inasan(m);
   lss_py::O2Inasan(m);
 

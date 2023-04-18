@@ -11,7 +11,7 @@ namespace lss {
 
 
 /**
- * Oxygen 1
+ * Oxygen (electrically neutral)
  * 
  * data: INASAN
  */
@@ -25,8 +25,6 @@ class O1Inasan : public Element {
 
   const double mass() override;
 
-  const int number_of_ionization_stages() override;
-
  private:
   static const std::vector<Level> all_levels_;
 
@@ -35,8 +33,6 @@ class O1Inasan : public Element {
   const double ionization_stage_ = 0.0; // 1
 
   const double mass_ = 16.0; // u
-
-  const int number_of_ionization_stages_ = 2; // 1
 };
 
 
@@ -57,11 +53,6 @@ inline const double O1Inasan::ionization_stage() {
 
 inline const double O1Inasan::mass() {
   return mass_;
-}
-
-
-inline const int O1Inasan::number_of_ionization_stages() {
-  return number_of_ionization_stages_;
 }
 
 

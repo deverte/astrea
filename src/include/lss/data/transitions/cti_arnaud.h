@@ -14,12 +14,12 @@ namespace lss {
  */
 class CTIArnaudFit {
  public:
-  const double ionization_with_element_atomic_number; // 1
-  const double ionization_with_element_ionization_stage; // 1
+  const double recombining_element_atomic_number; // 1
+  const double recombining_element_ionization_stage; // 1
   const double atomic_number; // 1
   const double ionization_stage; // 1
   const std::vector<double> temperatures_range; // K
-  const double a; // cm^3 * s^{-1}
+  const double a; // 1.0e-9 * cm^3 * s^{-1}
   const double b; // 1
   const double c; // 1
   const double delta_E; // eV
@@ -42,8 +42,8 @@ inline const std::vector<CTIArnaudFit>& CTIArnaud::fit() {
 
 inline const std::vector<CTIArnaudFit> CTIArnaud::fit_{
   {
-    .ionization_with_element_atomic_number = 1.0,
-    .ionization_with_element_ionization_stage = 1.0,
+    .recombining_element_atomic_number = 1.0,
+    .recombining_element_ionization_stage = 1.0,
     .atomic_number = 8.0,
     .ionization_stage = 0.0,
     .temperatures_range = {1.0e2, 1.0e5},
@@ -53,8 +53,8 @@ inline const std::vector<CTIArnaudFit> CTIArnaud::fit_{
     .delta_E = 19.6e-3,
   },
   {
-    .ionization_with_element_atomic_number = 1.0,
-    .ionization_with_element_ionization_stage = 1.0,
+    .recombining_element_atomic_number = 1.0,
+    .recombining_element_ionization_stage = 1.0,
     .atomic_number = 12.0,
     .ionization_stage = 1.0,
     .temperatures_range = {1.0e4, 3.0e5},
@@ -64,8 +64,8 @@ inline const std::vector<CTIArnaudFit> CTIArnaud::fit_{
     .delta_E = 1.44,
   },
   {
-    .ionization_with_element_atomic_number = 1.0,
-    .ionization_with_element_ionization_stage = 1.0,
+    .recombining_element_atomic_number = 1.0,
+    .recombining_element_ionization_stage = 1.0,
     .atomic_number = 14.0,
     .ionization_stage = 0.0,
     .temperatures_range = {1.0e4},
@@ -75,8 +75,8 @@ inline const std::vector<CTIArnaudFit> CTIArnaud::fit_{
     .delta_E = 0.03,
   },
   {
-    .ionization_with_element_atomic_number = 1.0,
-    .ionization_with_element_ionization_stage = 1.0,
+    .recombining_element_atomic_number = 1.0,
+    .recombining_element_ionization_stage = 1.0,
     .atomic_number = 14.0,
     .ionization_stage = 1.0,
     .temperatures_range = {5.0e3, 1.0e5},
@@ -86,8 +86,8 @@ inline const std::vector<CTIArnaudFit> CTIArnaud::fit_{
     .delta_E = 2.74,
   },
   {
-    .ionization_with_element_atomic_number = 1.0,
-    .ionization_with_element_ionization_stage = 1.0,
+    .recombining_element_atomic_number = 1.0,
+    .recombining_element_ionization_stage = 1.0,
     .atomic_number = 16.0,
     .ionization_stage = 0.0,
     .temperatures_range = {1.0e4},
@@ -97,8 +97,8 @@ inline const std::vector<CTIArnaudFit> CTIArnaud::fit_{
     .delta_E = 0.0,
   },
   {
-    .ionization_with_element_atomic_number = 2.0,
-    .ionization_with_element_ionization_stage = 1.0,
+    .recombining_element_atomic_number = 2.0,
+    .recombining_element_ionization_stage = 1.0,
     .atomic_number = 6.0,
     .ionization_stage = 1.0,
     .temperatures_range = {5.0e3, 5.0e4},
@@ -108,8 +108,8 @@ inline const std::vector<CTIArnaudFit> CTIArnaud::fit_{
     .delta_E = 6.29,
   },
   {
-    .ionization_with_element_atomic_number = 2.0,
-    .ionization_with_element_ionization_stage = 1.0,
+    .recombining_element_atomic_number = 2.0,
+    .recombining_element_ionization_stage = 1.0,
     .atomic_number = 7.0,
     .ionization_stage = 1.0,
     .temperatures_range = {1.0e4, 3.0e5},
@@ -119,8 +119,8 @@ inline const std::vector<CTIArnaudFit> CTIArnaud::fit_{
     .delta_E = 1.44,
   },
   {
-    .ionization_with_element_atomic_number = 2.0,
-    .ionization_with_element_ionization_stage = 1.0,
+    .recombining_element_atomic_number = 2.0,
+    .recombining_element_ionization_stage = 1.0,
     .atomic_number = 14.0,
     .ionization_stage = 1.0,
     .temperatures_range = {1.0e4, 3.0e5},
@@ -130,8 +130,8 @@ inline const std::vector<CTIArnaudFit> CTIArnaud::fit_{
     .delta_E = 6.91,
   },
   {
-    .ionization_with_element_atomic_number = 2.0,
-    .ionization_with_element_ionization_stage = 1.0,
+    .recombining_element_atomic_number = 2.0,
+    .recombining_element_ionization_stage = 1.0,
     .atomic_number = 14.0,
     .ionization_stage = 2.0,
     .temperatures_range = {1.0e4, 3.0e5},
@@ -141,8 +141,8 @@ inline const std::vector<CTIArnaudFit> CTIArnaud::fit_{
     .delta_E = 8.88,
   },
   {
-    .ionization_with_element_atomic_number = 2.0,
-    .ionization_with_element_ionization_stage = 1.0,
+    .recombining_element_atomic_number = 2.0,
+    .recombining_element_ionization_stage = 1.0,
     .atomic_number = 16.0,
     .ionization_stage = 1.0,
     .temperatures_range = {1.0e4, 3.0e5},
@@ -152,8 +152,8 @@ inline const std::vector<CTIArnaudFit> CTIArnaud::fit_{
     .delta_E = 9.2,
   },
   {
-    .ionization_with_element_atomic_number = 2.0,
-    .ionization_with_element_ionization_stage = 1.0,
+    .recombining_element_atomic_number = 2.0,
+    .recombining_element_ionization_stage = 1.0,
     .atomic_number = 16.0,
     .ionization_stage = 2.0,
     .temperatures_range = {1.0e4, 3.0e5},
@@ -163,8 +163,8 @@ inline const std::vector<CTIArnaudFit> CTIArnaud::fit_{
     .delta_E = 10.5,
   },
   {
-    .ionization_with_element_atomic_number = 2.0,
-    .ionization_with_element_ionization_stage = 1.0,
+    .recombining_element_atomic_number = 2.0,
+    .recombining_element_ionization_stage = 1.0,
     .atomic_number = 18.0,
     .ionization_stage = 1.0,
     .temperatures_range = {1.0e4, 3.0e5},

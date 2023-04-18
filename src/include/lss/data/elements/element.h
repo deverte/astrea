@@ -35,8 +35,6 @@ class Element {
 
   virtual const double mass() = 0;
 
-  virtual const int number_of_ionization_stages() = 0;
-
   std::vector<std::string> keys();
 
   void keys(std::vector<std::string> value);

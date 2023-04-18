@@ -29,8 +29,8 @@ inline Eigen::MatrixXd ce_regemorter_rates(
 ) {
   auto& k_B = BOLTZMANN_CONSTANT; // eV * K^{-1}
 
-  auto gamma_ij = 1.0; // effective electron collision strength.
-  auto zeta = 8.62913210858377e-6; // 
+  auto gamma_ij = 1.0; // 1 // effective electron collision strength
+  auto zeta = 8.62913210858377e-6; // cm^3 * s^{-1} * K^{1 / 2}
 
   auto& N_e = electron_number_density; // cm^{-3}
   auto& T = temperature; // K

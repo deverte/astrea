@@ -23,13 +23,16 @@ namespace lss {
  */
 inline Eigen::MatrixXd ctr_arnaud_rates(
   std::vector<std::shared_ptr<Element>> elements,
+  std::shared_ptr<Element> ionizing_element,
   double temperature /* K */,
   double electron_number_density /* cm^{-3} */
 ) {
   auto& N_e = electron_number_density; // cm^{-3}
+  auto s_B = ionizing_element->ionization_stage(); // 1
   auto& T = temperature; // K
   auto T_4 = T / 1.0e4; // 1
-  auto Z = elements[0]->atomic_number(); // 1
+  auto Z_A = elements[0]->atomic_number(); // 1
+  auto Z_B = ionizing_element->atomic_number(); // 1
 
   int S = elements.size();
   Eigen::VectorXi L(S);
@@ -43,7 +46,6 @@ inline Eigen::MatrixXd ctr_arnaud_rates(
   Eigen::MatrixXd R_CTR = Eigen::MatrixXd::Zero(K(S), K(S)); // s^{-1}
   Eigen::MatrixXd C_CTR = Eigen::MatrixXd::Zero(K(S), K(S)); // cm^3 * s^{-1}
   for (int s = 0; s <= S - 2; s++) {
-    // TODO: Now recombination acts only with H, add He.
     auto a = 0.0; // cm^3 * s^{-1}
     auto b = 0.0; // 1
     auto c = 0.0; // 1
@@ -51,7 +53,12 @@ inline Eigen::MatrixXd ctr_arnaud_rates(
     auto T_max = 0.0; // K
     auto T_min = 0.0; // K
     for (auto fit : CTRArnaud::fit()) {
-      if (fit.atomic_number == Z && fit.ionization_stage == s) {
+      if (
+        fit.atomic_number == Z_A &&
+        fit.ionization_stage == s &&
+        fit.ionizing_element_atomic_number == Z_B,
+        fit.ionizing_element_ionization_stage == s_B
+      ) {
         if (fit.temperatures_range.size() == 1) {
           T_min =
             fit.temperatures_range[0] - std::sqrt(fit.temperatures_range[0]);
@@ -63,7 +70,7 @@ inline Eigen::MatrixXd ctr_arnaud_rates(
           T_max = fit.temperatures_range[1];
         }
 
-        a = fit.a;
+        a = fit.a * 1.0e-9;
         b = fit.b;
         c = fit.c;
         d = fit.d;

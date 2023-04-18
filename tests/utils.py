@@ -27,6 +27,7 @@ class Transition(Enum):
 
 def calculate_rates_matrix(
     elements,
+    charge_transfer_elements = [],
     temperature = None,
     electron_temperature = None,
     electron_number_density = None,
@@ -63,17 +64,21 @@ def calculate_rates_matrix(
             electron_number_density,
         )
     if Transition.CTI_ARNAUD in transitions_types:
-        rates_matrix += lss.cti_arnaud_rates(
-            elements,
-            temperature,
-            electron_number_density,
-        )
+        for charge_transfer_element in charge_transfer_elements:
+            rates_matrix += lss.cti_arnaud_rates(
+                elements,
+                charge_transfer_element,
+                temperature,
+                electron_number_density,
+            )
     if Transition.CTR_ARNAUD in transitions_types:
-        rates_matrix += lss.ctr_arnaud_rates(
-            elements,
-            temperature,
-            electron_number_density,
-        )
+        for charge_transfer_element in charge_transfer_elements:
+            rates_matrix += lss.ctr_arnaud_rates(
+                elements,
+                charge_transfer_element,
+                temperature,
+                electron_number_density,
+            )
     if Transition.DR_BADNELL in transitions_types:
         rates_matrix += lss.dr_badnell_rates(
             elements,
@@ -135,6 +140,7 @@ def calculate_rates_matrix(
 def calculate_populations_nlte(
     elements,
     population_nlte_1,
+    charge_transfer_elements = [],
     temperatures = None,
     electron_temperatures = None,
     electron_number_densities = None,
@@ -149,6 +155,7 @@ def calculate_populations_nlte(
     for i, _ in enumerate(temperatures):
         rates_matrix = calculate_rates_matrix(
             elements,
+            charge_transfer_elements=charge_transfer_elements,
             temperature=temperatures[i],
             electron_temperature=electron_temperatures[i],
             electron_number_density=electron_number_densities[i],
@@ -186,6 +193,7 @@ def calculate_populations_lte(
 def calculate_b_factors(
     elements,
     population_nlte_1,
+    charge_transfer_elements = [],
     temperatures = None,
     electron_temperatures = None,
     electron_number_densities = None,
@@ -199,6 +207,7 @@ def calculate_b_factors(
     populations_nlte = calculate_populations_nlte(
         elements,
         population_nlte_1,
+        charge_transfer_elements,
         temperatures,
         electron_temperatures,
         electron_number_densities,
