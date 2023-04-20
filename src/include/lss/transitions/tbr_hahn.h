@@ -43,6 +43,7 @@ inline Eigen::MatrixXd tbr_hahn_rates(
   auto& N_e = electron_number_density; // cm^{-3}
   auto& N_s = N_e; // cm^{-3} // TODO: different number
   auto& T_e = electron_temperature; // K
+  auto zeta = 7.2e-32; // cm^6 * s^{-1}
 
   int S = elements.size();
   Eigen::VectorXi L(S);
@@ -64,7 +65,7 @@ inline Eigen::MatrixXd tbr_hahn_rates(
       {
         [&]() {
           return
-            + 7.2e-32                                             // cm^6 * s^{-1}
+            + zeta                                              // cm^6 * s^{-1}
             * std::pow(N_e, 2.0)                                  // cm^{-6}
             * N_s                                                 // cm^{-3}
             * std::pow(n, 6.0)                                    // 1
@@ -76,7 +77,7 @@ inline Eigen::MatrixXd tbr_hahn_rates(
       {
         [&]() {
           return
-            + 7.2e-32                                             // cm^6 * s^{-1}
+            + zeta                                              // cm^6 * s^{-1}
             * std::pow(N_e, 2.0)                                   // cm^{-6}
             * N_s                                                  // cm^{-3}
             * std::pow(n, 4.0)                                     // 1
