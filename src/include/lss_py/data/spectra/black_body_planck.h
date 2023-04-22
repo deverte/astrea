@@ -23,14 +23,14 @@ inline void BlackBodyPlanck(py::module_& m) {
 
   black_body_planck.def_property(
     "temperature",
-    nullptr,
-    &lss::BlackBodyPlanck::temperature
+    py::overload_cast<>(&lss::BlackBodyPlanck::temperature),
+    py::overload_cast<double>(&lss::BlackBodyPlanck::temperature)
   );
 
   black_body_planck.def_property(
     "total_area",
-    nullptr,
-    &lss::BlackBodyPlanck::total_area
+    py::overload_cast<>(&lss::BlackBodyPlanck::total_area),
+    py::overload_cast<double>(&lss::BlackBodyPlanck::total_area)
   );
 }
 

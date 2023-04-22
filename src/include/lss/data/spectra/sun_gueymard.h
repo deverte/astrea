@@ -40,9 +40,9 @@ class SunGueymard : public Spectrum {
   std::shared_ptr<boost::math::interpolators::barycentric_rational<double>>
   interpolant_;
 
-  double max_wavelength_ = 0.0;
+  double max_wavelength_ = 0.0; // nm
 
-  double min_wavelength_ = 0.0;
+  double min_wavelength_ = 0.0; // nm
 };
 
 

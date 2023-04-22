@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "nlte"
+name = "lss"
 version = "0.1.0"
 description = ""
 authors = ["deverte <deverte@ya.ru>"]

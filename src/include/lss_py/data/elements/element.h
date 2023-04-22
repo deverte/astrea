@@ -50,10 +50,10 @@ inline void Level(py::module_& m) {
     &lss::Level::energy
   );
 
-  // level.def_readonly(
-  //   "ionization_energy",
-  //   &lss::Level::ionization_energy
-  // );
+  level.def_readonly(
+    "ionization_energy",
+    &lss::Level::ionization_energy
+  );
 
   // level.def_readonly(
   //   "ionization_stage",

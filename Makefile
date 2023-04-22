@@ -1,4 +1,4 @@
-project = "nlte"
+project = "lss"
 version = 0.1.0
 
 
@@ -8,10 +8,5 @@ build:
 	cd build;\
 		cmake ../src;\
 		make;\
-		cp lss* ../tests;
-
-
-.PHONY: run
-run:
-	cd tests;\
-		python main.py;
+		cp lss* ../lss;
+	poetry build

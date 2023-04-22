@@ -15,7 +15,11 @@ class BlackBodyPlanck : public Spectrum {
  public:
   double operator()(double wavelength) override;
 
+  double temperature();
+
   void temperature(double value);
+
+  double total_area();
 
   void total_area(double value);
 
@@ -71,6 +75,11 @@ BlackBodyPlanck::operator()(double wavelength /* nm */) {
 }
 
 
+inline double BlackBodyPlanck::temperature() {
+  return temperature_;
+}
+
+
 inline void BlackBodyPlanck::temperature(double value /* K */) {
   temperature_ = value;
 
@@ -80,6 +89,11 @@ inline void BlackBodyPlanck::temperature(double value /* K */) {
   double J = sigma * std::pow(T, 4.0); // W * m^{-2}
 
   total_area_temperature_ = J;
+}
+
+
+inline double BlackBodyPlanck::total_area() {
+  return total_area_;
 }
 
 
