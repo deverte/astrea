@@ -4,23 +4,24 @@ version = 0.1.0
 
 .PHONY: install_py_dev
 install_py_dev:
-	poetry run pip install -e .
+	poetry run python lss_py/setup.py develop
 
 
-.PHONY: build_cxx
-build_cxx:
-	# conan create . --build=missing # build inside Conan cache (~/conan2/p)
-
-	conan install . --build=missing # local build
-	conan build .
+.PHONY: build_h
+build_h:
+	conan create . --build=missing # build inside Conan cache (~/conan2/p)
 
 
 .PHONY: build_py
 build_py:
-	poetry run python setup.py sdist bdist_wheel
+	cd lss_py;\
+		conan install . --build=missing;\
+		conan build .;\
+
+	poetry run python lss_py/setup.py sdist bdist_wheel
 
 
 .PHONY: build
 build:
-	$(MAKE) build_cxx
+	$(MAKE) build_h
 	$(MAKE) build_py

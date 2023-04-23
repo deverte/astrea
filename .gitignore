@@ -1,11 +1,11 @@
+/.venv
 /build
 /dist
-/CMakeUserPresets.json
+/lss_py/build
+/lss_py/CMakeUserPresets.json
 
 *.so
 *.dll
-
-*.venv
 
 *.ipynb_checkpoints
 *.egg-info
