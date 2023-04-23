@@ -15,5 +15,9 @@ sympy = "^1.11.1"
 
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = [
+    "setuptools",
+    "conan",
+    "cmake",
+]
+build-backend = "setuptools.build_meta"
