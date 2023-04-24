@@ -1,28 +1,8 @@
-from enum import Enum
-
-import matplotlib.pyplot as plt
 import numpy as np
 
 import lss
 
-
-class Transition(Enum):
-    CBB_MASHONKINA_O1 = 1
-    CBB_REGEMORTER = 2
-    CI_ARNAUD_YOUNGER = 3
-    CI_HAHN = 4
-    CTI_ARNAUD = 5
-    CTR_ARNAUD = 6
-    DR_BADNELL = 7
-    PI_MASHONKINA_O1 = 8
-    PI_TASITSIOMI = 9
-    RBB_MASHONKINA_DOPPLER_O1 = 10
-    RBB_MASHONKINA_VOIGT_O1 = 11
-    RBB_TASITSIOMI = 12
-    RR_BADNELL_VERNER = 13
-    RR_SEATON = 14
-    SE_NIST_O1 = 15
-    TBR_HAHN = 16
+from .transition import Transition
 
 
 def calculate_rates_matrix(
@@ -133,96 +113,3 @@ def calculate_rates_matrix(
             electron_number_density,
         )
     return rates_matrix
-
-
-def calculate_populations_nlte(
-    elements,
-    population_nlte_1,
-    spectrum = None,
-    charge_transfer_elements = [],
-    temperatures = None,
-    electron_temperatures = None,
-    electron_number_densities = None,
-    optical_depth = 0.0,
-    delta_time = 60.0,
-    transitions_types = [],
-):
-    populations_nlte = np.zeros(
-        (len(temperatures), sum([len(el.keys) for el in elements]))
-    )
-    population_nlte_2 = population_nlte_1
-    for i, _ in enumerate(temperatures):
-        rates_matrix = calculate_rates_matrix(
-            elements,
-            spectrum=spectrum,
-            charge_transfer_elements=charge_transfer_elements,
-            temperature=temperatures[i],
-            electron_temperature=electron_temperatures[i],
-            electron_number_density=electron_number_densities[i],
-            optical_depth=optical_depth,
-            transitions_types=transitions_types,
-        )
-        population_nlte_2 = lss.nlte_population(
-            population_nlte_2,
-            delta_time,
-            rates_matrix,
-        )
-        populations_nlte[i] = population_nlte_2
-    return populations_nlte
-
-
-def calculate_populations_lte(
-    elements,
-    temperatures = None,
-    electron_temperatures = None,
-    electron_number_densities = None,
-):
-    populations_lte = np.zeros(
-        (len(temperatures), sum([len(el.keys) for el in elements]))
-    )
-    for i, _ in enumerate(temperatures):
-        populations_lte[i] = lss.lte_population(
-            elements,
-            temperatures[i],
-            electron_temperatures[i],
-            electron_number_densities[i],
-        )
-    return populations_lte
-
-
-def calculate_b_factors(
-    elements,
-    population_nlte_1,
-    spectrum = None,
-    charge_transfer_elements = [],
-    temperatures = None,
-    electron_temperatures = None,
-    electron_number_densities = None,
-    optical_depth = 0.0,
-    delta_time = 60.0,
-    transitions_types = [],
-):
-    b_factors = np.zeros(
-        (len(temperatures), sum([len(el.keys) for el in elements]))
-    )
-    populations_nlte = calculate_populations_nlte(
-        elements,
-        population_nlte_1,
-        spectrum=spectrum,
-        charge_transfer_elements=charge_transfer_elements,
-        temperatures=temperatures,
-        electron_temperatures=electron_temperatures,
-        electron_number_densities=electron_number_densities,
-        optical_depth=optical_depth,
-        delta_time=delta_time,
-        transitions_types=transitions_types,
-    )
-    populations_lte = calculate_populations_lte(
-        elements,
-        temperatures,
-        electron_temperatures,
-        electron_number_densities,
-    )
-    for i, _ in enumerate(temperatures):
-        b_factors[i] = populations_nlte[i] / populations_lte[i]
-    return b_factors

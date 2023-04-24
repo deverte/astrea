@@ -1,0 +1,20 @@
+from enum import Enum
+
+
+class Transition(Enum):
+    CBB_MASHONKINA_O1 = 1
+    CBB_REGEMORTER = 2
+    CI_ARNAUD_YOUNGER = 3
+    CI_HAHN = 4
+    CTI_ARNAUD = 5
+    CTR_ARNAUD = 6
+    DR_BADNELL = 7
+    PI_MASHONKINA_O1 = 8
+    PI_TASITSIOMI = 9
+    RBB_MASHONKINA_DOPPLER_O1 = 10
+    RBB_MASHONKINA_VOIGT_O1 = 11
+    RBB_TASITSIOMI = 12
+    RR_BADNELL_VERNER = 13
+    RR_SEATON = 14
+    SE_NIST_O1 = 15
+    TBR_HAHN = 16
