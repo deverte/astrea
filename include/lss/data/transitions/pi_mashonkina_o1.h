@@ -6168,7 +6168,8 @@ inline const std::vector<double> PIMashonkinaO1::frequencies_{
 
 
 // cm^2
-inline const std::vector<double> PIMashonkinaO1::photoionization_cross_sections_{
+inline const std::vector<double>
+PIMashonkinaO1::photoionization_cross_sections_{
   0.2481000E-19,  0.9265000E-20,  0.2603000E-20,
   0.1016000E-21,  0.9151000E-20,  0.4913000E-19,  0.1771000E-18,  0.5979000E-18,
   0.2357000E-17,  0.1737000E-16,  0.1376000E-15,  0.1324000E-15,  0.1390000E-16,

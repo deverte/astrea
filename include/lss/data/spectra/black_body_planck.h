@@ -60,7 +60,7 @@ BlackBodyPlanck::operator()(double wavelength /* nm */) {
 
   auto R_lambda = [&](double lambda, double T) {
     return // J * s^{-1} * m^{-2} * nm^{-1} = W * m^{-2} * nm^{-1}
-      + 2.0 * pi * h * eV_to_J * std::pow(c * cm_to_nm, 2.0) // J * nm^2 * s^{-1}
+      + 2.0 * pi * h * eV_to_J * std::pow(c * cm_to_nm, 2.0)// J * nm^2 * s^{-1}
       / std::pow(lambda, 5.0)                           // nm^{-5}
       / (std::exp(h * c * cm_to_nm / (lambda * k_B * T)) - 1.0) // 1
       * std::pow(nm_to_m, -2.0)
