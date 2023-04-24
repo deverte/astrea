@@ -1,15 +1,12 @@
 #pragma once
 
 
-#include <functional>
 #include <memory>
 #include <vector>
 
 #include <boost/math/interpolators/barycentric_rational.hpp>
-// #include <boost/math/interpolators/vector_barycentric_rational.hpp>
-// #include <boost/math/interpolators/makima.hpp>
-// #include <boost/math/interpolators/pchip.hpp>
 #include <Eigen/Dense>
+#include <fm/fm.h>
 
 #include "../data/elements/element.h"
 #include "../data/transitions/cbb_mashonkina_o1.h"

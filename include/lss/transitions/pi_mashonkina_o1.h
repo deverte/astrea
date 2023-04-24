@@ -8,8 +8,10 @@
 #include <boost/math/interpolators/barycentric_rational.hpp>
 #include <boost/math/quadrature/trapezoidal.hpp>
 #include <Eigen/Dense>
+#include <fm/fm.h>
 
 #include "../data/elements/element.h"
+#include "../data/spectra/spectrum.h"
 #include "../data/transitions/pi_mashonkina_o1.h"
 #include "../physics/constants.h"
 

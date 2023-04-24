@@ -4,8 +4,7 @@
             "name": "default",
             "includePath": [
                 "${workspaceFolder}/include",
-                "~/.conan2/p/**",
-                "/usr/include/python3.10"
+                "~/.conan2/p/**"
             ],
             "intelliSenseMode": "linux-gcc-x64",
             "compilerPath": "/usr/bin/g++",

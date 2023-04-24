@@ -8,9 +8,11 @@
 
 #include <boost/math/quadrature/trapezoidal.hpp>
 #include <Eigen/Dense>
+#include <fm/fm.h>
 
 #include "./se_nist_o1.h"
 #include "../data/elements/element.h"
+#include "../data/spectra/spectrum.h"
 #include "../physics/constants.h"
 
 
@@ -96,6 +98,7 @@ inline Eigen::MatrixXd pi_tasitsiomi_rates(
 
       auto f_ij = [&](double nu /* s^{-1} */) { // 1
         return 1.0;
+        // return 1.0e-3;
       };
 
       auto delta_nu_L = [&]() { // s^{-1}

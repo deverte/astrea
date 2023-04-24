@@ -6,6 +6,7 @@
 #include <vector>
 
 #include <Eigen/Dense>
+#include <fm/fm.h>
 
 #include "../data/elements/element.h"
 #include "../data/transitions/ctr_arnaud.h"
