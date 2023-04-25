@@ -1,3 +1,11 @@
+/**
+ * \file lss/data/transitions/rbb_mashonkina_doppler_o1.h
+ * Radiative bound-bound transition for electrically neutral oxygen using
+ * Doppler profile using Mashonkina data.
+ * 
+ * \copyright GPL
+ * \author Artem Shepelin (4.shepelin@gmail.com)
+ */
 #pragma once
 
 
@@ -9,20 +17,36 @@ namespace lss {
 
 
 /**
- * Radiative bound-bound transition using Doppler profile
- * 
- * data: INASAN
+ * Radiative bound-bound transition for electrically neutral oxygen using
+ * Doppler profile using Mashonkina data (from private communication).
  */
-class RBBMashonkinaDopplerO1Transition {
- public:
+struct RBBMashonkinaDopplerO1Transition {
+  /**
+   * Initial level.
+   */
   const std::string initial;
+  /**
+   * Final level.
+   */
   const std::string final;
-  const double oscillator_strength; // s^{-1},
+  /**
+   * Oscillator strength in \f$1\f$.
+   */
+  const double oscillator_strength;
 };
 
 
+/**
+ * Radiative bound-bound transitions for electrically neutral oxygen using
+ * Doppler profile using Mashonkina data (from private communication).
+ */
 class RBBMashonkinaDopplerO1 {
  public:
+  /**
+   * Radiative bound-bound transitions using Doppler profile.
+   * 
+   * \return Radiative bound-bound transitions.
+   */
   static const std::vector<RBBMashonkinaDopplerO1Transition>& transitions();
 
  private:

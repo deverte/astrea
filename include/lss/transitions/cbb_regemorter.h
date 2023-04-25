@@ -1,3 +1,10 @@
+/**
+ * \file lss/transitions/cbb_regemorter.h
+ * Collisional bound-bound transitions rates using Regemorter formula.
+ * 
+ * \copyright GPL
+ * \author Artem Shepelin (4.shepelin@gmail.com)
+ */
 #pragma once
 
 
@@ -16,16 +23,20 @@ namespace lss {
 
 
 /**
- * Collisional excitation / de-excitation
+ * Collisional bound-bound transitions rates using Regemorter formula
+ * (doi-10.1086%2F147445).
  * 
- * formula: doi-10.1086%2F147445 (Regemorter 1961)
- * inverse process: this
+ * \param elements Elements.
+ * \param temperature Temperature in \f$K\f$.
+ * \param electron_temperature Electron temperature in \f$K\f$.
+ * \param electron_number_density Electron number density in \f$cm^{-3}\f$.
+ * \return Transitions rates in \f$s^{-1}\f$.
  */
 inline Eigen::MatrixXd cbb_regemorter_rates(
   std::vector<std::shared_ptr<Element>> elements,
-  double temperature /* K */,
-  double electron_temperature /* K */,
-  double electron_number_density /* cm^{-3} */
+  double temperature,
+  double electron_temperature,
+  double electron_number_density
 ) {
   auto& k_B = BOLTZMANN_CONSTANT; // eV * K^{-1}
 

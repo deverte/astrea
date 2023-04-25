@@ -1,3 +1,11 @@
+/**
+ * \file lss/data/transitions/pi_mashonkina_o1.h
+ * Photoionization transition for electrically neutral oxygen using Mashonkina
+ * data.
+ * 
+ * \copyright GPL
+ * \author Artem Shepelin (4.shepelin@gmail.com)
+ */
 #pragma once
 
 
@@ -9,39 +17,59 @@ namespace lss {
 
 
 /**
- * Radiative bound-free transition
- * 
- * data: INASAN
+ * Photoionization transition for electrically neutral oxygen using Mashonkina
+ * data (from private communication).
  */
-class PIMashonkinaO1Transition {
- public:
+struct PIMashonkinaO1Transition {
+  /**
+   * Initial level.
+   */
   const std::string initial;
+  /**
+   * Data start index.
+   */
   const int start_index;
+  /**
+   * Data finish index.
+   */
   const int finish_index;
 };
 
 
+/**
+ * Photoionization transitions for electrically neutral oxygen using Mashonkina
+ * data (from private communication).
+ */
 class PIMashonkinaO1 {
  public:
+  /**
+   * Frequencies.
+   * 
+   * \return Frequencies in \f$s^{-1}\f$.
+   */
+  static const std::vector<double>& frequencies();
+
+  /**
+   * Photoionization cross sections.
+   * 
+   * \return Photoionization cross sections in \f$cm^2\f$.
+   */
+  static const std::vector<double>& photoionization_cross_sections();
+
+  /**
+   * Photoionization transitions.
+   * 
+   * \return Photoionization transitions.
+   */
   static const std::vector<PIMashonkinaO1Transition>& transitions();
 
-  static const std::vector<double>& frequencies(); // s^{-1}
-
-  static const std::vector<double>& photoionization_cross_sections(); // cm^2
-
  private:
+  static const std::vector<double> frequencies_;
+
+  static const std::vector<double> photoionization_cross_sections_;
+
   static const std::vector<PIMashonkinaO1Transition> transitions_;
-
-  static const std::vector<double> frequencies_; // s^{-1}
-
-  static const std::vector<double> photoionization_cross_sections_; // cm^2
 };
-
-
-inline const std::vector<PIMashonkinaO1Transition>&
-PIMashonkinaO1::transitions() {
-  return transitions_;
-}
 
 
 inline const std::vector<double>& PIMashonkinaO1::frequencies() {
@@ -52,6 +80,12 @@ inline const std::vector<double>& PIMashonkinaO1::frequencies() {
 inline const std::vector<double>&
 PIMashonkinaO1::photoionization_cross_sections() {
   return photoionization_cross_sections_;
+}
+
+
+inline const std::vector<PIMashonkinaO1Transition>&
+PIMashonkinaO1::transitions() {
+  return transitions_;
 }
 
 

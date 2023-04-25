@@ -1,3 +1,10 @@
+/**
+ * \file lss/data/elements/h2.h
+ * Hydrogen (1-ion) ion.
+ * 
+ * \copyright GPL
+ * \author Artem Shepelin (4.shepelin@gmail.com)
+ */
 #pragma once
 
 
@@ -11,26 +18,46 @@ namespace lss {
 
 
 /**
- * Hydrogen (1-ion)
+ * Hydrogen (1-ion) ion.
  */
 class H2 : public Element {
  public:
+  /**
+   * All element's levels terms (keys).
+   * 
+   * \return Terms (keys).
+   */
   const std::vector<Level>& all_levels() override;
 
+  /**
+   * Atomic number.
+   * 
+   * \return Atomic number in \f$1\f$.
+   */
   const double atomic_number() override;
 
+  /**
+   * Ionization stage.
+   * 
+   * \return Ionization stage in \f$1\f$.
+   */
   const double ionization_stage() override;
 
+  /**
+   * Mass.
+   * 
+   * \return Mass in \f$u\f$ (\f$Da\f$).
+   */
   const double mass() override;
 
  private:
   static const std::vector<Level> all_levels_;
 
-  const double atomic_number_ = 1.0; // 1
+  const double atomic_number_ = 1.0;
 
-  const double ionization_stage_ = 1.0; // 1
+  const double ionization_stage_ = 1.0;
 
-  const double mass_ = 1.0; // u
+  const double mass_ = 1.0;
 };
 
 

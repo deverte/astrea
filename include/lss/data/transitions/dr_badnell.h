@@ -1,3 +1,10 @@
+/**
+ * \file lss/data/transitions/dr_badnell.h
+ * Dielectronic recombination fit using Badnell data.
+ * 
+ * \copyright GPL
+ * \author Artem Shepelin (4.shepelin@gmail.com)
+ */
 #pragma once
 
 
@@ -8,26 +15,50 @@ namespace lss {
 
 
 /**
- * Dielectronic recombination
- * 
- * data: doi-10.1086%2F508465 (Badnell 2006)
- * urls: http://amdpp.phys.strath.ac.uk/tamoc/DR/
+ * Dielectronic recombination fit using Badnell data (doi-10.1086%2F508465,
+ * http://amdpp.phys.strath.ac.uk/tamoc/DR/).
  */
-class DRBadnellFit {
- public:
-  const double Z; // Nuclear charge
-  const double N; // Isoelectronic sequence N (where N=1,2 ... is the number of
-                  // electrons of the initial target ion)
-  const double M; // Initial metastable levels M (where M=1 for the ground level
-                  // etc.) of the ground and metastable terms
+struct DRBadnellFit {
+  /**
+   * Nuclear charge in \f$1\f$.
+   */
+  const double Z;
+  /**
+   * Isoelectronic sequence N in \f$1\f$ (where N=1,2 ... is the number of
+   * electrons of the initial target ion).
+   */
+  const double N;
+  /**
+   * Initial metastable levels M in \f$1\f$ (where M=1 for the ground level
+   * etc.) of the ground and metastable terms.
+   */
+  const double M;
+  /**
+   * Numerical constant \f$W\f$ in \f$1\f$.
+   */
   const double W;
+  /**
+   * Numerical constants \f$C\f$ in \f$1\f$.
+   */
   const std::vector<double> C;
+  /**
+   * Numerical constants \f$E\f$ in \f$1\f$.
+   */
   const std::vector<double> E;
 };
 
 
+/**
+ * Dielectronic recombination using Badnell data (doi-10.1086%2F508465,
+ * http://amdpp.phys.strath.ac.uk/tamoc/DR/).
+ */
 class DRBadnell {
  public:
+  /**
+   * Transitions fit.
+   * 
+   * \return Transitions fit.
+   */
   static const std::vector<DRBadnellFit>& fit();
 
  private:

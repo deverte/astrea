@@ -1,4 +1,11 @@
-
+/**
+ * \file lss/data/transitions/se_nist_o1.h
+ * Spontaneous emission transition for electrically neutral oxygen using NIST
+ * data.
+ * 
+ * \copyright GPL
+ * \author Artem Shepelin (4.shepelin@gmail.com)
+ */
 #pragma once
 
 
@@ -10,22 +17,44 @@ namespace lss {
 
 
 /**
- * Spontaneous emission
- * 
- * data: NIST
+ * Spontaneous emission transition for electrically neutral oxygen using NIST
+ * data.
  */
-class SENistO1Transition {
- public:
+struct SENistO1Transition {
+  /**
+   * Initial level.
+   */
   const std::string initial;
+  /**
+   * Final level.
+   */
   const std::string final;
-  const double rate; // s^{-1}
-  const double initial_total_angular_momentum_quantum_number; // 1
-  const double final_total_angular_momentum_quantum_number; // 1
+  /**
+   * Rate in \f$s^{-1}\f$.
+   */
+  const double rate;
+  /**
+   * Initial total angular momentum quantum number in \f$1\f$.
+   */
+  const double initial_total_angular_momentum_quantum_number;
+  /**
+   * Final total angular momentum quantum number in \f$1\f$.
+   */
+  const double final_total_angular_momentum_quantum_number;
 };
 
 
+/**
+ * Spontaneous emission transitions for electrically neutral oxygen using NIST
+ * data.
+ */
 class SENistO1 {
  public:
+  /**
+   * Spontaneous emission transitions.
+   * 
+   * \return Spontaneous emission transitions.
+   */
   static const std::vector<SENistO1Transition>& transitions();
 
  private:

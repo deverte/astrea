@@ -1,3 +1,10 @@
+/**
+ * \file lss/data/transitions/cti_arnaud.h
+ * Charge transfer ionization fit using Arnaud data.
+ * 
+ * \copyright GPL
+ * \author Artem Shepelin (4.shepelin@gmail.com)
+ */
 #pragma once
 
 
@@ -8,26 +15,60 @@ namespace lss {
 
 
 /**
- * Charge transfer ionization
- * 
- * data: bibcode-1985A&AS...60..425A
+ * Charge transfer ionization fit using Arnaud data (
+ * bibcode-1985A&AS...60..425A).
  */
-class CTIArnaudFit {
- public:
-  const double recombining_element_atomic_number; // 1
-  const double recombining_element_ionization_stage; // 1
-  const double atomic_number; // 1
-  const double ionization_stage; // 1
-  const std::vector<double> temperatures_range; // K
-  const double a; // 1.0e-9 * cm^3 * s^{-1}
-  const double b; // 1
-  const double c; // 1
-  const double delta_E; // eV
+struct CTIArnaudFit {
+  /**
+   * Recombining element atomic number in \f$1\f$.
+   */
+  const double recombining_element_atomic_number;
+  /**
+   * Recombining element ionization stage in \f$1\f$.
+   */
+  const double recombining_element_ionization_stage;
+  /**
+   * Atomic number in \f$1\f$.
+   */
+  const double atomic_number;
+  /**
+   * Ionization stage in \f$1\f$.
+   */
+  const double ionization_stage;
+  /**
+   * Temperatures range in \f$K\f$.
+   */
+  const std::vector<double> temperatures_range;
+  /**
+   * Numeric approximation constant \f$a\f$ in
+   * \f$1.0e-9 \cdot cm^3 \cdot s^{-1}\f$.
+   */
+  const double a;
+  /**
+   * Numeric approximation constant \f$b\f$ in \f$1\f$.
+   */
+  const double b;
+  /**
+   * Numeric approximation constant \f$c\f$ in \f$1\f$.
+   */
+  const double c;
+  /**
+   * Ionization energy in \f$eV\f$.
+   */
+  const double delta_E;
 };
 
 
+/**
+ * Charge transfer ionization using Arnaud data (bibcode-1985A&AS...60..425A).
+ */
 class CTIArnaud {
  public:
+  /**
+   * Transitions fit.
+   * 
+   * \return Transitions fit.
+   */
   static const std::vector<CTIArnaudFit>& fit();
 
  private:

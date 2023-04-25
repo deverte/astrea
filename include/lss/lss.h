@@ -1,3 +1,10 @@
+/**
+ * \file lss/lss.h
+ * Electrons population LTE and NLTE calculation header-only library.
+ * 
+ * \copyright GPL
+ * \author Artem Shepelin (4.shepelin@gmail.com)
+ */
 #pragma once
 
 

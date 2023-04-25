@@ -1,3 +1,10 @@
+/**
+ * \file lss/transitions/se_nist_o1.h
+ * Spontaneous emission transitions rates using NIST data.
+ * 
+ * \copyright GPL
+ * \author Artem Shepelin (4.shepelin@gmail.com)
+ */
 #pragma once
 
 
@@ -15,14 +22,13 @@ namespace lss {
 
 
 /**
- * Spontaneous emission rates
+ * Spontaneous emission transitions rates using NIST data.
  * 
- * data: NIST
- * inverse process: ?
+ * \param elements Elements.
+ * \return Transitions rates in \f$s^{-1}\f$.
  */
-inline Eigen::MatrixXd se_nist_o1_rates(
-  std::vector<std::shared_ptr<Element>> elements
-) {
+inline Eigen::MatrixXd
+se_nist_o1_rates(std::vector<std::shared_ptr<Element>> elements) {
   int S = elements.size();
   Eigen::VectorXi L(S);
   for (int s = 0; s <= S - 1; s++) {

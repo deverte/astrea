@@ -1,3 +1,10 @@
+/**
+ * \file lss/calculation/lte.h
+ * LTE electrons population calculation.
+ * 
+ * \copyright GPL
+ * \author Artem Shepelin (4.shepelin@gmail.com)
+ */
 #pragma once
 
 
@@ -15,11 +22,21 @@
 namespace lss {
 
 
+/**
+ * Calculates LTE electrons population using Boltzmann distribution and Saha
+ * ionization equation.
+ * 
+ * \param elements Elements.
+ * \param temperature Temperature in \f$K\f$.
+ * \param electron_temperature Electron temperature in \f$K\f$.
+ * \param electron_number_density Electron number density in \f$cm^{-3}\f$.
+ * \return Electrons population in \f$1\f$.
+ */
 inline Eigen::VectorXd lte_population(
   std::vector<std::shared_ptr<Element>> elements,
-  double temperature, /* K */
-  double electron_temperature, /* K */
-  double electron_number_density /* cm^{-3} */
+  double temperature,
+  double electron_temperature,
+  double electron_number_density
 ) {
   auto& h = PLANCK_CONSTANT; // eV * s
   auto& k_B = BOLTZMANN_CONSTANT; // eV * K^{-1}

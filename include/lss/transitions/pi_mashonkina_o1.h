@@ -1,3 +1,10 @@
+/**
+ * \file lss/transitions/pi_mashonkina_o1.h
+ * Photoionization transitions rates using Mashonkina data.
+ * 
+ * \copyright GPL
+ * \author Artem Shepelin (4.shepelin@gmail.com)
+ */
 #pragma once
 
 
@@ -20,15 +27,18 @@ namespace lss {
 
 
 /**
- * Radiative bound-free transitions
+ * Photoionization transitions rates using Mashonkina data (from private
+ * communication).
  * 
- * data: INASAN
- * inverse process: this
+ * \param elements Elements.
+ * \param spectrum Spectrum.
+ * \param optical_depth Optical depth in \f$1\f$.
+ * \return Transitions rates in \f$s^{-1}\f$.
  */
 inline Eigen::MatrixXd pi_mashonkina_o1_rates(
   std::vector<std::shared_ptr<Element>> elements,
   std::shared_ptr<Spectrum> spectrum,
-  double optical_depth /* 1 */
+  double optical_depth
 ) {
   auto eV_to_J = 1.602177e-19;
   auto cm_to_m = 0.01;
@@ -50,7 +60,7 @@ inline Eigen::MatrixXd pi_mashonkina_o1_rates(
   };
 
   auto F_lambda = [&](double lambda /* nm */) { // W * m^{-2} * nm^{-1}
-    return spectrum->operator()(lambda);
+    return spectrum->spectral_irradiance(lambda);
   };
 
   Eigen::MatrixXd R_PI_RR_DR = Eigen::MatrixXd::Zero(K(S), K(S)); // s^{-1}

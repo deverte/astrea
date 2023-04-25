@@ -1,3 +1,10 @@
+/**
+ * \file lss/transitions/rbb_tasitsiomi.h
+ * Radiative bound-bound transitions rates using Tasitsiomi formula.
+ * 
+ * \copyright GPL
+ * \author Artem Shepelin (4.shepelin@gmail.com)
+ */
 #pragma once
 
 
@@ -20,17 +27,22 @@ namespace lss {
 
 
 /**
- * Photoexcitation / photo-de-excitation
+ * Radiative bound-bound transitions rates using Tasitsiomi formula
+ * (doi-10.1086%2F504460).
  * 
- * formula: doi-10.1086%2F504460 (Tasitsiomi 2006 for cross-sections)
- * inverse process: this
+ * \param elements Elements.
+ * \param spectrum Spectrum.
+ * \param optical_depth Optical depth in \f$1\f$.
+ * \param temperature Temperature in \f$K\f$.
+ * \param spontaneous_emission_rates Spontaneous emission rates in \f$s^{-1}\f$.
+ * \return Transitions rates in \f$s^{-1}\f$.
  */
 inline Eigen::MatrixXd rbb_tasitsiomi_rates(
   std::vector<std::shared_ptr<Element>> elements,
   std::shared_ptr<Spectrum> spectrum,
-  double optical_depth /* 1 */,
-  double temperature /* K */,
-  Eigen::MatrixXd R_SE /* s^{-1} */
+  double optical_depth,
+  double temperature,
+  Eigen::MatrixXd spontaneous_emission_rates
 ) {
   auto cm_to_angstrom = 1.0e8;
   auto cm_to_m = 1.0e-2;
@@ -72,12 +84,13 @@ inline Eigen::MatrixXd rbb_tasitsiomi_rates(
   };
 
   auto m_i = elements[0]->mass(); // u
+  auto& R_SE = spontaneous_emission_rates;
   auto& T = temperature; // K
   auto& tau = optical_depth; // 1
   auto infty = c / (spectrum->min_wavelength() * nm_to_cm); // s^{-1}
 
   auto F_lambda = [&](double lambda /* nm */) { // W * m^{-2} * nm^{-1}
-    return spectrum->operator()(lambda);
+    return spectrum->spectral_irradiance(lambda);
   };
 
   Eigen::VectorXd E(K(S)); // eV

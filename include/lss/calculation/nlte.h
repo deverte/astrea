@@ -1,3 +1,10 @@
+/**
+ * \file lss/calculation/nlte.h
+ * NLTE electrons population calculation.
+ * 
+ * \copyright GPL
+ * \author Artem Shepelin (4.shepelin@gmail.com)
+ */
 #pragma once
 
 
@@ -13,9 +20,13 @@
 namespace lss {
 
 
-inline Eigen::MatrixXd nlte_transition_operator(
-  Eigen::MatrixXd rates_matrix // s^{-1}
-) {
+/**
+ * Calculates NLTE transition operator.
+ * 
+ * \param rates_matrix Rates matrix in \f$s^{-1}\f$.
+ * \return Transition operator in \f$1\f$.
+ */
+inline Eigen::MatrixXd nlte_transition_operator(Eigen::MatrixXd rates_matrix) {
   auto& R = rates_matrix; // s^{-1}
 
   Eigen::MatrixXd Q = Eigen::MatrixXd::Zero(R.rows(), R.cols()); // s^{-1}
@@ -46,14 +57,20 @@ inline Eigen::MatrixXd nlte_transition_operator(
 }
 
 
+/**
+ * Calculates NLTE electrons population.
+ * 
+ * \param population Previous electrons population in \f$1\f$.
+ * \param delta_time Time step in \f$s\f$.
+ * \param rates_matrix Rates matrix in \f$s^{-1}\f$.
+ * \return Electrons population in \f$1\f$.
+ */
 inline Eigen::VectorXd nlte_population(
-  Eigen::VectorXd population /* 1 */,
-  double delta_time /* s */,
-  Eigen::MatrixXd rates_matrix // s^{-1}
+  Eigen::VectorXd population,
+  double delta_time,
+  Eigen::MatrixXd rates_matrix
 ) {
-  auto Q_tot = nlte_transition_operator(
-    rates_matrix
-  ); // s^{-1}
+  auto Q_tot = nlte_transition_operator(rates_matrix); // s^{-1}
   auto& dt = delta_time; // s
   auto I = Eigen::MatrixXd::Identity(Q_tot.rows(), Q_tot.cols()); // 1
   auto& n_t = population; // 1

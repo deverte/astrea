@@ -1,3 +1,11 @@
+/**
+ * \file lss/data/transitions/cbb_mashonkina_o1.h
+ * Collisional bound-bound transition for electrically neutral oxygen using
+ * Mashonkina data.
+ * 
+ * \copyright GPL
+ * \author Artem Shepelin (4.shepelin@gmail.com)
+ */
 #pragma once
 
 
@@ -9,19 +17,40 @@ namespace lss {
 
 
 /**
- * Collisional excitation / de-excitation
+ * Collisional bound-bound transition for electrically neutral oxygen using
+ * Mashonkina data (from private communication).
  */
-class CBBMashonkinaO1Transition {
- public:
+struct CBBMashonkinaO1Transition {
+  /**
+   * Initial level.
+   */
   const std::string initial;
+  /**
+   * Final level.
+   */
   const std::string final;
-  const std::vector<double> collision_rate_coefficients; // cm^3 * s^{-1}
-  const std::vector<double> temperatures; // K
+  /**
+   * Collision rate coefficients in \f$cm^3 * s^{-1}\f$.
+   */
+  const std::vector<double> collision_rate_coefficients;
+  /**
+   * Temperatures in \f$K\f$.
+   */
+  const std::vector<double> temperatures;
 };
 
 
+/**
+ * Collisional bound-bound transitions for electrically neutral oxygen using
+ * Mashonkina data (from private communication).
+ */
 class CBBMashonkinaO1 {
  public:
+  /**
+   * Collisinal bound-bound transitions.
+   * 
+   * \return Collisinal bound-bound transitions.
+   */
   static const std::vector<CBBMashonkinaO1Transition>& transitions();
 
  private:

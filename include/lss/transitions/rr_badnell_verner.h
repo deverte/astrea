@@ -1,3 +1,11 @@
+/**
+ * \file lss/transitions/rr_badnell_verner.h
+ * Radiative recombination transitions rates using Verner formula and Badnell
+ * data.
+ * 
+ * \copyright GPL
+ * \author Artem Shepelin (4.shepelin@gmail.com)
+ */
 #pragma once
 
 
@@ -15,19 +23,18 @@ namespace lss {
 
 
 /**
- * Radiative recombination
+ * Radiative recombination transitions rates using Verner formula
+ * (doi-10.1086%2F192284) and Badnell data (doi-10.1086%2F508465).
  * 
- * A^{i+} + e^- \rightarrow A^{(i - 1)+}_* + h \nu
- * A^{(i - 1)+} \rightarrow A^{(i - 1)+} + h \nu_1 + h \nu_2 + h \nu_3...
- * 
- * formula: doi-10.1086%2F192284 (Verner 1995)
- * data: doi-10.1086%2F508465 (Badnell 2006)
- * inverse process: photoionization - dielectronic recombination
+ * \param elements Elements.
+ * \param temperature Temperature in \f$K\f$.
+ * \param electron_number_density Electron number density in \f$cm^{-3}\f$.
+ * \return Transitions rates in \f$s^{-1}\f$.
  */
 inline Eigen::MatrixXd rr_badnell_verner_rates(
   std::vector<std::shared_ptr<Element>> elements,
-  double temperature /* K */,
-  double electron_number_density /* cm^{-3} */
+  double temperature,
+  double electron_number_density
 ) {
   auto& N_e = electron_number_density; // cm^{-3}
   auto& T = temperature; // K

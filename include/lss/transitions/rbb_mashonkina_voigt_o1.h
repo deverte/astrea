@@ -1,3 +1,11 @@
+/**
+ * \file lss/transitions/rbb_mashonkina_voigt_o1.h
+ * Radiative bound-bound transitions rates using Voigt profile using
+ * Mashonkina data.
+ * 
+ * \copyright GPL
+ * \author Artem Shepelin (4.shepelin@gmail.com)
+ */
 #pragma once
 
 
@@ -17,10 +25,11 @@ namespace lss {
 
 
 /**
- * Radiative bound-bound transitions using Voigt profiles
+ * Radiative bound-bound transitions rates using Voigt profile using
+ * Mashonkina data (from private communication).
  * 
- * data: INASAN
- * inverse process: this
+ * \param elements Elements.
+ * \return Transitions rates in \f$s^{-1}\f$.
  */
 inline Eigen::MatrixXd
 rbb_mashonkina_voigt_o1_rates(std::vector<std::shared_ptr<Element>> elements) {

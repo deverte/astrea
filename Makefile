@@ -1,5 +1,5 @@
-project = "lss"
-version = 0.1.0
+export project = lss
+export version = 0.1.1
 
 
 .PHONY: build

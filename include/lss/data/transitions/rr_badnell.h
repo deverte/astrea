@@ -1,3 +1,10 @@
+/**
+ * \file lss/data/transitions/rr_badnell.h
+ * Radiative recombination fit using Badnell data.
+ * 
+ * \copyright GPL
+ * \author Artem Shepelin (4.shepelin@gmail.com)
+ */
 #pragma once
 
 
@@ -8,28 +15,58 @@ namespace lss {
 
 
 /**
- * Radiative recombination
- * 
- * data: doi-10.1086%2F508465 (Badnell 2006)
- * urls:
- *   - https://iopscience.iop.org/article/10.1086/508465/fulltext/
- *   - http://amdpp.phys.strath.ac.uk/tamoc/RR/ (NEW!!!)
+ * Radiative recombination fit using Badnell data (doi-10.1086%2F508465,
+ * https://iopscience.iop.org/article/10.1086/508465/fulltext/,
+ * http://amdpp.phys.strath.ac.uk/tamoc/RR/).
  */
-class RRBadnellFit {
- public:
-  const double Z; // Nuclear charge
-  const double N; // Number of ion electrons before recombination
-  const double A; // cm^3 * s^{-1} - Total RR rate coefficient "A"
-  const double B; // Total RR rate coefficient "B"
-  const double T0; // K - Total RR rate coefficient "T_0_"
-  const double T1; // K - Total RR rate coefficient "T_1_"
-  const double C = 0.0; // Total RR rate coefficient "C"
-  const double T2 = 0.0; // K - Total RR rate coefficient "T_2_"
+struct RRBadnellFit {
+  /**
+   * Nuclear charge in \f$1\f$.
+   */
+  const double Z;
+  /**
+   * Number of ion electrons before recombination in \f$1\f$.
+   */
+  const double N;
+  /**
+   * Total RR rate coefficient "A" in \f$cm^3 \cdot s^{-1}\f$.
+   */
+  const double A;
+  /**
+   * Total RR rate coefficient "B" in \f$1\f$.
+   */
+  const double B;
+  /**
+   * Total RR rate coefficient "T_0_" in \f$K\f$.
+   */
+  const double T0;
+  /**
+   * Total RR rate coefficient "T_1_" in \f$K\f$.
+   */
+  const double T1;
+  /**
+   * Total RR rate coefficient "C" in \f$1\f$.
+   */
+  const double C = 0.0;
+  /**
+   * Total RR rate coefficient "T_2_" in \f$K\f$.
+   */
+  const double T2 = 0.0;
 };
 
 
+/**
+ * Radiative recombination using Badnell data (doi-10.1086%2F508465,
+ * https://iopscience.iop.org/article/10.1086/508465/fulltext/,
+ * http://amdpp.phys.strath.ac.uk/tamoc/RR/).
+ */
 class RRBadnell {
  public:
+  /**
+   * Transitions fit.
+   * 
+   * \return Transitions fit.
+   */
   static const std::vector<RRBadnellFit>& fit();
 
  private:

@@ -1,3 +1,11 @@
+/**
+ * \file lss/transitions/cbb_mashonkina_o1.h
+ * Collisional bound-bound transitions rates for electrically neutral oxygen
+ * using Mashonkina data.
+ * 
+ * \copyright GPL
+ * \author Artem Shepelin (4.shepelin@gmail.com)
+ */
 #pragma once
 
 
@@ -16,15 +24,18 @@ namespace lss {
 
 
 /**
- * Collisional excitation / de-excitation
+ * Collisional bound-bound transitions rates for electrically neutral oxygen
+ * using Mashonkina data (from private communication).
  * 
- * data: INASAN
- * inverse process: this
+ * \param elements Elements.
+ * \param temperature Temperature in \f$K\f$.
+ * \param electron_number_density Electron number density in \f$cm^{-3}\f$.
+ * \return Transitions rates in \f$s^{-1}\f$.
  */
 inline Eigen::MatrixXd cbb_mashonkina_o1_rates(
   std::vector<std::shared_ptr<Element>> elements,
-  double temperature /* K */,
-  double electron_number_density /* cm^{-3} */
+  double temperature,
+  double electron_number_density
 ) {
   auto& N_e = electron_number_density; // cm^{-3}
   auto& T = temperature; // K

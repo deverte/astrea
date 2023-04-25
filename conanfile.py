@@ -1,10 +1,16 @@
+import os
+
 from conan import ConanFile
 from conan.tools.files import copy
 
 
+version = os.environ['version']
+project = os.environ['project']
+
+
 class Lss(ConanFile):
-    name = "lss"
-    version = "0.1.0"
+    name = project
+    version = version
     exports_sources = "include/*"
     no_copy_source = True
 

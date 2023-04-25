@@ -1,3 +1,10 @@
+/**
+ * \file lss/data/elements/element.h
+ * Element base class.
+ * 
+ * \copyright GPL
+ * \author Artem Shepelin (4.shepelin@gmail.com)
+ */
 #pragma once
 
 
@@ -8,38 +15,103 @@
 namespace lss {
 
 
-class Level {
- public:
+/**
+ * Element's level.
+ */
+struct Level {
+  /**
+   * Level term.
+   */
   const std::string term;
+  /**
+   * Limit term.
+   */
   const std::string limit_term;
+  /**
+   * Ground state term.
+   */
   const std::string ground_state_term;
-  const double principal_quantum_number; // one
-  const double statistical_weight; // one
-  const double energy; // eV
-  const double ionization_energy; // eV
-  const double ionization_stage; // 1
+  /**
+   * Principal quantum number in \f$1\f$.
+   */
+  const double principal_quantum_number;
+  /**
+   * Statistical weight in \f$1\f$.
+   */
+  const double statistical_weight;
+  /**
+   * Level energy in \f$eV\f$.
+   */
+  const double energy;
+  /**
+   * Level ionization energy in \f$eV\f$.
+   */
+  const double ionization_energy;
 };
 
 
+/**
+ * Element base class.
+ */
 class Element {
  public:
   virtual ~Element() = default;
 
+  /**
+   * All element's levels terms (keys).
+   * 
+   * \return Terms (keys).
+   */
   virtual const std::vector<std::string> all_keys();
 
+  /**
+   * All element's levels.
+   * 
+   * \return Levels.
+   */
   virtual const std::vector<Level>& all_levels() = 0;
 
+  /**
+   * Atomic number.
+   * 
+   * \return Atomic number in \f$1\f$.
+   */
   virtual const double atomic_number() = 0;
 
+  /**
+   * Ionization stage.
+   * 
+   * \return Ionization stage in \f$1\f$.
+   */
   virtual const double ionization_stage() = 0;
 
-  virtual const double mass() = 0;
-
+  /**
+   * Element's levels terms (keys) selection for calculation.
+   * 
+   * \return Terms (keys).
+   */
   std::vector<std::string> keys();
 
+  /**
+   * Element's levels terms (keys) selection for calculation.
+   * 
+   * \param value Terms (keys).
+   */
   void keys(std::vector<std::string> value);
 
+  /**
+   * Element's levels selection for calculation.
+   * 
+   * \return Levels.
+   */
   std::vector<Level> levels();
+
+  /**
+   * Mass.
+   * 
+   * \return Mass in \f$u\f$ (\f$Da\f$).
+   */
+  virtual const double mass() = 0;
 
  private:
   std::vector<std::string> keys_;

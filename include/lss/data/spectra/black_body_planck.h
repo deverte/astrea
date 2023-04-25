@@ -1,3 +1,10 @@
+/**
+ * \file lss/data/spectra/black_body_planck.h
+ * Black body spectrum calculated using Planck's law.
+ * 
+ * \copyright GPL
+ * \author Artem Shepelin (4.shepelin@gmail.com)
+ */
 #pragma once
 
 
@@ -11,37 +18,85 @@
 namespace lss {
 
 
+/**
+ * Black body spectrum calculated using Planck's law.
+ */
 class BlackBodyPlanck : public Spectrum {
  public:
-  double operator()(double wavelength) override;
-
-  double temperature();
-
-  void temperature(double value);
-
-  double total_area();
-
-  void total_area(double value);
-
+  /**
+   * Maximal wavelength of the spectrum.
+   * 
+   * \return Wavelength in \f$nm\f$.
+   */
   double max_wavelength() override;
 
+  /**
+   * Minimal wavelength of the spectrum.
+   * 
+   * \return Wavelength in \f$nm\f$.
+   */
   double min_wavelength() override;
 
+  /**
+   * Spectral irradiance.
+   * 
+   * \param wavelength Wavelength in \f$nm\f$.
+   * \return Spectral irradiance in \f$W \cdot m^{-2} \cdot nm^{-1}\f$.
+   */
+  double spectral_irradiance(double wavelength) override;
+
+  /**
+   * Black body temperature.
+   * 
+   * \return Temperature in \f$K\f$.
+   */
+  double temperature();
+
+  /**
+   * Black body temperature.
+   * 
+   * \param value Temperature in \f$K\f$.
+   */
+  void temperature(double value);
+
+  /**
+   * Spectral irradiance total area.
+   * 
+   * \return Spectral irradiance area in \f$W \cdot m^{-2}\f$.
+   */
+  double total_area();
+
+  /**
+   * Spectral irradiance total area.
+   * 
+   * \param value Spectral irradiance area in \f$W \cdot m^{-2}\f$.
+   */
+  void total_area(double value);
+
  private:
-  double max_wavelength_ = 1.0e5; // nm
+  double max_wavelength_ = 1.0e5;
 
-  double min_wavelength_ = 1.0e-1; // nm
+  double min_wavelength_ = 1.0e-1;
 
-  double temperature_ = 0.0; // K
+  double temperature_ = 0.0;
 
-  double total_area_ = 1.0; // W * m^{-2}
+  double total_area_ = 1.0;
 
-  double total_area_temperature_ = 1.0; // W * m^{-2}
+  double total_area_temperature_ = 1.0;
 };
 
 
-inline double /* W * m^{-2} * nm^{-1} */
-BlackBodyPlanck::operator()(double wavelength /* nm */) {
+inline double BlackBodyPlanck::max_wavelength() {
+  return max_wavelength_;
+}
+
+
+inline double BlackBodyPlanck::min_wavelength() {
+  return min_wavelength_;
+}
+
+
+inline double BlackBodyPlanck::spectral_irradiance(double wavelength) {
   auto& c = SPEED_OF_LIGHT; // cm * s^{-1}
   auto& h = PLANCK_CONSTANT; // eV * s
   auto& k_B = BOLTZMANN_CONSTANT; // eV * K^{-1}
@@ -80,7 +135,7 @@ inline double BlackBodyPlanck::temperature() {
 }
 
 
-inline void BlackBodyPlanck::temperature(double value /* K */) {
+inline void BlackBodyPlanck::temperature(double value) {
   temperature_ = value;
 
   auto sigma = 5.67040040e-8; // W * m^{-2} * K^{-4}
@@ -97,18 +152,8 @@ inline double BlackBodyPlanck::total_area() {
 }
 
 
-inline void BlackBodyPlanck::total_area(double value /* W * m^{-2} */) {
+inline void BlackBodyPlanck::total_area(double value) {
   total_area_ = value;
-}
-
-
-inline double BlackBodyPlanck::max_wavelength() {
-  return max_wavelength_;
-}
-
-
-inline double BlackBodyPlanck::min_wavelength() {
-  return min_wavelength_;
 }
 
 

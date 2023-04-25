@@ -1,3 +1,10 @@
+/**
+ * \file lss/data/elements/o1_mashonkina.h
+ * Oxygen (electrically neutral) atom using Mashonkina data.
+ * 
+ * \copyright GPL
+ * \author Artem Shepelin (4.shepelin@gmail.com)
+ */
 #pragma once
 
 
@@ -11,28 +18,47 @@ namespace lss {
 
 
 /**
- * Oxygen (electrically neutral)
- * 
- * data: INASAN
+ * Oxygen (electrically neutral) atom using Mashonkina data (from private
+ * communication).
  */
 class O1Mashonkina : public Element {
  public:
+  /**
+   * All element's levels terms (keys).
+   * 
+   * \return Terms (keys).
+   */
   const std::vector<Level>& all_levels() override;
 
+  /**
+   * Atomic number.
+   * 
+   * \return Atomic number in \f$1\f$.
+   */
   const double atomic_number() override;
 
+  /**
+   * Ionization stage.
+   * 
+   * \return Ionization stage in \f$1\f$.
+   */
   const double ionization_stage() override;
 
+  /**
+   * Mass.
+   * 
+   * \return Mass in \f$u\f$ (\f$Da\f$).
+   */
   const double mass() override;
 
  private:
   static const std::vector<Level> all_levels_;
 
-  const double atomic_number_ = 8.0; // 1
+  const double atomic_number_ = 8.0;
 
-  const double ionization_stage_ = 0.0; // 1
+  const double ionization_stage_ = 0.0;
 
-  const double mass_ = 16.0; // u
+  const double mass_ = 16.0;
 };
 
 

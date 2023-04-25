@@ -1,3 +1,11 @@
+/**
+ * \file lss/data/transitions/rbb_mashonkina_voigt_o1.h
+ * Radiative bound-bound transition for electrically neutral oxygen using
+ * Voigt profile using Mashonkina data.
+ * 
+ * \copyright GPL
+ * \author Artem Shepelin (4.shepelin@gmail.com)
+ */
 #pragma once
 
 
@@ -9,23 +17,48 @@ namespace lss {
 
 
 /**
- * Radiative bound-bound transition using Voigt profile
- * 
- * data: INASAN
+ * Radiative bound-bound transition for electrically neutral oxygen using
+ * Voigt profile using Mashonkina data (from private communication).
  */
-class RBBMashonkinaVoigtO1Transition {
- public:
+struct RBBMashonkinaVoigtO1Transition {
+  /**
+   * Initial level.
+   */
   const std::string initial;
+  /**
+   * Final level.
+   */
   const std::string final;
-  const double oscillator_strength; // one
-  const double van_der_waals_constant; // ?
-  const double quadratic_stark_constant; // ?
-  const double radiative_damping_constant; // ?
+  /**
+   * Oscillator strength in \f$1\f$.
+   */
+  const double oscillator_strength;
+  /**
+   * Van-der-Waals constant in \f$1\f$.
+   */
+  const double van_der_waals_constant;
+  /**
+   * Quadratic Stark constant in \f$1\f$.
+   */
+  const double quadratic_stark_constant;
+  /**
+   * Radiative dumping constant in \f$1\f$.
+   */
+  const double radiative_damping_constant;
 };
 
 
+/**
+ * Radiative bound-bound transitions for electrically neutral oxygen using
+ * Voigt profile using Mashonkina data (from private communication).
+ */
 class RBBMashonkinaVoigtO1 {
  public:
+  /**
+   * Radiative bound-bound transitions using Voigt profile.
+   * 
+   * \return Radiative bound-bound transitions.
+   */
   static const std::vector<RBBMashonkinaVoigtO1Transition>& transitions();
 
  private:

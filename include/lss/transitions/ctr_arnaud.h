@@ -1,3 +1,11 @@
+/**
+ * \file lss/transitions/ctr_arnaud.h
+ * Charge transfer recombination transitions rates using Arnaud formula and
+ * data.
+ * 
+ * \copyright GPL
+ * \author Artem Shepelin (4.shepelin@gmail.com)
+ */
 #pragma once
 
 
@@ -16,17 +24,20 @@ namespace lss {
 
 
 /**
- * Charge transfer recombination
+ * Charge transfer recombination transitions rates using Arnaud formula and data
+ * (bibcode-1985A&AS...60..425A).
  * 
- * formula: bibcode-1985A&AS...60..425A (Arnaud 1985)
- * data: bibcode-1985A&AS...60..425A (Arnaud 1985)
- * inverse process: charge transfer ionization
+ * \param elements Elements.
+ * \param ionizing_element Ionizing element.
+ * \param temperature Temperature in \f$K\f$.
+ * \param electron_number_density Electron number density in \f$cm^{-3}\f$.
+ * \return Transitions rates in \f$s^{-1}\f$.
  */
 inline Eigen::MatrixXd ctr_arnaud_rates(
   std::vector<std::shared_ptr<Element>> elements,
   std::shared_ptr<Element> ionizing_element,
-  double temperature /* K */,
-  double electron_number_density /* cm^{-3} */
+  double temperature,
+  double electron_number_density
 ) {
   auto& N_e = electron_number_density; // cm^{-3}
   auto s_B = ionizing_element->ionization_stage(); // 1

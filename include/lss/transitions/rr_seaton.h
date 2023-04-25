@@ -1,3 +1,10 @@
+/**
+ * \file lss/transitions/rr_seaton.h
+ * Radiative recombination transitions rates using Seaton formula.
+ * 
+ * \copyright GPL
+ * \author Artem Shepelin (4.shepelin@gmail.com)
+ */
 #pragma once
 
 
@@ -16,15 +23,18 @@ namespace lss {
 
 
 /**
- * Radiative recombination
+ * Radiative recombination transitions rates using Seaton formula
+ * (doi-10.1093%2Fmnras%2F119.2.81).
  * 
- * formula: doi-10.1093%2Fmnras%2F119.2.81 (Seaton 1959)
- * inverse process: photoionization - dielectronic recombination
+ * \param elements Elements.
+ * \param electron_temperature Electron temperature in \f$K\f$.
+ * \param electron_number_density Electron number density in \f$cm^{-3}\f$.
+ * \return Transitions rates in \f$s^{-1}\f$.
  */
 Eigen::MatrixXd rr_seaton_rates(
   std::vector<std::shared_ptr<Element>> elements,
-  double electron_temperature /* K */,
-  double electron_number_density /* cm^{-3} */
+  double electron_temperature,
+  double electron_number_density
 ) {
   auto& k_B = BOLTZMANN_CONSTANT; // eV * K^{-1}
 

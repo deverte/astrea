@@ -1,3 +1,10 @@
+/**
+ * \file lss/transitions/dr_badnell.h
+ * Dielectronic recombination transitions rates using Badnell formula and data.
+ * 
+ * \copyright GPL
+ * \author Artem Shepelin (4.shepelin@gmail.com)
+ */
 #pragma once
 
 
@@ -16,22 +23,18 @@ namespace lss {
 
 
 /**
- * Dielectronic recombination
+ * Dielectronic recombination transitions rates using Badnell formula and data
+ * (doi-10.1086%2F508465).
  * 
- * A^{i+}(1s, ...) + e^- \rightarrow A^{(i - 1)+}_*(n_1 l_1; n_2 l_2)
- * A^{(i - 1)+}(n_1 l_1; n_2 l_2) \rightarrow
- *   A^{(i - 1)+}_*(n_3 l_3; n_2 l_2) + h \nu
- * A^{(i - 1)+}_*(n_3 l_3; n_2 l_2) \rightarrow
- *   A^{(i - 1)+}(n_3 l_3; n_4 l_4) + h \nu_1 + h \nu_2...
- * 
- * formula: doi-10.1086%2F508465 (Badnell 2006)
- * data: doi-10.1086%2F508465 (Badnell 2006)
- * inverse process: photoionization - radiative recombination
+ * \param elements Elements.
+ * \param temperature Temperature in \f$K\f$.
+ * \param electron_number_density Electron number density in \f$cm^{-3}\f$.
+ * \return Transitions rates in \f$s^{-1}\f$.
  */
 inline Eigen::MatrixXd dr_badnell_rates(
   std::vector<std::shared_ptr<Element>> elements,
-  double temperature /* K */,
-  double electron_number_density /* cm^{-3} */
+  double temperature,
+  double electron_number_density
 ) {
   auto& N_e = electron_number_density; // cm^{-3}
   auto& T = temperature; // K

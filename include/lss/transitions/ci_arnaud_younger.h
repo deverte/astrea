@@ -1,3 +1,11 @@
+/**
+ * \file lss/transitions/ci_arnaud_younger.h
+ * Collisional ionization transitions rates using Younger formula and Arnaud
+ * data.
+ * 
+ * \copyright GPL
+ * \author Artem Shepelin (4.shepelin@gmail.com)
+ */
 #pragma once
 
 
@@ -19,19 +27,19 @@ namespace lss {
 
 
 /**
- * Collisional ionization
+ * Collisional ionization transitions rates using Younger formula
+ * (doi-10.1016%2F0022-4073(81)90127-8) and Arnaud data
+ * (bibcode-1985A&AS...60..425A).
  * 
- * A^{i+} + e^- \rightarrow A^{(i + 1)+} + 2 e^- - \Delta E_{A^{i+}}
- * 
- * formula: doi-10.1016%2F0022-4073(81)90127-8 (Younger 1981)
- * data: bibcode-1985A&AS...60..425A (Arnaud 1985)
- * inverse process: three-body-recombination
- * A^{(i + 1)+} + 2 e^- \rightarrow A^{i+} + e^-
+ * \param elements Elements.
+ * \param electron_temperature Electron temperature in \f$K\f$.
+ * \param electron_number_density Electron number density in \f$cm^{-3}\f$.
+ * \return Transitions rates in \f$s^{-1}\f$.
  */
 Eigen::MatrixXd ci_arnaud_younger_rates(
   std::vector<std::shared_ptr<Element>> elements,
-  double electron_temperature /* K */,
-  double electron_number_density /* cm^{-3} */
+  double electron_temperature,
+  double electron_number_density
 ) {
   auto infty = std::numeric_limits<double>::infinity();
   auto& k_B = BOLTZMANN_CONSTANT; // eV * K^{-1}
