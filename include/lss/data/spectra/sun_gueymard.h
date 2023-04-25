@@ -9,6 +9,7 @@
 
 
 #include <algorithm>
+#include <cmath>
 #include <memory>
 #include <vector>
 
@@ -35,6 +36,20 @@ class SunGueymard : public Spectrum {
   virtual ~SunGueymard();
 
   /**
+   * Distance to radiation source.
+   * 
+   * \return Distance in \f$au\f$.
+   */
+  double distance();
+
+  /**
+   * Distance to radiation source.
+   * 
+   * \param distance Distance in \f$au\f$.
+   */
+  void distance(double value) override;
+
+  /**
    * Maximal wavelength of the spectrum.
    * 
    * \return Wavelength in \f$nm\f$.
@@ -57,6 +72,8 @@ class SunGueymard : public Spectrum {
   double spectral_irradiance(double wavelength) override;
 
  private:
+  double distance_ = 1.0;
+
   std::shared_ptr<boost::math::interpolators::barycentric_rational<double>>
   interpolant_;
 
@@ -64,6 +81,9 @@ class SunGueymard : public Spectrum {
 
   double min_wavelength_ = 0.0;
 
+  /**
+   * Spectral irradiance in \f$W \cdot m^{-2} \cdot nm^{-1} \cdot au^2\f$.
+   */
   static std::vector<double> spectral_irradiance_;
 
   static std::vector<double> wavelengths_;
@@ -84,8 +104,18 @@ inline SunGueymard::SunGueymard() {
 
 
 inline SunGueymard::~SunGueymard() {
-  wavelengths_ = interpolant_->return_x();
   spectral_irradiance_ = interpolant_->return_y();
+  wavelengths_ = interpolant_->return_x();
+}
+
+
+inline double SunGueymard::distance() {
+  return distance_;
+}
+
+
+inline void SunGueymard::distance(double value) {
+  distance_ = value;
 }
 
 
@@ -100,7 +130,12 @@ inline double SunGueymard::min_wavelength() {
 
 
 inline double SunGueymard::spectral_irradiance(double wavelength) {
-  return interpolant_->operator()(wavelength);
+  auto E_e_lambda = interpolant_->operator()(wavelength);//W*m^{-2}*nm^{-1}*au^2
+  auto D = distance_; // au
+
+  auto E = E_e_lambda / std::pow(D, 2.0); // W * m^{-2} * nm^{-1}
+
+  return E;
 }
 
 

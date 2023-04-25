@@ -9,6 +9,7 @@
 
 
 #include <algorithm>
+#include <cmath>
 #include <memory>
 #include <vector>
 
@@ -33,6 +34,20 @@ class Kelt9Fossati : public Spectrum {
   virtual ~Kelt9Fossati();
 
   /**
+   * Distance to radiation source.
+   * 
+   * \return Distance in \f$au\f$.
+   */
+  double distance();
+
+  /**
+   * Distance to radiation source.
+   * 
+   * \param distance Distance in \f$au\f$.
+   */
+  void distance(double value) override;
+
+  /**
    * Maximal wavelength of the spectrum.
    * 
    * \return Wavelength in \f$nm\f$.
@@ -55,6 +70,8 @@ class Kelt9Fossati : public Spectrum {
   double spectral_irradiance(double wavelength) override;
 
  private:
+  double distance_ = 42181800.36;
+
   std::shared_ptr<boost::math::interpolators::barycentric_rational<double>>
   interpolant_;
 
@@ -62,6 +79,10 @@ class Kelt9Fossati : public Spectrum {
 
   double min_wavelength_ = 0.0;
 
+  /**
+   * Spectral irradiance in
+   * \f$erg \cdot s^{-1} \cdot cm^{-2} \cdot A^{-1} \cdot au^2\f$.
+   */
   static std::vector<double> spectral_irradiance_;
 
   static std::vector<double> wavelengths_;
@@ -73,15 +94,27 @@ inline Kelt9Fossati::Kelt9Fossati() {
   min_wavelength_ = *std::min_element(wavelengths_.begin(), wavelengths_.end());
   interpolant_ =
     std::make_shared<boost::math::interpolators::barycentric_rational<double>>(
-      std::move(wavelengths_), std::move(spectral_irradiance_)
+      std::move(wavelengths_),
+      std::move(spectral_irradiance_),
+      1
     )
   ;
 }
 
 
 inline Kelt9Fossati::~Kelt9Fossati() {
-  wavelengths_ = interpolant_->return_x();
   spectral_irradiance_ = interpolant_->return_y();
+  wavelengths_ = interpolant_->return_x();
+}
+
+
+inline double Kelt9Fossati::distance() {
+  return distance_;
+}
+
+
+inline void Kelt9Fossati::distance(double value) {
+  distance_ = value;
 }
 
 
@@ -96,7 +129,21 @@ inline double Kelt9Fossati::min_wavelength() {
 
 
 inline double Kelt9Fossati::spectral_irradiance(double wavelength) {
-  return interpolant_->operator()(wavelength);
+  auto A_to_nm = 0.1;
+  auto cm_to_m = 0.01;
+  auto erg_to_J = 1.0e-7;
+
+  auto E_e_lambda = // W * m^{-2} * nm^{-1} * au^2
+    + interpolant_->operator()(wavelength)//erg*s^{-1} * cm^{-2} * A^{-1} * au^2
+    * erg_to_J
+    / std::pow(cm_to_m, 2.0)
+    / A_to_nm
+  ;
+  auto D = distance_; // au
+
+  auto E = E_e_lambda / std::pow(D, 2.0); // W * m^{-2} * nm^{-1}
+
+  return E;
 }
 
 

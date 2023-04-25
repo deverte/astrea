@@ -17,6 +17,20 @@ namespace lss {
 class Spectrum {
  public:
   /**
+   * Distance to radiation source.
+   * 
+   * \return Distance in \f$au\f$.
+   */
+  virtual double distance() = 0;
+
+  /**
+   * Distance to radiation source.
+   * 
+   * \param distance Distance in \f$au\f$.
+   */
+  virtual void distance(double value) = 0;
+
+  /**
    * Maximal wavelength of the spectrum.
    * 
    * \return Wavelength in \f$nm\f$.
