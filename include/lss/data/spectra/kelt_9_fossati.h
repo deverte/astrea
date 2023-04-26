@@ -10,10 +10,12 @@
 
 #include <algorithm>
 #include <cmath>
+#include <functional>
 #include <memory>
 #include <vector>
 
-#include <boost/math/interpolators/barycentric_rational.hpp>
+// #include <boost/math/interpolators/barycentric_rational.hpp>
+#include <libInterpolate/Interpolate.hpp>
 
 #include "./spectrum.h"
 
@@ -31,7 +33,7 @@ class Kelt9Fossati : public Spectrum {
    */
   Kelt9Fossati();
 
-  virtual ~Kelt9Fossati();
+  // virtual ~Kelt9Fossati();
 
   /**
    * Distance to radiation source.
@@ -70,10 +72,14 @@ class Kelt9Fossati : public Spectrum {
   double spectral_irradiance(double wavelength) override;
 
  private:
-  double distance_ = 42181800.36;
+  double distance_ = 0.03; // to Kelt-9 b
+  // double distance_ = 42181800.36; // to Earth
 
-  std::shared_ptr<boost::math::interpolators::barycentric_rational<double>>
-  interpolant_;
+  // std::shared_ptr<boost::math::interpolators::barycentric_rational<double>>
+  // interpolant_;
+  std::function<double(double)> interpolant_ =
+    _1D::LinearInterpolator<double>()
+  ;
 
   double max_wavelength_ = 0.0;
 
@@ -92,20 +98,22 @@ class Kelt9Fossati : public Spectrum {
 inline Kelt9Fossati::Kelt9Fossati() {
   max_wavelength_ = *std::max_element(wavelengths_.begin(), wavelengths_.end());
   min_wavelength_ = *std::min_element(wavelengths_.begin(), wavelengths_.end());
-  interpolant_ =
-    std::make_shared<boost::math::interpolators::barycentric_rational<double>>(
-      std::move(wavelengths_),
-      std::move(spectral_irradiance_),
-      1
-    )
-  ;
+  // interpolant_ =
+  //   std::make_shared<boost::math::interpolators::barycentric_rational<double>>(
+  //     std::move(wavelengths_),
+  //     std::move(spectral_irradiance_),
+  //     1
+  //   )
+  // ;
+  interpolant_.target<_1D::LinearInterpolator<double>>()
+    ->setData(wavelengths_, spectral_irradiance_);
 }
 
 
-inline Kelt9Fossati::~Kelt9Fossati() {
-  spectral_irradiance_ = interpolant_->return_y();
-  wavelengths_ = interpolant_->return_x();
-}
+// inline Kelt9Fossati::~Kelt9Fossati() {
+//   spectral_irradiance_ = interpolant_->return_y();
+//   wavelengths_ = interpolant_->return_x();
+// }
 
 
 inline double Kelt9Fossati::distance() {
@@ -134,7 +142,8 @@ inline double Kelt9Fossati::spectral_irradiance(double wavelength) {
   auto erg_to_J = 1.0e-7;
 
   auto E_e_lambda = // W * m^{-2} * nm^{-1} * au^2
-    + interpolant_->operator()(wavelength)//erg*s^{-1} * cm^{-2} * A^{-1} * au^2
+    // + interpolant_->operator()(wavelength)//erg*s^{-1} * cm^{-2} * A^{-1} * au^2
+    + interpolant_(wavelength)//erg*s^{-1} * cm^{-2} * A^{-1} * au^2
     * erg_to_J
     / std::pow(cm_to_m, 2.0)
     / A_to_nm

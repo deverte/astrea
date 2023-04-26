@@ -12,7 +12,6 @@
 #include <memory>
 #include <vector>
 
-#include <boost/math/interpolators/barycentric_rational.hpp>
 #include <Eigen/Dense>
 #include <fm/fm.h>
 
@@ -37,6 +36,8 @@ inline Eigen::MatrixXd cbb_mashonkina_o1_rates(
   double temperature,
   double electron_number_density
 ) {
+  auto cbb_mashonkina_o1 = CBBMashonkinaO1();
+
   auto& N_e = electron_number_density; // cm^{-3}
   auto& T = temperature; // K
 
@@ -58,23 +59,15 @@ inline Eigen::MatrixXd cbb_mashonkina_o1_rates(
       for (int j = 0; j <= L(s) - 1; j++) {
         auto final = elements[s]->levels()[j];
 
-        for (auto transition : CBBMashonkinaO1::transitions()) {
-          if (
-            transition.initial == initial.term &&
-            transition.final == final.term
-          ) {
-            auto vec_T = transition.temperatures;
-            auto vec_q = transition.collision_rate_coefficients;
+        auto C_CE_CD_ij = [&](double temperature) {
+          return cbb_mashonkina_o1.collision_rate_coefficient(
+            initial.term,
+            final.term,
+            temperature
+          );
+        };
 
-            boost::math::interpolators::barycentric_rational<double>
-            C_CE_CD_ij(std::move(vec_T), std::move(vec_q)); // cm^3 * s^{-1}
-
-            C_CE_CD(i + K(s), j + K(s)) = C_CE_CD_ij(T);
-
-            vec_T = C_CE_CD_ij.return_x();
-            vec_q = C_CE_CD_ij.return_y();
-          }
-        }
+        C_CE_CD(i + K(s), j + K(s)) = C_CE_CD_ij(T);
       }
     }
   }

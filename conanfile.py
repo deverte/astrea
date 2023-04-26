@@ -15,8 +15,9 @@ class Lss(ConanFile):
     no_copy_source = True
 
     def requirements(self):
-        self.requires("boost/1.81.0")
-        self.requires("eigen/3.4.0")
+        self.requires("boost/1.81.0", override=True)
+        self.requires("eigen/3.4.0", override=True)
+        self.requires("libinterpolate/2.6.2")
 
     def package(self):
         copy(self, "*.h", self.source_folder, self.package_folder)
