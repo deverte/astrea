@@ -33,6 +33,8 @@ namespace lss {
  */
 inline Eigen::MatrixXd
 rbb_mashonkina_voigt_o1_rates(std::vector<std::shared_ptr<Element>> elements) {
+  auto rbb_mashonkina_voigt = RBBMashonkinaVoigtO1();
+
   auto& c = SPEED_OF_LIGHT; // cm * s^{-1}
   auto& hbar = REDUCED_PLANCK_CONSTANT; // eV * s
 
@@ -62,15 +64,13 @@ rbb_mashonkina_voigt_o1_rates(std::vector<std::shared_ptr<Element>> elements) {
       for (int j = 0; j < L(s); j++) {
         auto final = elements[s]->levels()[j];
 
-        for (auto transition : RBBMashonkinaVoigtO1::transitions()) {
+        for (auto transition : rbb_mashonkina_voigt.transitions()) {
           if (
             transition.initial == initial.term &&
             transition.final == final.term
           ) {
             auto& f_ij = transition.oscillator_strength; // 1
 
-            // 0.66702 Constant from
-            // https://www.nist.gov/pml/atomic-spectroscopy-compendium-basic-ideas-notation-data-and-formulas/atomic-spectroscopy
             R_PE(i + K(s), j + K(s)) =
               + 0.66702
               / std::pow(

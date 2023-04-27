@@ -1,0 +1,11 @@
+#if 0
+# atomic_number in 1
+# mass in u
+# ionization_stage in 1
+#endif
+{
+  atomic_number: 2.0,
+  mass: 4.0,
+  ionization_stage: 1.0,
+  all_levels: {},
+}

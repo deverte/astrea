@@ -39,6 +39,8 @@ inline Eigen::MatrixXd ctr_arnaud_rates(
   double temperature,
   double electron_number_density
 ) {
+  auto ctr_arnaud = CTRArnaud();
+
   auto& N_e = electron_number_density; // cm^{-3}
   auto s_B = ionizing_element->ionization_stage(); // 1
   auto& T = temperature; // K
@@ -64,7 +66,7 @@ inline Eigen::MatrixXd ctr_arnaud_rates(
     auto d = 0.0; // 1
     auto T_max = 0.0; // K
     auto T_min = 0.0; // K
-    for (auto fit : CTRArnaud::fit()) {
+    for (auto fit : ctr_arnaud.fit()) {
       if (
         fit.atomic_number == Z_A &&
         fit.ionization_stage == s &&

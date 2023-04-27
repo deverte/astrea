@@ -34,6 +34,8 @@ namespace lss {
 inline Eigen::MatrixXd rbb_mashonkina_doppler_o1_rates(
   std::vector<std::shared_ptr<Element>> elements
 ) {
+  auto rbb_mashonkina_doppler_o1 = RBBMashonkinaDopplerO1();
+
   auto& c = SPEED_OF_LIGHT; // cm * s^{-1}
   auto& hbar = REDUCED_PLANCK_CONSTANT; // eV * s
 
@@ -63,7 +65,7 @@ inline Eigen::MatrixXd rbb_mashonkina_doppler_o1_rates(
       for (int j = 0; j <= L(s) - 1; j++) {
         auto final = elements[s]->levels()[j];
 
-        for (auto transition : RBBMashonkinaDopplerO1::transitions()) {
+        for (auto transition : rbb_mashonkina_doppler_o1.transitions()) {
           if (
             transition.initial == initial.term &&
             transition.final == final.term

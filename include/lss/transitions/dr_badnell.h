@@ -36,6 +36,8 @@ inline Eigen::MatrixXd dr_badnell_rates(
   double temperature,
   double electron_number_density
 ) {
+  auto dr_badnell = DRBadnell();
+
   auto& N_e = electron_number_density; // cm^{-3}
   auto& T = temperature; // K
   auto Z = elements[0]->atomic_number(); // 1
@@ -53,7 +55,7 @@ inline Eigen::MatrixXd dr_badnell_rates(
   for (int s = 0; s <= S - 2; s++) {
     std::vector<double> C; // cm^3 * s^{-1} * K^{3/2}
     std::vector<double> E; // K
-    for (auto fit : DRBadnell::fit()) {
+    for (auto fit : dr_badnell.fit()) {
       if (fit.Z == Z && fit.N == Z - s - 1.0) {
         C = fit.C;
         E = fit.E;

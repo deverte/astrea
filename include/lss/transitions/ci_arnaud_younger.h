@@ -41,6 +41,8 @@ Eigen::MatrixXd ci_arnaud_younger_rates(
   double electron_temperature,
   double electron_number_density
 ) {
+  auto ci_arnaud = CIArnaud();
+
   auto infty = std::numeric_limits<double>::infinity();
   auto& k_B = BOLTZMANN_CONSTANT; // eV * K^{-1}
   auto& pi = PI;
@@ -88,8 +90,8 @@ Eigen::MatrixXd ci_arnaud_younger_rates(
 
   Eigen::MatrixXd C_CI = Eigen::MatrixXd::Zero(K(S), K(S)); // cm^3 * s^{-1}
   for (int s = 0; s <= S - 2; s++) {
-    std::vector<CIArnaudFit> subshells;
-    for (auto fit : CIArnaud::fit()) {
+    std::vector<ICIArnaudFit> subshells;
+    for (auto fit : ci_arnaud.fit()) {
       if (fit.Z == Z && fit.N == Z - s) {
         subshells.push_back(fit);
       }

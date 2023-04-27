@@ -29,7 +29,6 @@
 #include "./transitions/ctr_arnaud.h"
 #include "./transitions/dr_badnell.h"
 #include "./transitions/pi_mashonkina_o1.h"
-#include "./transitions/pi_tasitsiomi.h"
 #include "./transitions/rbb_mashonkina_doppler_o1.h"
 #include "./transitions/rbb_mashonkina_voigt_o1.h"
 #include "./transitions/rbb_tasitsiomi.h"

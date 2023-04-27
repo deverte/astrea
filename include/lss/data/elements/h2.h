@@ -8,9 +8,6 @@
 #pragma once
 
 
-#include <string>
-#include <vector>
-
 #include "./element.h"
 
 
@@ -22,66 +19,18 @@ namespace lss {
  */
 class H2 : public Element {
  public:
-  /**
-   * All element's levels terms (keys).
-   * 
-   * \return Terms (keys).
-   */
-  const std::vector<Level>& all_levels() override;
-
-  /**
-   * Atomic number.
-   * 
-   * \return Atomic number in \f$1\f$.
-   */
-  const double atomic_number() override;
-
-  /**
-   * Ionization stage.
-   * 
-   * \return Ionization stage in \f$1\f$.
-   */
-  const double ionization_stage() override;
-
-  /**
-   * Mass.
-   * 
-   * \return Mass in \f$u\f$ (\f$Da\f$).
-   */
-  const double mass() override;
+  const IElement& resource() override;
 
  private:
-  static const std::vector<Level> all_levels_;
-
-  const double atomic_number_ = 1.0;
-
-  const double ionization_stage_ = 1.0;
-
-  const double mass_ = 1.0;
+  IElement resource_ =
+    #include "../../resources/elements/h2.yaml"
+  ;
 };
 
 
-inline const std::vector<Level>& H2::all_levels() {
-  return all_levels_;
+const IElement& H2::resource() {
+  return resource_;
 }
-
-
-inline const double H2::atomic_number() {
-  return atomic_number_;
-}
-
-
-inline const double H2::ionization_stage() {
-  return ionization_stage_;
-}
-
-
-inline const double H2::mass() {
-  return mass_;
-}
-
-
-inline const std::vector<Level> H2::all_levels_{};
 
 
 }

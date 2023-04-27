@@ -8,7 +8,29 @@
 #pragma once
 
 
+#include <vector>
+
+
 namespace lss {
+
+
+/**
+ * Spectrum interface.
+ */
+struct ISpectrum {
+  /**
+   * Distance in \f$au\f$.
+   */
+  double distance;
+  /**
+   * Spectral irradiance in \f$W \cdot m^{-2} \cdot nm^{-1}\f$.
+   */
+  std::vector<double> spectral_irradiance;
+  /**
+   * Wavelengths in \f$nm\f$.
+   */
+  std::vector<double> wavelengths;
+};
 
 
 /**

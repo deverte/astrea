@@ -29,6 +29,8 @@ namespace lss {
  */
 inline Eigen::MatrixXd
 se_nist_o1_rates(std::vector<std::shared_ptr<Element>> elements) {
+  auto se_nist_o1 = SENistO1();
+
   int S = elements.size();
   Eigen::VectorXi L(S);
   for (int s = 0; s <= S - 1; s++) {
@@ -45,8 +47,8 @@ se_nist_o1_rates(std::vector<std::shared_ptr<Element>> elements) {
         auto initial = elements[s]->levels()[i];
         auto final = elements[s]->levels()[j];
 
-        std::vector<SENistO1Transition> transitions;
-        for (auto transition : SENistO1::transitions()) {
+        std::vector<ISENistO1Transition> transitions;
+        for (auto transition : se_nist_o1.transitions()) {
           if (
             (transition.initial == initial.term) &&
             (transition.final == final.term)

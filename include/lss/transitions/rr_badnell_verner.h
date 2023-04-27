@@ -36,6 +36,8 @@ inline Eigen::MatrixXd rr_badnell_verner_rates(
   double temperature,
   double electron_number_density
 ) {
+  auto rr_badnell = RRBadnell();
+
   auto& N_e = electron_number_density; // cm^{-3}
   auto& T = temperature; // K
   auto Z = elements[0]->atomic_number(); // 1
@@ -55,7 +57,7 @@ inline Eigen::MatrixXd rr_badnell_verner_rates(
     auto B = 0.0; // 1
     auto T_0 = 0.0; // K
     auto T_1 = 0.0; // K
-    for (auto fit : RRBadnell::fit()) {
+    for (auto fit : rr_badnell.fit()) {
       if (fit.Z == Z && fit.N == Z - s - 1.0) {
         A = fit.A;
         B = fit.B;

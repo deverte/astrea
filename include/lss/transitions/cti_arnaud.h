@@ -39,6 +39,8 @@ inline Eigen::MatrixXd cti_arnaud_rates(
   double temperature,
   double electron_number_density
 ) {
+  auto cti_arnaud = CTIArnaud();
+
   auto& k_B = BOLTZMANN_CONSTANT; // eV * K^{-1}
 
   auto& N_e = electron_number_density; // cm^{-3}
@@ -65,7 +67,7 @@ inline Eigen::MatrixXd cti_arnaud_rates(
     auto delta_E = 0.0; // eV
     auto T_max = 0.0; // K
     auto T_min = 0.0; // K
-    for (auto fit : CTIArnaud::fit()) {
+    for (auto fit : cti_arnaud.fit()) {
       if (
         fit.atomic_number == Z_A &&
         fit.ionization_stage == s &&

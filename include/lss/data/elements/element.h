@@ -16,9 +16,9 @@ namespace lss {
 
 
 /**
- * Element's level.
+ * Element's level interface.
  */
-struct Level {
+struct ILevel {
   /**
    * Level term.
    */
@@ -51,6 +51,29 @@ struct Level {
 
 
 /**
+ * Element interface.
+ */
+struct IElement {
+  /**
+   * Atomic number in \f$1\f$.
+   */
+  double atomic_number;
+  /**
+   * Mass in \f$u\f$ (\f$Da\f$).
+   */
+  double mass;
+  /**
+   * Ionization stage in \f$1\f$.
+   */
+  double ionization_stage;
+  /**
+   * All element's levels.
+   */
+  std::vector<ILevel> all_levels;
+};
+
+
+/**
  * Element base class.
  */
 class Element {
@@ -69,21 +92,21 @@ class Element {
    * 
    * \return Levels.
    */
-  virtual const std::vector<Level>& all_levels() = 0;
+  virtual const std::vector<ILevel>& all_levels();
 
   /**
    * Atomic number.
    * 
    * \return Atomic number in \f$1\f$.
    */
-  virtual const double atomic_number() = 0;
+  virtual const double atomic_number();
 
   /**
    * Ionization stage.
    * 
    * \return Ionization stage in \f$1\f$.
    */
-  virtual const double ionization_stage() = 0;
+  virtual const double ionization_stage();
 
   /**
    * Element's levels terms (keys) selection for calculation.
@@ -104,19 +127,26 @@ class Element {
    * 
    * \return Levels.
    */
-  std::vector<Level> levels();
+  std::vector<ILevel> levels();
 
   /**
    * Mass.
    * 
    * \return Mass in \f$u\f$ (\f$Da\f$).
    */
-  virtual const double mass() = 0;
+  virtual const double mass();
+
+  /**
+   * Resource.
+   * 
+   * \return Element resource.
+   */
+  virtual const IElement& resource() = 0;
 
  private:
   std::vector<std::string> keys_;
 
-  std::vector<Level> levels_;
+  std::vector<ILevel> levels_;
 };
 
 
@@ -126,6 +156,21 @@ inline const std::vector<std::string> Element::all_keys() {
     keys.push_back(level.term);
   }
   return keys;
+}
+
+
+inline const std::vector<ILevel>& Element::all_levels() {
+  return resource().all_levels;
+}
+
+
+inline const double Element::atomic_number() {
+  return resource().atomic_number;
+}
+
+
+inline const double Element::ionization_stage() {
+  return resource().ionization_stage;
 }
 
 
@@ -148,8 +193,13 @@ inline void Element::keys(std::vector<std::string> value) {
 }
 
 
-inline std::vector<Level> Element::levels() {
+inline std::vector<ILevel> Element::levels() {
   return levels_;
+}
+
+
+inline const double Element::mass() {
+  return resource().mass;
 }
 
 
