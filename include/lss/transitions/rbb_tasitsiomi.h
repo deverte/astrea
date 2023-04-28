@@ -13,14 +13,19 @@
 #include <memory>
 #include <vector>
 
+#include <boost/math/constants/constants.hpp>
 #include <boost/math/quadrature/trapezoidal.hpp>
+#include <boost/units/systems/si/codata_constants.hpp>
+#include <boost/units/systems/si.hpp>
+#include <boost/units/cmath.hpp>
+#include <boost/units/pow.hpp>
 #include <Eigen/Dense>
 #include <fm/fm.h>
 
 #include "./se_nist_o1.h"
 #include "../data/elements/element.h"
 #include "../data/spectra/spectrum.h"
-#include "../physics/constants.h"
+#include "../physics/units.h"
 
 
 namespace lss {
@@ -44,35 +49,36 @@ inline Eigen::MatrixXd rbb_tasitsiomi_rates(
   double temperature,
   Eigen::MatrixXd spontaneous_emission_rates
 ) {
-  auto cm_to_angstrom = 1.0e8;
-  auto cm_to_m = 1.0e-2;
-  auto cm_to_nm = 1.0e7;
-  auto eV_to_J = 1.602177e-19;
-  auto nm_to_angstrom = 10.0;
-  auto nm_to_cm = 1.0e-7;
-  auto m_to_cm = 100.0;
-  auto statC_to_C = 3.33564e-10;
-  auto u_to_eV_s2_cm_2 = 1.03642696526422e-12;
+  using boost::math::constants::pi;
+  using boost::units::si::constants::codata::c;
+  using boost::units::si::constants::codata::e;
+  using boost::units::si::constants::codata::epsilon_0;
+  using boost::units::si::constants::codata::h;
+  using boost::units::si::constants::codata::k_B;
+  using boost::units::si::constants::codata::m_e;
+  using boost::units::si::frequency;
+  using boost::units::si::kelvin;
+  using boost::units::si::length;
+  using boost::units::si::meter;
+  using boost::units::si::second;
+  using boost::units::si::watt;
+  using boost::units::pow;
+  using boost::units::quantity;
+  using lss::units::angstrom;
+  using lss::units::dalton;
+  using lss::units::electronvolt;
+  using lss::units::nanometer;
 
-  auto& c = SPEED_OF_LIGHT; // cm * s^{-1}
-  auto& e = ELEMENTARY_CHARGE; // statC
-  auto& epsilon_0 = // F * m^{-1} = C * V^{-1} * m^{-1} = C^2 * J^{-1} * m^{-1}
-    VACUUM_PERMITTIVITY
-  ;
-  auto h = PLANCK_CONSTANT; // eV * s
-  auto& k_B = BOLTZMANN_CONSTANT; // eV * K^{-1}
-  auto Lambda = 6.6702e15; // angstrom^2 * s^{-1}
-  auto m_e = ELECTRON_MASS; // cm^{-2} * eV * s^2
-  auto& pi = PI; // 1
+  auto Lambda = 6.6702e15 * pow<2>(angstrom) * pow<-1>(second);
 
-  auto chi = 21.0; // 1
-  auto epsilon = 1.77245385; // 1
-  auto kappa_0 = 0.1117; // 1
-  auto kappa_1 = 4.421; // 1
-  auto kappa_2 = -9.207; // 1
-  auto kappa_3 = 5.674; // 1
-  auto zeta_0 = 0.855; // 1
-  auto zeta_1 = 3.42; // 1
+  auto chi = 21.0;
+  auto epsilon = 1.77245385;
+  auto kappa_0 = 0.1117;
+  auto kappa_1 = 4.421;
+  auto kappa_2 = -9.207;
+  auto kappa_3 = 5.674;
+  auto zeta_0 = 0.855;
+  auto zeta_1 = 3.42;
 
   int S = elements.size();
   Eigen::VectorXi L(S);
@@ -80,17 +86,20 @@ inline Eigen::MatrixXd rbb_tasitsiomi_rates(
     L(s) = elements[s]->levels().size();
   }
   auto K = [&](int s) {
-    return int(fm::sum(0, s - 1, [&](int z) { return L(z); }));
+    return fm::sum<int>(0, s - 1, [&](int z) { return L(z); });
   };
 
-  auto m_i = elements[0]->mass(); // u
+  auto m_i = elements[0]->mass() * dalton;
   auto& R_SE = spontaneous_emission_rates;
-  auto& T = temperature; // K
-  auto& tau = optical_depth; // 1
-  auto infty = c / (spectrum->min_wavelength() * nm_to_cm); // s^{-1}
+  auto T = temperature * kelvin;
+  auto& tau = optical_depth;
+  auto infty = c / (spectrum->min_wavelength() * nanometer);
 
-  auto F_lambda = [&](double lambda /* nm */) { // W * m^{-2} * nm^{-1}
-    return spectrum->spectral_irradiance(lambda);
+  auto F_lambda = [&](quantity<length> lambda) {
+    return
+      + spectrum->spectral_irradiance(lambda / nanometer)
+      * watt * pow<-2>(meter) * pow<-1>(nanometer)
+    ;
   };
 
   Eigen::VectorXd E(K(S)); // eV
@@ -106,72 +115,62 @@ inline Eigen::MatrixXd rbb_tasitsiomi_rates(
   for (int s = 0; s <= S - 1; s++) {
     for (int i = 0; i <= L(s) - 1; i++) {
       for (int j = 0; j <= L(s) - 1; j++) {
-        auto nu_0 = std::abs(E(j + K(s)) - E(i + K(s))) / h; // s^{-1}
+        auto nu_0 =
+          abs(E(j + K(s)) * electronvolt - E(i + K(s)) * electronvolt) / h
+        ;
 
-        auto f_ij = [&](double nu /* s^{-1} */) { // 1
-          auto lambda = c / nu * cm_to_angstrom; // angstrom
-
-          return
-            + (R_SE(i + K(s), j + K(s)) + R_SE(j + K(s), i + K(s))) // s^{-1}
-            * g(j + K(s)) / g(i + K(s))      // 1
-            * std::pow(lambda, 2.0) / Lambda // s
-          ;
-        };
-
-        auto delta_nu_L = [&]() { // s^{-1}
-          return
-            + 3.0                             // 1
-            * m_i * u_to_eV_s2_cm_2 * eV_to_J // J * s^2 * cm^{-2}
-            * std::pow(c, 3.0)                // cm^3 * s^{-3}
-            * epsilon_0 / m_to_cm             // C^2 * J^{-1} * cm^{-1}
-            / std::pow(e * statC_to_C, 2.0)   // C^{-2}
-          ;
-        };
-
-        auto delta_nu_D = [&]() { // s^{-1}
-          auto m_i_ = m_i * u_to_eV_s2_cm_2; // eV * s^2 * cm^{-2}
+        auto f_ij = [&](quantity<frequency> nu) {
+          auto lambda = c / nu;
 
           return
-            + nu_0       // s^{-1}
-            * std::sqrt( // 1
-              2.0 * k_B * T / (m_i_ * std::pow(c, 2))
+            + (
+              + R_SE(i + K(s), j + K(s)) * pow<-1>(second)
+              + R_SE(j + K(s), i + K(s)) * pow<-1>(second)
             )
+            * g(j + K(s)) / g(i + K(s))
+            * pow<2>(lambda) / Lambda
           ;
         };
 
-        auto x = [&](double nu /* s^{-1} */) { // 1
+        auto delta_nu_L = [&]() {
+          return 3.0 * m_i * pow<3>(c) * epsilon_0 / pow<2>(e);
+        };
+
+        auto delta_nu_D = [&]() {
+          return nu_0 * std::sqrt(2.0 * k_B * T / (m_i * pow<2>(c)));
+        };
+
+        auto x = [&](quantity<frequency> nu) {
+          return (nu - nu_0) / delta_nu_D();
+        };
+
+        auto z = [&](quantity<frequency> nu) {
           return
-            (nu - nu_0) / delta_nu_D()
+            + (std::pow(x(nu), 2.0) - zeta_0)
+            / (std::pow(x(nu), 2.0) + zeta_1)
           ;
         };
 
-        auto z = [&](double nu /* s^{-1} */) { // 1
-          return
-            + (std::pow(x(nu), 2.0) - zeta_0) // 1
-            / (std::pow(x(nu), 2.0) + zeta_1) // 1
-          ;
-        };
-
-        auto alpha = [&]() { // 1
+        auto alpha = [&]() {
           return delta_nu_L() / (2.0 * delta_nu_D());
         };
 
-        auto q = [&](double nu /* s^{-1} */) { // 1
-          return fm::cases({
+        auto q = [&](quantity<frequency> nu) {
+          return fm::cases<double>({
             {
               [&]() {
                 return
-                  + z(nu)                              // 1
-                  * (1.0 + chi / std::pow(x(nu), 2.0)) // 1
-                  * alpha()                            // 1
-                  / (pi * (std::pow(x(nu), 2.0) + 1))  // 1
-                  * (                                  // 1
-                    + kappa_0 // 1
-                    + z(nu)   // 1
-                    * (       // 1
-                      + kappa_1                     // 1
-                      + z(nu)                       // 1
-                      * (kappa_2 + kappa_3 * z(nu)) // 1
+                  + z(nu)
+                  * (1.0 + chi / std::pow(x(nu), 2.0))
+                  * alpha()
+                  / (pi<double>() * (std::pow(x(nu), 2.0) + 1))
+                  * (
+                    + kappa_0
+                    + z(nu)
+                    * (
+                      + kappa_1
+                      + z(nu)
+                      * (kappa_2 + kappa_3 * z(nu))
                     )
                   )
                 ;
@@ -182,88 +181,67 @@ inline Eigen::MatrixXd rbb_tasitsiomi_rates(
           });
         };
 
-        auto H = [&](double nu /* s^{-1} */) { // 1
+        auto H = [&](quantity<frequency> nu) {
           return
-            + std::sqrt(pi) // 1
-            * (             // 1
-              + q(nu)                                     // 1
-              + std::exp(-std::pow(x(nu), 2.0)) / epsilon // 1
+            + std::sqrt(pi<double>())
+            * (
+              + q(nu)
+              + std::exp(-std::pow(x(nu), 2.0)) / epsilon
             )
           ;
         };
 
-        auto sigma = [&](double nu /* s^{-1} */) { // m^2
-          auto epsilon_0_ = epsilon_0 / m_to_cm; // C^2 * J^{-1} * cm^{-1}
-          auto e_ = e * statC_to_C; // C
-          auto m_e_ = m_e * eV_to_J; // cm^{-2} * J * s^2
-
-          auto sigma_ = // m^2
-            + 1.0                               // 1
-            / (4.0 * pi * epsilon_0_)           // C^{-2} * J * cm
-            * f_ij(nu)                          // 1
-            * std::sqrt(pi) * std::pow(e_, 2.0) // C^2
-            / (m_e_ * c * delta_nu_D())         // cm * J^{-1}
-            * H(nu)                             // 1
-            * std::pow(cm_to_m, 2.0)
+        auto sigma = [&](quantity<frequency> nu) { // m^2
+          return
+            + 1.0
+            / (4.0 * pi<double>() * epsilon_0)
+            * f_ij(nu)
+            * std::sqrt(pi<double>()) * pow<2>(e)
+            / (m_e * c * delta_nu_D())
+            * H(nu)
           ;
-
-          return sigma_;
         };
 
-        R_PE_PD(i + K(s), j + K(s)) = fm::cases({
+        R_PE_PD(i + K(s), j + K(s)) = fm::cases<double>({
           {
             [&]() {
-              return 4.0 * pi * boost::math::quadrature::trapezoidal( // s^{-1}
-                [&](double nu /* s^{-1} */) {
-                  auto lambda = c / nu * cm_to_nm; // nm
-                  auto F_nu = // W * m^{-2} * s
-                    + (c * cm_to_nm) // nm * s^{-1}
-                    / std::pow(nu, 2.0) // s^2
-                    * F_lambda(lambda) // W * m^{-2} * nm^{-1}
-                  ;
+              return 4.0 * pi<double>() * boost::math::quadrature::trapezoidal(
+                [&](double nu) { // s^{-1}
+                  auto nu_ = nu * pow<-1>(second);
+                  auto lambda = c / nu_;
+                  auto F_nu = c / pow<2>(nu_) * F_lambda(lambda);
 
-                  return
-                    + sigma(nu)            // m^2
-                    / ((h * eV_to_J) * nu) // J^{-1} = W^{-1} * s^{-1}
-                    * F_nu                 // W * m^{-2} * s
-                    * std::exp(-tau)       // 1
-                    // * dnu                // s^{-1}
-                  ;
+                  return (
+                    + sigma(nu_)
+                    / (h * nu_)
+                    * F_nu
+                    * std::exp(-tau)
+                  ).value();
                 },
-                nu_0,
-                infty
+                (nu_0 / pow<-1>(second)).value(),
+                (infty / pow<-1>(second)).value()
               );
             },
             i < j
           },
           {
             [&]() {
-              return 4.0 * pi * boost::math::quadrature::trapezoidal( // s^{-1}
-                [&](double nu /* s^{-1} */) {
-                  auto lambda = c / nu * cm_to_nm; // nm
-                  auto F_nu = // W * m^{-2} * s
-                    + (c * cm_to_nm) // nm * s^{-1}
-                    / std::pow(nu, 2.0) // s^2
-                    * F_lambda(lambda) // W * m^{-2} * nm^{-1}
-                  ;
+              return 4.0 * pi<double>() * boost::math::quadrature::trapezoidal(
+                [&](double nu) { // s^{-1}
+                  auto nu_ = nu * pow<-1>(second);
+                  auto lambda = c / nu_;
+                  auto F_nu = c / pow<2>(nu_) * F_lambda(lambda);
 
-                  return
-                    + sigma(nu)                     // m^2
-                    / ((h * eV_to_J) * nu)          // J^{-1} = W^{-1} * s^{-1}
-                    * (                             // W * m^{-2} * s
-                      + (    // J * m^{-2} = W * s * m^{-2}
-                        2 * (h * eV_to_J) * std::pow(nu, 3.0) // J * s^{-2}
-                        / std::pow(c * cm_to_m, 2.0)          // m^{-2} * s^2
-                      )
-                      + F_nu // W * s * m^{-2}
-                    )
-                    * std::exp(-h * nu / (k_B * T)) // 1
-                    * std::exp(-tau)                // 1
-                    // * dnu                        // s^{-1}
-                  ;
+                  return (
+                    + sigma(nu_)
+                    / (h * nu_)
+                    * ((2.0 * h * pow<3>(nu_) / pow<2>(c)) + F_nu)
+                    * std::exp(-(h * nu_) / (k_B * T))
+                    * std::exp(-tau)
+                  ).value();
                 },
-                nu_0,
-                infty
+                (nu_0 / pow<-1>(second)).value(),
+                (infty / pow<-1>(second)).value()
               );
             },
             i > j

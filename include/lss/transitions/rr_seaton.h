@@ -12,11 +12,14 @@
 #include <memory>
 #include <vector>
 
+#include <boost/units/systems/si/codata_constants.hpp>
+#include <boost/units/systems/si.hpp>
+#include <boost/units/pow.hpp>
 #include <Eigen/Dense>
 #include <fm/fm.h>
 
 #include "../data/elements/element.h"
-#include "../physics/constants.h"
+#include "../physics/units.h"
 
 
 namespace lss {
@@ -36,16 +39,20 @@ Eigen::MatrixXd rr_seaton_rates(
   double electron_temperature,
   double electron_number_density
 ) {
-  auto& k_B = BOLTZMANN_CONSTANT; // eV * K^{-1}
+  using boost::units::si::constants::codata::k_B;
+  using boost::units::si::kelvin;
+  using boost::units::si::second;
+  using boost::units::pow;
+  using lss::units::centimeter;
 
-  auto& n_e = electron_number_density; // cm^{-3}
-  auto& T_e = electron_temperature; // K
-  auto Z = elements[0]->atomic_number(); // 1
+  auto n_e = electron_number_density * pow<-3>(centimeter);
+  auto T_e = electron_temperature * kelvin;
+  auto Z = elements[0]->atomic_number();
 
-  auto D = 5.197e-14; // cm^3 * s^{-1}
-  auto E = 0.4288; // 1
-  auto F = 0.5; // 1 // or 0.4 * log(lambda) ?
-  auto G = 0.469; // 1
+  auto D = 5.197e-14 * pow<3>(centimeter) * pow<-1>(second);
+  auto E = 0.4288;
+  auto F = 0.5; // or 0.4 * log(lambda) ?
+  auto G = 0.469;
 
   int S = elements.size();
   Eigen::VectorXi L(S);
@@ -53,31 +60,33 @@ Eigen::MatrixXd rr_seaton_rates(
     L(s) = elements[s]->levels().size();
   }
   auto K = [&](int s) -> int {
-    return int(fm::sum(0, s - 1, [&](int z) { return L(z); }));
+    return fm::sum<int>(0, s - 1, [&](int z) { return L(z); });
   };
 
-  auto lambda = 157890.0 * std::pow(Z, 2.0) / T_e; // 1
+  auto lambda = (157890.0 * kelvin) * std::pow(Z, 2.0) / T_e;
 
-  auto C_RR_Nj = // cm^3 * s^{-1}
-    + D                           // cm^3 * s^{-1}
-    * Z                           // 1
-    * std::pow(lambda, 1.0 / 2.0) // 1
-    * (                           // 1
-      + E                                // 1
-      + F * std::log(lambda)             // 1
-      + G * std::pow(lambda, -1.0 / 3.0) // 1
+  auto C_RR_Nj =
+    + D
+    * Z
+    * std::pow(lambda, 1.0 / 2.0)
+    * (
+      + E
+      + F * std::log(lambda)
+      + G * std::pow(lambda, -1.0 / 3.0)
     )
   ;
 
   Eigen::MatrixXd C_RR = Eigen::MatrixXd::Zero(K(S), K(S)); // cm^3 * s^{-1}
   for (int s = 0; s <= S - 2; s++) {
     for (int j = 0; j <= L(s) - 1; j++) {
-      C_RR(L(s) + K(s), j + K(s)) = C_RR_Nj;
+      C_RR(L(s) + K(s), j + K(s)) =
+        C_RR_Nj / (pow<3>(centimeter) * pow<-1>(second))
+      ;
     }
   }
 
   Eigen::MatrixXd R_RR = Eigen::MatrixXd::Zero(K(S), K(S)); // s^{-1}
-  R_RR = n_e * C_RR;
+  R_RR = (n_e / pow<-3>(centimeter)) * C_RR;
 
   return R_RR;
 }

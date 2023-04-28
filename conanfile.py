@@ -17,7 +17,7 @@ class Lss(ConanFile):
     def requirements(self):
         self.requires("boost/1.81.0", override=True)
         self.requires("eigen/3.4.0", override=True)
-        self.requires("fm/0.1.0")
+        self.requires("fm/0.1.1")
         self.requires("libinterpolate/2.6.2")
 
     def package(self):

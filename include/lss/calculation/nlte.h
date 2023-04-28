@@ -11,6 +11,8 @@
 #include <memory>
 #include <vector>
 
+#include <boost/units/systems/si.hpp>
+#include <boost/units/pow.hpp>
 #include <Eigen/Dense>
 #include <fm/fm.h>
 
@@ -27,29 +29,34 @@ namespace lss {
  * \return Transition operator in \f$1\f$.
  */
 inline Eigen::MatrixXd nlte_transition_operator(Eigen::MatrixXd rates_matrix) {
+  using boost::units::si::frequency;
+  using boost::units::si::second;
+  using boost::units::pow;
+  using boost::units::quantity;
+
   auto& R = rates_matrix; // s^{-1}
 
   Eigen::MatrixXd Q = Eigen::MatrixXd::Zero(R.rows(), R.cols()); // s^{-1}
-  auto K = Q.cols(); // 1
+  auto K = Q.cols();
 
   for (int i = 0; i <= K - 1; i++) {
     for (int j = 0; j <= K - 1; j++) {
-      Q(i, j) = fm::cases({
+      Q(i, j) = fm::cases<quantity<frequency>>({
         {
           [&]() {
             return
-              - fm::sum(0, K - 1, [&](int k) {
-                return fm::cases({
-                  {[&]() { return R(i, k); }, i != k},
-                  {[]() { return 0.0; }, i == k},
+              - fm::sum<quantity<frequency>>(0, K - 1, [&](int k) {
+                return fm::cases<quantity<frequency>>({
+                  {[&]() { return R(i, k) * pow<-1>(second); }, i != k},
+                  {[]() { return 0.0 * pow<-1>(second); }, i == k},
                 });
               })
             ;
           },
           i == j
         },
-        {[&]() { return R(j, i); }, i != j},
-      });
+        {[&]() { return R(j, i) * pow<-1>(second); }, i != j},
+      }) / pow<-1>(second);
     }
   }
 
@@ -70,12 +77,14 @@ inline Eigen::VectorXd nlte_population(
   double delta_time,
   Eigen::MatrixXd rates_matrix
 ) {
-  auto Q_tot = nlte_transition_operator(rates_matrix); // s^{-1}
-  auto& dt = delta_time; // s
-  auto I = Eigen::MatrixXd::Identity(Q_tot.rows(), Q_tot.cols()); // 1
-  auto& n_t = population; // 1
+  using boost::units::si::second;
 
-  auto P = (I - Q_tot * dt).inverse(); // 1
+  auto Q_tot = nlte_transition_operator(rates_matrix); // s^{-1}
+  auto dt = delta_time * second;
+  auto I = Eigen::MatrixXd::Identity(Q_tot.rows(), Q_tot.cols()); // 1
+  auto& n_t = population;
+
+  auto P = (I - Q_tot * (dt / second)).inverse(); // 1
 
   auto n_t_plus_dt = P * n_t; // 1
 

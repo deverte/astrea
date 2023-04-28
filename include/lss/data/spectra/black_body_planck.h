@@ -11,8 +11,13 @@
 #include <cmath>
 #include <limits>
 
+#include <boost/math/constants/constants.hpp>
+#include <boost/units/systems/si/codata_constants.hpp>
+#include <boost/units/systems/si.hpp>
+#include <boost/units/pow.hpp>
+
 #include "./spectrum.h"
-#include "../../physics/constants.h"
+#include "../../physics/units.h"
 
 
 namespace lss {
@@ -123,38 +128,45 @@ inline double BlackBodyPlanck::min_wavelength() {
 
 
 inline double BlackBodyPlanck::spectral_irradiance(double wavelength) {
-  auto& c = SPEED_OF_LIGHT; // cm * s^{-1}
-  auto& h = PLANCK_CONSTANT; // eV * s
-  auto& k_B = BOLTZMANN_CONSTANT; // eV * K^{-1}
-  auto& pi = PI; // 1
+  using boost::math::constants::pi;
+  using boost::units::si::constants::codata::c;
+  using boost::units::si::constants::codata::h;
+  using boost::units::si::constants::codata::k_B;
+  using boost::units::si::kelvin;
+  using boost::units::si::length;
+  using boost::units::si::meter;
+  using boost::units::si::temperature;
+  using boost::units::si::watt;
+  using boost::units::pow;
+  using boost::units::quantity;
+  using lss::units::astronomical_unit;
+  using lss::units::nanometer;
 
-  auto cm_to_nm = 10000000.0;
-  auto eV_to_J = 1.602177e-19;
-  auto nm_to_m = 1.0e-9;
+  auto D = distance_ * astronomical_unit;
+  auto E_e = total_area_ * watt * pow<-2>(meter);
+  auto J = total_area_temperature_ * watt * pow<-2>(meter);
+  auto lambda = wavelength * nanometer;
+  auto lambda_0 = min_wavelength_ * nanometer;
+  auto lambda_infty = max_wavelength_ * nanometer;
+  auto T = temperature_ * kelvin;
 
-  auto D = distance_; // au
-  auto E_e = total_area_; // W * m^{-2}
-  auto J = total_area_temperature_; // W * m^{-2}
-  auto lambda = wavelength; // nm
-  auto lambda_0 = min_wavelength_; // nm
-  auto lambda_infty = max_wavelength_; // nm
-  auto T = temperature_; // K
-
-  auto R_lambda = [&](double lambda, double T) {
-    return // J * s^{-1} * m^{-2} * nm^{-1} * au^2 = W * m^{-2} * nm^{-1} * au^2
-      + 2.0 * pi * h * eV_to_J * std::pow(c * cm_to_nm, 2.0)// J * nm^2 * s^{-1}
-      / std::pow(lambda, 5.0)                                   // nm^{-5}
-      / (std::exp(h * c * cm_to_nm / (lambda * k_B * T)) - 1.0) // 1
-      * std::pow(nm_to_m, -2.0)
-      * 1.0                                                     // au^2
+  auto R_lambda = [&](quantity<length> lambda, quantity<temperature> T) {
+    return
+      + 2.0 * pi<double>() * h * pow<2>(c)
+      / pow<5>(lambda)
+      / (std::exp(h * c / (lambda * k_B * T)) - 1.0)
+      * 1.0 * pow<2>(astronomical_unit)
     ;
   };
 
-  auto E_e_lambda = [&](double lambda, double T) {// W * m^{-2} * nm^{-1} * au^2
+  auto E_e_lambda = [&](quantity<length> lambda, quantity<temperature> T) {
     return E_e * R_lambda(lambda, T) / J;
   };
 
-  auto E = E_e_lambda(lambda, T) / std::pow(D, 2.0); // W * m^{-2} * nm^{-1}
+  auto E =
+    + E_e_lambda(lambda, T) / pow<2>(D)
+    / (watt * pow<-2>(meter) * pow<-1>(nanometer))
+  ;
 
   return E;
 }
@@ -166,12 +178,17 @@ inline double BlackBodyPlanck::temperature() {
 
 
 inline void BlackBodyPlanck::temperature(double value) {
+  using boost::units::si::kelvin;
+  using boost::units::si::meter;
+  using boost::units::si::watt;
+  using boost::units::pow;
+
   temperature_ = value;
 
-  auto sigma = 5.67040040e-8; // W * m^{-2} * K^{-4}
-  auto T = temperature_; // K
+  auto sigma = 5.67040040e-8 * watt * pow<-2>(meter) * pow<-4>(kelvin);
+  auto T = temperature_ * kelvin;
 
-  double J = sigma * std::pow(T, 4.0); // W * m^{-2}
+  auto J = sigma * pow<4>(T) / (watt * pow<-2>(meter));
 
   total_area_temperature_ = J;
 }

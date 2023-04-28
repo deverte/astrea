@@ -12,11 +12,16 @@
 #include <memory>
 #include <vector>
 
+#include <boost/math/constants/constants.hpp>
+#include <boost/units/systems/si/codata_constants.hpp>
+#include <boost/units/systems/si/prefixes.hpp>
+#include <boost/units/systems/si.hpp>
+#include <boost/units/pow.hpp>
 #include <Eigen/Dense>
 #include <fm/fm.h>
 
 #include "../data/elements/element.h"
-#include "../physics/constants.h"
+#include "../physics/units.h"
 
 
 namespace lss {
@@ -33,9 +38,11 @@ inline Eigen::VectorXd lte_boltzmann_population(
   std::vector<std::shared_ptr<Element>> elements,
   double temperature
 ) {
-  auto& k_B = BOLTZMANN_CONSTANT; // eV * K^{-1}
+  using boost::units::si::constants::codata::k_B;
+  using boost::units::si::kelvin;
+  using lss::units::electronvolt;
 
-  auto& T = temperature; // K
+  auto T = temperature * kelvin;
 
   int S = elements.size();
   Eigen::VectorXd L(S);
@@ -43,7 +50,7 @@ inline Eigen::VectorXd lte_boltzmann_population(
     L(s) = elements[s]->levels().size();
   }
   auto K = [&](int s) -> int {
-    return int(fm::sum(0, s - 1, [&](int z) { return L(z); }));
+    return fm::sum<int>(0, s - 1, [&](int z) { return L(z); });
   };
 
   Eigen::VectorXd E(K(S)); // eV
@@ -59,13 +66,15 @@ inline Eigen::VectorXd lte_boltzmann_population(
   Eigen::VectorXd n(K(S)); // 1
   for (int s = 0; s <= S - 1; s++) {
     for (int i = 0; i <= L(s) - 1; i++) {
-      n(i + K(s)) = // 1
-        + g(i + K(s))                        // 1
-        * std::exp(-E(i + K(s)) / (k_B * T)) // 1
-        / fm::sum(0, L(s) - 1, [&](int j) {  // 1
-          return g(j + K(s)) * std::exp(-E(j + K(s)) / (k_B * T)); // 1
+      n(i + K(s)) =
+        + g(i + K(s))
+        * std::exp(-E(i + K(s)) * electronvolt / (k_B * T))
+        / fm::sum<double>(0, L(s) - 1, [&](int j) {
+          return
+            g(j + K(s)) * std::exp(-E(j + K(s)) * electronvolt / (k_B * T))
+          ;
         })
-        * 1.0                                // 1
+        * 1.0
       ;
     }
   }
@@ -90,14 +99,19 @@ inline Eigen::VectorXd lte_boltzmann_saha_population(
   double electron_temperature,
   double electron_number_density
 ) {
-  auto& h = PLANCK_CONSTANT; // eV * s
-  auto& k_B = BOLTZMANN_CONSTANT; // eV * K^{-1}
-  auto& m_e = ELECTRON_MASS; // cm^{-2} * eV * s^2
-  auto& pi = PI; // 1
+  using boost::math::constants::pi;
+  using boost::units::si::constants::codata::h;
+  using boost::units::si::constants::codata::k_B;
+  using boost::units::si::constants::codata::m_e;
+  using boost::units::si::kelvin;
+  using boost::units::pow;
+  using boost::units::static_rational;
+  using lss::units::centimeter;
+  using lss::units::electronvolt;
 
-  auto& N_e = electron_number_density; // cm^{-3}
-  auto& T = temperature; // K
-  auto& T_e = electron_temperature; // K
+  auto N_e = electron_number_density * pow<-3>(centimeter);
+  auto T = temperature * kelvin;
+  auto T_e = electron_temperature * kelvin;
 
   int S = elements.size();
   Eigen::VectorXd L(S);
@@ -105,7 +119,7 @@ inline Eigen::VectorXd lte_boltzmann_saha_population(
     L(s) = elements[s]->levels().size();
   }
   auto K = [&](int s) -> int {
-    return int(fm::sum(0, s - 1, [&](int z) { return L(z); }));
+    return fm::sum<int>(0, s - 1, [&](int z) { return L(z); });
   };
 
   Eigen::VectorXd I(S); // eV
@@ -119,34 +133,34 @@ inline Eigen::VectorXd lte_boltzmann_saha_population(
     }
   }
 
-  auto tilde_lambda = // cm
-    std::sqrt(std::pow(h, 2.0) / (2.0 * pi * m_e * k_B * T_e))
-  ;
+  auto tilde_lambda = pow<static_rational<1, 2>>(
+    pow<2>(h) / (2.0 * pi<double>() * m_e * k_B * T_e)
+  );
 
   // Saha Equation
   Eigen::VectorXd N(S); // 1
   Eigen::VectorXd r(S - 1); // 1
   for (int s = 0; s <= S - 2; s++) {
-    r(s) =
-      + N_e                                    // cm^{-3}
-      * fm::sum(0, L(s) - 1, [&](auto i) {     // 1
-        return g(i + K(s)) * std::exp(-E(i + K(s)) / (k_B * T)); // 1
+    r(s) = 
+      + N_e
+      * fm::sum<double>(0, L(s) - 1, [&](auto i) {
+        return g(i + K(s)) * std::exp(-E(i + K(s)) * electronvolt / (k_B * T));
       })
-      / fm::sum(0, L(s + 1) - 1, [&](auto i) { // 1
+      / fm::sum<double>(0, L(s + 1) - 1, [&](auto i) {
         return
-          + g(i + K(s))                        // 1
-          * std::exp(-E(i + K(s)) / (k_B * T)) // 1
+          + g(i + K(s))
+          * std::exp(-E(i + K(s)) * electronvolt / (k_B * T))
         ;
       })
-      * std::pow(tilde_lambda, 3.0) / 2.0      // cm^3
-      * std::exp(I(s) / (k_B * T_e))           // 1
+      * pow<3>(tilde_lambda) / 2.0
+      * std::exp(I(s) * electronvolt / (k_B * T_e))
     ;
   }
   for (int s = 0; s <= S - 1; s++) {
     N(s) =
-      + fm::prod(s, S - 2, [&](auto i) { return r(i); })
-      / fm::sum(0, S - 1, [&](auto k) {
-        return fm::prod(k, S - 2, [&](auto i) { return r(i);});
+      + fm::prod<double>(s, S - 2, [&](auto i) { return r(i); })
+      / fm::sum<double>(0, S - 1, [&](auto k) {
+        return fm::prod<double>(k, S - 2, [&](auto i) { return r(i);});
       })
     ;
   }
@@ -155,13 +169,15 @@ inline Eigen::VectorXd lte_boltzmann_saha_population(
   Eigen::VectorXd n(K(S)); // 1
   for (int s = 0; s <= S - 1; s++) {
     for (int i = 0; i <= L(s) - 1; i++) {
-      n(i + K(s)) = // 1
-        + g(i + K(s))                        // 1
-        * std::exp(-E(i + K(s)) / (k_B * T)) // 1
-        / fm::sum(0, L(s) - 1, [&](int j) {  // 1
-          return g(j + K(s)) * std::exp(-E(j + K(s)) / (k_B * T)); // 1
+      n(i + K(s)) =
+        + g(i + K(s))
+        * std::exp(-E(i + K(s)) * electronvolt / (k_B * T))
+        / fm::sum<double>(0, L(s) - 1, [&](int j) {
+          return
+            g(j + K(s)) * std::exp(-E(j + K(s)) * electronvolt / (k_B * T))
+          ;
         })
-        * N(s)                               // 1
+        * N(s)
       ;
     }
   }

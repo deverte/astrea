@@ -11,6 +11,8 @@
 #include <memory>
 #include <vector>
 
+#include <boost/units/systems/si.hpp>
+#include <boost/units/pow.hpp>
 #include <Eigen/Dense>
 #include <fm/fm.h>
 
@@ -29,6 +31,11 @@ namespace lss {
  */
 inline Eigen::MatrixXd
 se_nist_o1_rates(std::vector<std::shared_ptr<Element>> elements) {
+  using boost::units::si::frequency;
+  using boost::units::si::second;
+  using boost::units::pow;
+  using boost::units::quantity;
+
   auto se_nist_o1 = SENistO1();
 
   int S = elements.size();
@@ -37,7 +44,7 @@ se_nist_o1_rates(std::vector<std::shared_ptr<Element>> elements) {
     L(s) = elements[s]->levels().size();
   }
   auto K = [&](int s) {
-    return int(fm::sum(0, s - 1, [&](int z) { return L(z); }));
+    return fm::sum<int>(0, s - 1, [&](int z) { return L(z); });
   };
 
   Eigen::MatrixXd R_SE = Eigen::MatrixXd::Zero(K(S), K(S)); // s^{-1}
@@ -65,20 +72,22 @@ se_nist_o1_rates(std::vector<std::shared_ptr<Element>> elements) {
           J(m) = transitions[m].initial_total_angular_momentum_quantum_number;
         }
 
-        R_SE(i + K(s), j + K(s)) = fm::cases({
-          {[&]() { return 0.0; }, (i == j) || (M <= 0)},
+        R_SE(i + K(s), j + K(s)) = fm::cases<quantity<frequency>>({
+          {[&]() { return 0.0 * pow<-1>(second); }, (i == j) || (M <= 0)},
           {
             [&]() {
               return
-                + fm::sum(0, M - 1, [&](int m) {
-                  return R(m) * (2.0 * J(m) + 1.0);
+                + fm::sum<quantity<frequency>>(0, M - 1, [&](int m) {
+                  return (R(m) * pow<-1>(second)) * (2.0 * J(m) + 1.0);
                 })
-                / fm::sum(0, M - 1, [&](int m) { return 2.0 * J(m) + 1.0; })
+                / fm::sum<double>(0, M - 1, [&](int m) {
+                  return 2.0 * J(m) + 1.0;
+                })
               ;
             },
             (i != j) || (M > 0)
           },
-        });
+        }) / pow<-1>(second);
       }
     }
   }

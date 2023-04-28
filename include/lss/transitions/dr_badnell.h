@@ -12,11 +12,14 @@
 #include <memory>
 #include <vector>
 
+#include <boost/units/systems/si.hpp>
+#include <boost/units/pow.hpp>
 #include <Eigen/Dense>
 #include <fm/fm.h>
 
 #include "../data/elements/element.h"
 #include "../data/transitions/dr_badnell.h"
+#include "../physics/units.h"
 
 
 namespace lss {
@@ -36,11 +39,17 @@ inline Eigen::MatrixXd dr_badnell_rates(
   double temperature,
   double electron_number_density
 ) {
+  using boost::units::si::kelvin;
+  using boost::units::si::second;
+  using boost::units::pow;
+  using boost::units::static_rational;
+  using lss::units::centimeter;
+
   auto dr_badnell = DRBadnell();
 
-  auto& N_e = electron_number_density; // cm^{-3}
-  auto& T = temperature; // K
-  auto Z = elements[0]->atomic_number(); // 1
+  auto N_e = electron_number_density * pow<-3>(centimeter);
+  auto T = temperature * kelvin;
+  auto Z = elements[0]->atomic_number();
 
   int S = elements.size();
   Eigen::VectorXi L(S);
@@ -48,7 +57,7 @@ inline Eigen::MatrixXd dr_badnell_rates(
     L(s) = elements[s]->levels().size();
   }
   auto K = [&](int s) -> int {
-    return int(fm::sum(0, s - 1, [&](int z) { return L(z); }));
+    return fm::sum<int>(0, s - 1, [&](int z) { return L(z); });
   };
 
   Eigen::MatrixXd C_DR = Eigen::MatrixXd::Zero(K(S), K(S)); // cm^3 * s^{-1}
@@ -65,17 +74,27 @@ inline Eigen::MatrixXd dr_badnell_rates(
     }
     auto M = C.size();
 
-    auto C_DR_Nj = fm::sum(0, M - 1, [&](int i) { // cm^3 * s^{-1}
-      return std::pow(T, -3.0 / 2.0) * C[i] * std::exp(-E[i] / T);
-    });
+    auto C_DR_Nj = fm::sum<double>(0, M - 1, [&](int i) { // cm^3 * s^{-1}
+      return
+        + std::pow(T / kelvin, -3.0 / 2.0) * pow<static_rational<-3, 2>>(kelvin)
+        * C[i]
+        * pow<3>(centimeter)
+        * pow<-1>(second)
+        * pow<static_rational<3, 2>>(kelvin)
+        * std::exp(-E[i] * kelvin / T)
+        / (pow<3>(centimeter) * pow<-1>(second))
+      ;
+    }) * pow<3>(centimeter) * pow<-1>(second);
 
     for (int j = 0; j <= L(s) - 1; j++) {
-      C_DR(L(s) + K(s), j + K(s)) = C_DR_Nj;
+      C_DR(L(s) + K(s), j + K(s)) =
+        C_DR_Nj / (pow<3>(centimeter) * pow<-1>(second))
+      ;
     }
   }
 
   Eigen::MatrixXd R_DR = Eigen::MatrixXd::Zero(K(S), K(S)); // s^{-1}
-  R_DR = N_e * C_DR;
+  R_DR = (N_e / pow<-3>(centimeter)) * C_DR;
 
   return R_DR;
 }

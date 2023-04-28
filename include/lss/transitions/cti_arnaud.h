@@ -12,12 +12,15 @@
 #include <memory>
 #include <vector>
 
+#include <boost/units/systems/si/codata_constants.hpp>
+#include <boost/units/systems/si.hpp>
+#include <boost/units/pow.hpp>
 #include <Eigen/Dense>
 #include <fm/fm.h>
 
 #include "../data/elements/element.h"
 #include "../data/transitions/cti_arnaud.h"
-#include "../physics/constants.h"
+#include "../physics/units.h"
 
 
 namespace lss {
@@ -39,16 +42,21 @@ inline Eigen::MatrixXd cti_arnaud_rates(
   double temperature,
   double electron_number_density
 ) {
+  using boost::units::si::constants::codata::k_B;
+  using boost::units::si::kelvin;
+  using boost::units::si::second;
+  using boost::units::pow;
+  using lss::units::centimeter;
+  using lss::units::electronvolt;
+
   auto cti_arnaud = CTIArnaud();
 
-  auto& k_B = BOLTZMANN_CONSTANT; // eV * K^{-1}
-
-  auto& N_e = electron_number_density; // cm^{-3}
-  auto s_B = recombining_element->ionization_stage(); // 1
-  auto& T = temperature; // K
-  auto T_4 = T / 1.0e4; // 1
-  auto Z_A = elements[0]->atomic_number(); // 1
-  auto Z_B = recombining_element->atomic_number(); // 1
+  auto N_e = electron_number_density * pow<-3>(centimeter);
+  auto s_B = recombining_element->ionization_stage();
+  auto T = temperature * kelvin;
+  auto T_4 = T / (1.0e4 * kelvin);
+  auto Z_A = elements[0]->atomic_number();
+  auto Z_B = recombining_element->atomic_number();
 
   int S = elements.size();
   Eigen::VectorXi L(S);
@@ -56,17 +64,17 @@ inline Eigen::MatrixXd cti_arnaud_rates(
     L(s) = elements[s]->levels().size();
   }
   auto K = [&](int s) -> int {
-    return int(fm::sum(0, s - 1, [&](int z) { return L(z); }));
+    return fm::sum<int>(0, s - 1, [&](int z) { return L(z); });
   };
 
   Eigen::MatrixXd C_CTI = Eigen::MatrixXd::Zero(K(S), K(S)); // cm^3 * s^{-1}
   for (int s = 0; s <= S - 2; s++) {
-    auto a = 0.0; // cm^3 * s^{-1}
-    auto b = 0.0; // 1
-    auto c = 0.0; // 1
-    auto delta_E = 0.0; // eV
-    auto T_max = 0.0; // K
-    auto T_min = 0.0; // K
+    auto a = 0.0 * pow<3>(centimeter) * pow<-1>(second);
+    auto b = 0.0;
+    auto c = 0.0;
+    auto delta_E = 0.0 * electronvolt;
+    auto T_max = 0.0 * kelvin;
+    auto T_min = 0.0 * kelvin;
     for (auto fit : cti_arnaud.fit()) {
       if (
         fit.atomic_number == Z_A &&
@@ -76,31 +84,36 @@ inline Eigen::MatrixXd cti_arnaud_rates(
       ) {
         if (fit.temperatures_range.size() == 1) {
           T_min =
-          fit.temperatures_range[0] - std::sqrt(fit.temperatures_range[0]);
+            + (fit.temperatures_range[0] - std::sqrt(fit.temperatures_range[0]))
+            * kelvin
+          ;
           T_max =
-          fit.temperatures_range[0] + std::sqrt(fit.temperatures_range[0]);
+            + (fit.temperatures_range[0] + std::sqrt(fit.temperatures_range[0]))
+            * kelvin
+          ;
         }
         else if (fit.temperatures_range.size() == 2) {
-          T_min = fit.temperatures_range[0];
-          T_max = fit.temperatures_range[1];
+          T_min = fit.temperatures_range[0] * kelvin;
+          T_max = fit.temperatures_range[1] * kelvin;
         }
 
-        a = fit.a * 1.0e-9;
+        a = fit.a * 1.0e-9 * pow<3>(centimeter) * pow<-1>(second);
         b = fit.b;
         c = fit.c;
-        delta_E = fit.delta_E;
+        delta_E = fit.delta_E * electronvolt;
 
         break;
       }
     }
 
-    auto C_CTI_iN = fm::cases({ // cm^3 * s^{-1}
+    auto C_CTI_iN = fm::cases<double>({ // cm^3 * s^{-1}
       {
         [&]() {
           return
             + a
             * std::exp(-delta_E / (k_B * T))
             * (1.0 - 0.93 * std::exp(-c * T_4))
+            / (pow<3>(centimeter) * pow<-1>(second))
           ;
         },
         (Z_A == 8.0) && (Z_B == 1.0)
@@ -112,19 +125,23 @@ inline Eigen::MatrixXd cti_arnaud_rates(
             * std::pow(T_4, b)
             * std::exp(-c * T_4)
             * std::exp(-delta_E / (k_B * T))
+            / (pow<3>(centimeter) * pow<-1>(second))
           ;
         },
         true
       },
-    });
+    }) * pow<3>(centimeter) * pow<-1>(second);
 
     for (int i = 0; i <= L(s) - 1; i++) {
-      C_CTI(i + K(s), L(s) + K(s)) = C_CTI_iN;
+      C_CTI(i + K(s), L(s) + K(s)) =
+        + C_CTI_iN
+        / (pow<3>(centimeter) * pow<-1>(second))
+      ;
     }
   }
 
   Eigen::MatrixXd R_CTI = Eigen::MatrixXd::Zero(K(S), K(S)); // s^{-1}
-  R_CTI = N_e * C_CTI;
+  R_CTI = (N_e / pow<-3>(centimeter)) * C_CTI;
 
   return R_CTI;
 }

@@ -12,14 +12,18 @@
 #include <memory>
 #include <vector>
 
+#include <boost/math/constants/constants.hpp>
 #include <boost/math/quadrature/trapezoidal.hpp>
+#include <boost/units/systems/si/codata_constants.hpp>
+#include <boost/units/systems/si.hpp>
+#include <boost/units/pow.hpp>
 #include <Eigen/Dense>
 #include <fm/fm.h>
 
 #include "../data/elements/element.h"
 #include "../data/spectra/spectrum.h"
 #include "../data/transitions/pi_mashonkina_o1.h"
-#include "../physics/constants.h"
+#include "../physics/units.h"
 
 
 namespace lss {
@@ -39,19 +43,25 @@ inline Eigen::MatrixXd pi_mashonkina_o1_rates(
   std::shared_ptr<Spectrum> spectrum,
   double optical_depth
 ) {
+  using boost::math::constants::pi;
+  using boost::units::si::constants::codata::c;
+  using boost::units::si::constants::codata::h;
+  using boost::units::si::frequency;
+  using boost::units::si::length;
+  using boost::units::si::meter;
+  using boost::units::si::second;
+  using boost::units::si::watt;
+  using boost::units::pow;
+  using boost::units::quantity;
+  using lss::units::centimeter;
+  using lss::units::nanometer;
+
   auto pi_mashonkina_o1 = PIMashonkinaO1();
 
-  auto eV_to_J = 1.602177e-19;
-  auto cm_to_m = 0.01;
-  auto cm_to_nm = 1.0e7;
+  auto infty = pi_mashonkina_o1.max_frequency() * pow<-1>(second);
+  auto nu_0 = pi_mashonkina_o1.min_frequency() * pow<-1>(second);
 
-  auto& c = SPEED_OF_LIGHT; // cm * s^{-1}
-  auto h = PLANCK_CONSTANT; // eV * s
-  auto infty = pi_mashonkina_o1.max_frequency(); // s^{-1}
-  auto nu_0 = pi_mashonkina_o1.min_frequency(); // s^{-1}
-  auto& pi = PI; // 1
-
-  auto& tau = optical_depth; // 1
+  auto& tau = optical_depth;
 
   int S = elements.size();
   Eigen::VectorXi L(S);
@@ -59,11 +69,14 @@ inline Eigen::MatrixXd pi_mashonkina_o1_rates(
     L(s) = elements[s]->levels().size();
   }
   auto K = [&](int s) -> int {
-    return int(fm::sum(0, s - 1, [&](int z) { return L(z); }));
+    return fm::sum<int>(0, s - 1, [&](int z) { return L(z); });
   };
 
-  auto F_lambda = [&](double lambda /* nm */) { // W * m^{-2} * nm^{-1}
-    return spectrum->spectral_irradiance(lambda);
+  auto F_lambda = [&](quantity<length> lambda) {
+    return
+      + spectrum->spectral_irradiance(lambda / nanometer)
+      * watt * pow<-2>(meter) * pow<-1>(nanometer)
+    ;
   };
 
   Eigen::MatrixXd R_PI_RR_DR = Eigen::MatrixXd::Zero(K(S), K(S)); // s^{-1}
@@ -71,33 +84,29 @@ inline Eigen::MatrixXd pi_mashonkina_o1_rates(
     for (int i = 0; i <= L(s) - 1; i++) {
       auto initial = elements[s]->levels()[i];
 
-      auto sigma = [&](double frequency) {
+      auto sigma = [&](quantity<frequency> frequency) {
         return pi_mashonkina_o1.photoionization_cross_section(
           initial.term,
-          frequency
-        );
+          frequency / pow<-1>(second)
+        ) * pow<2>(centimeter);
       };
 
       R_PI_RR_DR(i + K(s), L(s) + K(s)) =
-        4.0 * pi * boost::math::quadrature::trapezoidal( // s^{-1}
-          [&](double nu /* s^{-1} */) {
-            auto lambda = c / nu * cm_to_nm; // nm
-            auto F_nu = // W * m^{-2} * s
-              + (c * cm_to_nm)    // nm * s^{-1}
-              / std::pow(nu, 2.0) // s^2
-              * F_lambda(lambda)  // W * m^{-2} * nm^{-1}
-            ;
+        4.0 * pi<double>() * boost::math::quadrature::trapezoidal( // s^{-1}
+          [&](double nu) -> double {
+            auto nu_ = nu * pow<-1>(second);
+            auto lambda = c / nu_;
+            auto F_nu = c / pow<2>(nu_) * F_lambda(lambda);
 
-            return
-              + (sigma(nu) * std::pow(cm_to_m, 2.0)) // m^2
-              / ((h * eV_to_J) * nu)                 // J^{-1} = W^{-1} * s^{-1}
-              * F_nu                                 // W * m^{-2} * s
-              * std::exp(-tau)                       // 1
-              // * dnu                               // s^{-1}
-            ;
+            return (
+              + sigma(nu_)
+              / (h * nu_)
+              * F_nu
+              * std::exp(-tau)
+            ).value();
           },
-          nu_0,
-          infty
+          (nu_0 / pow<-1>(second)).value(),
+          (infty / pow<-1>(second)).value()
         )
       ;
     }

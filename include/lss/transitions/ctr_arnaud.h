@@ -13,11 +13,14 @@
 #include <memory>
 #include <vector>
 
+#include <boost/units/systems/si.hpp>
+#include <boost/units/pow.hpp>
 #include <Eigen/Dense>
 #include <fm/fm.h>
 
 #include "../data/elements/element.h"
 #include "../data/transitions/ctr_arnaud.h"
+#include "../physics/units.h"
 
 
 namespace lss {
@@ -39,14 +42,19 @@ inline Eigen::MatrixXd ctr_arnaud_rates(
   double temperature,
   double electron_number_density
 ) {
+  using boost::units::si::kelvin;
+  using boost::units::si::second;
+  using boost::units::pow;
+  using lss::units::centimeter;
+
   auto ctr_arnaud = CTRArnaud();
 
-  auto& N_e = electron_number_density; // cm^{-3}
-  auto s_B = ionizing_element->ionization_stage(); // 1
-  auto& T = temperature; // K
-  auto T_4 = T / 1.0e4; // 1
-  auto Z_A = elements[0]->atomic_number(); // 1
-  auto Z_B = ionizing_element->atomic_number(); // 1
+  auto N_e = electron_number_density * pow<-3>(centimeter);
+  auto s_B = ionizing_element->ionization_stage();
+  auto T = temperature * kelvin;
+  auto T_4 = T / (1.0e4 * kelvin);
+  auto Z_A = elements[0]->atomic_number();
+  auto Z_B = ionizing_element->atomic_number();
 
   int S = elements.size();
   Eigen::VectorXi L(S);
@@ -54,18 +62,18 @@ inline Eigen::MatrixXd ctr_arnaud_rates(
     L(s) = elements[s]->levels().size();
   }
   auto K = [&](int s) -> int {
-    return int(fm::sum(0, s - 1, [&](int z) { return L(z); }));
+    return fm::sum<int>(0, s - 1, [&](int z) { return L(z); });
   };
 
   Eigen::MatrixXd R_CTR = Eigen::MatrixXd::Zero(K(S), K(S)); // s^{-1}
   Eigen::MatrixXd C_CTR = Eigen::MatrixXd::Zero(K(S), K(S)); // cm^3 * s^{-1}
   for (int s = 0; s <= S - 2; s++) {
-    auto a = 0.0; // cm^3 * s^{-1}
-    auto b = 0.0; // 1
-    auto c = 0.0; // 1
-    auto d = 0.0; // 1
-    auto T_max = 0.0; // K
-    auto T_min = 0.0; // K
+    auto a = 0.0 * pow<3>(centimeter) * pow<-1>(second);
+    auto b = 0.0;
+    auto c = 0.0;
+    auto d = 0.0;
+    auto T_max = 0.0 * kelvin;
+    auto T_min = 0.0 * kelvin;
     for (auto fit : ctr_arnaud.fit()) {
       if (
         fit.atomic_number == Z_A &&
@@ -75,16 +83,20 @@ inline Eigen::MatrixXd ctr_arnaud_rates(
       ) {
         if (fit.temperatures_range.size() == 1) {
           T_min =
-            fit.temperatures_range[0] - std::sqrt(fit.temperatures_range[0]);
+            + (fit.temperatures_range[0] - std::sqrt(fit.temperatures_range[0]))
+            * kelvin
+          ;
           T_max =
-            fit.temperatures_range[0] + std::sqrt(fit.temperatures_range[0]);
+            + (fit.temperatures_range[0] + std::sqrt(fit.temperatures_range[0]))
+            * kelvin
+          ;
         }
         else if (fit.temperatures_range.size() == 2) {
-          T_min = fit.temperatures_range[0];
-          T_max = fit.temperatures_range[1];
+          T_min = fit.temperatures_range[0] * kelvin;
+          T_max = fit.temperatures_range[1] * kelvin;
         }
 
-        a = fit.a * 1.0e-9;
+        a = fit.a * 1.0e-9 * pow<3>(centimeter) * pow<-1>(second);
         b = fit.b;
         c = fit.c;
         d = fit.d;
@@ -96,16 +108,19 @@ inline Eigen::MatrixXd ctr_arnaud_rates(
       return R_CTR;
     }
 
-    auto C_CTR_Nj = // cm^3 * s^{-1}
+    auto C_CTR_Nj =
       a * std::pow(T_4, b) * (1.0 + c * std::exp(d * T_4))
     ;
 
     for (int j = 0; j <= L(s) - 1; j++) {
-      C_CTR(L(s) + K(s), j + K(s)) = C_CTR_Nj;
+      C_CTR(L(s) + K(s), j + K(s)) =
+        + C_CTR_Nj
+        / (pow<3>(centimeter) * pow<-1>(second))
+      ;
     }
   }
 
-  R_CTR = N_e * C_CTR;
+  R_CTR = (N_e / pow<-3>(centimeter)) * C_CTR;
 
   return R_CTR;
 }

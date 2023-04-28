@@ -12,11 +12,14 @@
 #include <memory>
 #include <vector>
 
+#include <boost/units/systems/si/codata_constants.hpp>
+#include <boost/units/systems/si.hpp>
+#include <boost/units/pow.hpp>
 #include <Eigen/Dense>
 #include <fm/fm.h>
 
 #include "../data/elements/element.h"
-#include "../physics/constants.h"
+#include "../physics/units.h"
 
 
 namespace lss {
@@ -36,16 +39,20 @@ inline Eigen::MatrixXd tbr_hahn_rates(
   double electron_temperature,
   double electron_number_density
 ) {
-  auto k_B = BOLTZMANN_CONSTANT; // eV * K^{-1}
-  auto Ry = RYDBERG_ENERGY; // eV
+  using boost::units::si::constants::codata::k_B;
+  using boost::units::si::kelvin;
+  using boost::units::si::second;
+  using boost::units::pow;
+  using lss::units::centimeter;
+  using lss::units::Ry;
 
   // TODO: calculate Gaunt factor
-  auto Gamma = [](double Z, double n) { return 1.0; }; // 1
-  auto n = elements[0]->atomic_number(); // 1
-  auto& N_e = electron_number_density; // cm^{-3}
-  auto& N_s = N_e; // cm^{-3} // TODO: different number
-  auto& T_e = electron_temperature; // K
-  auto zeta = 7.2e-32; // cm^6 * s^{-1}
+  auto Gamma = [](double Z, double n) { return 1.0; };
+  auto n = elements[0]->atomic_number();
+  auto N_e = electron_number_density * pow<-3>(centimeter);
+  auto N_s = N_e; // TODO: different number
+  auto T_e = electron_temperature * kelvin;
+  auto zeta = 7.2e-32 * pow<6>(centimeter) * pow<-1>(second);
 
   int S = elements.size();
   Eigen::VectorXi L(S);
@@ -53,25 +60,26 @@ inline Eigen::MatrixXd tbr_hahn_rates(
     L(s) = elements[s]->levels().size();
   }
   auto K = [&](int s) -> int {
-    return int(fm::sum(0, s - 1, [&](int z) { return L(z); }));
+    return fm::sum<int>(0, s - 1, [&](int z) { return L(z); });
   };
 
-  auto I = [&](double s, double n) { // eV
+  auto I = [&](double s, double n) {
     return std::pow(s, 2.0) / std::pow(n, 2.0) * Ry;
   };
 
-  auto x = [&](double s, double n) { return I(s, n) / (k_B * T_e); }; // 1
+  auto x = [&](double s, double n) { return I(s, n) / (k_B * T_e); };
 
-  auto C_TBR_Nj = [&](double s, double n) { // cm^{-3} * s^{-1}
-    return fm::cases({
+  auto C_TBR_Nj = [&](double s, double n) {
+    return fm::cases<double>({
       {
         [&]() {
           return
-            + zeta                                              // cm^6 * s^{-1}
-            * std::pow(N_e, 2.0)                                  // cm^{-6}
-            * N_s                                                 // cm^{-3}
-            * std::pow(n, 6.0)                                    // 1
-            * Gamma(s, n) / (std::pow(s, 4.0) * (k_B * T_e) / Ry) // 1
+            + zeta
+            * pow<2>(N_e)
+            * N_s
+            * std::pow(n, 6.0)
+            * Gamma(s, n) / (std::pow(s, 4.0) * (k_B * T_e) / Ry)
+            / (pow<-3>(centimeter) * pow<-1>(second))
           ;
         },
         x(s, n) >= 1.0 /* && T <= 1.0e4 */
@@ -79,12 +87,13 @@ inline Eigen::MatrixXd tbr_hahn_rates(
       {
         [&]() {
           return
-            + zeta                                              // cm^6 * s^{-1}
-            * std::pow(N_e, 2.0)                                   // cm^{-6}
-            * N_s                                                  // cm^{-3}
-            * std::pow(n, 4.0)                                     // 1
-            * Gamma(s, n)                                          // 1
-            / (std::pow((k_B * T_e) / Ry, 2.0) * std::pow(s, 2.0)) // 1
+            + zeta
+            * pow<2>(N_e)
+            * N_s
+            * std::pow(n, 4.0)
+            * Gamma(s, n)
+            / (std::pow((k_B * T_e) / Ry, 2.0) * std::pow(s, 2.0))
+            / (pow<-3>(centimeter) * pow<-1>(second))
           ;
         },
         x(s, n) < 1.0 /* && T > 1.0e4 */
@@ -100,7 +109,7 @@ inline Eigen::MatrixXd tbr_hahn_rates(
   }
 
   Eigen::MatrixXd R_TBR = Eigen::MatrixXd::Zero(K(S), K(S)); // s^{-1}
-  R_TBR = C_TBR / N_e;
+  R_TBR = C_TBR / (N_e / pow<-3>(centimeter));
 
   return R_TBR;
 }

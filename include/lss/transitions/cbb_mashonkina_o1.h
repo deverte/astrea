@@ -12,11 +12,14 @@
 #include <memory>
 #include <vector>
 
+#include <boost/units/systems/si.hpp>
+#include <boost/units/pow.hpp>
 #include <Eigen/Dense>
 #include <fm/fm.h>
 
 #include "../data/elements/element.h"
 #include "../data/transitions/cbb_mashonkina_o1.h"
+#include "../physics/units.h"
 
 
 namespace lss {
@@ -36,10 +39,17 @@ inline Eigen::MatrixXd cbb_mashonkina_o1_rates(
   double temperature,
   double electron_number_density
 ) {
+  using boost::units::si::kelvin;
+  using boost::units::si::second;
+  using temperature_ = boost::units::si::temperature;
+  using boost::units::pow;
+  using boost::units::quantity;
+  using lss::units::centimeter;
+
   auto cbb_mashonkina_o1 = CBBMashonkinaO1();
 
-  auto& N_e = electron_number_density; // cm^{-3}
-  auto& T = temperature; // K
+  auto N_e = electron_number_density * pow<-3>(centimeter);
+  auto T = temperature * kelvin;
 
   int S = elements.size();
   Eigen::VectorXi L(S);
@@ -47,7 +57,7 @@ inline Eigen::MatrixXd cbb_mashonkina_o1_rates(
     L(s) = elements[s]->levels().size();
   }
   auto K = [&](int s) -> int {
-    return int(fm::sum(0, s - 1, [&](int z) { return L(z); }));
+    return fm::sum<int>(0, s - 1, [&](int z) { return L(z); });
   };
 
   Eigen::MatrixXd C_CE_CD = Eigen::MatrixXd::Zero(K(S), K(S)); // cm^3 * s^{-1}
@@ -59,21 +69,23 @@ inline Eigen::MatrixXd cbb_mashonkina_o1_rates(
       for (int j = 0; j <= L(s) - 1; j++) {
         auto final = elements[s]->levels()[j];
 
-        auto C_CE_CD_ij = [&](double temperature) {
+        auto C_CE_CD_ij = [&](quantity<temperature_> temperature) {
           return cbb_mashonkina_o1.collision_rate_coefficient(
             initial.term,
             final.term,
-            temperature
-          );
+            temperature / kelvin
+          ) * pow<3>(centimeter) * pow<-1>(second);
         };
 
-        C_CE_CD(i + K(s), j + K(s)) = C_CE_CD_ij(T);
+        C_CE_CD(i + K(s), j + K(s)) =
+          C_CE_CD_ij(T) / (pow<3>(centimeter) * pow<-1>(second))
+        ;
       }
     }
   }
 
   Eigen::MatrixXd R_CE_CD = Eigen::MatrixXd::Zero(K(S), K(S)); // s^{-1}
-  R_CE_CD = N_e * C_CE_CD;
+  R_CE_CD = (N_e / pow<-3>(centimeter)) * C_CE_CD;
 
   return R_CE_CD;
 }

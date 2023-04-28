@@ -12,11 +12,14 @@
 #include <memory>
 #include <vector>
 
+#include <boost/units/systems/si/codata_constants.hpp>
+#include <boost/units/systems/si.hpp>
+#include <boost/units/pow.hpp>
 #include <Eigen/Dense>
 #include <fm/fm.h>
 
 #include "../data/elements/element.h"
-#include "../physics/constants.h"
+#include "../physics/units.h"
 
 
 namespace lss {
@@ -36,15 +39,19 @@ inline Eigen::MatrixXd ci_hahn_rates(
   double electron_temperature,
   double electron_number_density
 ) {
-  auto k_B = BOLTZMANN_CONSTANT; // eV * K^{-1}
-  auto Ry = RYDBERG_ENERGY; // eV
+  using boost::units::si::constants::codata::k_B;
+  using boost::units::si::kelvin;
+  using boost::units::si::second;
+  using boost::units::pow;
+  using lss::units::centimeter;
+  using lss::units::Ry;
 
-  auto Gamma = [](double Z, double n) { return 1.0; }; // 1, TODO: calculate Gaunt factor
-  auto n = elements[0]->atomic_number(); // 1
-  auto& N_e = electron_number_density; // cm^{-3}
-  auto& N_Z = N_e; // cm^{-3}
-  auto& T_e = electron_temperature; // K
-  auto zeta = 2.2e-8; // cm^3 * s^{-1}
+  auto Gamma = [](double Z, double n) { return 1.0; }; // TODO: Gaunt factor
+  auto n = elements[0]->atomic_number();
+  auto N_e = electron_number_density * pow<-3>(centimeter);
+  auto N_Z = N_e;
+  auto T_e = electron_temperature * kelvin;
+  auto zeta = 2.2e-8 * pow<3>(centimeter) * pow<-1>(second);
 
   int S = elements.size();
   Eigen::VectorXi L(S);
@@ -52,27 +59,28 @@ inline Eigen::MatrixXd ci_hahn_rates(
     L(s) = elements[s]->levels().size();
   }
   auto K = [&](int s) -> int {
-    return int(fm::sum(0, s - 1, [&](int z) { return L(z); }));
+    return fm::sum<int>(0, s - 1, [&](int z) { return L(z); });
   };
 
-  auto I = [&](double s, double n) { // eV
+  auto I = [&](double s, double n) {
     return std::pow(s, 2.0) / std::pow(n, 2.0) * Ry;
   };
 
-  auto x = [&](double s, double n) { return I(s, n) / (k_B * T_e); }; // 1
+  auto x = [&](double s, double n) { return I(s, n) / (k_B * T_e); };
 
-  auto C_CI_ij = [&](double s, double n) { // cm^{-3} * s^{-1}
-    return fm::cases({
+  auto C_CI_ij = [&](double s, double n) {
+    return fm::cases<double>({
       {
         [&]() {
           return
-            + zeta                                // cm^3 * s^{-1}
-            * N_Z                                 // cm^{-3}
-            * N_e                                 // cm^{-3}
-            * std::pow(k_B * T_e / Ry, 1.0 / 2.0) // 1
-            * std::pow(n, 4.0)                    // 1
-            * std::exp(-x(s, n))                     // 1
-            * Gamma(s, n) / std::pow(s, 4.0)      // 1
+            + zeta
+            * N_Z
+            * N_e
+            * std::pow(k_B * T_e / Ry, 1.0 / 2.0)
+            * std::pow(n, 4.0)
+            * std::exp(-x(s, n))
+            * Gamma(s, n) / std::pow(s, 4.0)
+            / (pow<-3>(centimeter) * pow<-1>(second))
           ;
         },
         x(s, n) >= 1.0 /* && T <= 1.0e4 */
@@ -80,29 +88,33 @@ inline Eigen::MatrixXd ci_hahn_rates(
       {
         [&]() {
           return
-            + zeta                                              // cm^3 * s^{-1}
-            * N_Z                                                     // cm^{-3}
-            * N_e                                                     // cm^{-3}
-            * std::pow(n, 2.0)                                         // 1
-            * std::exp(-x(s, n))                                          // 1
-            * Gamma(s, n)                                              // 1
-            / (std::pow(s, 2.0) * std::pow(k_B * T_e / Ry, 1.0 / 2.0)) // 1
+            + zeta
+            * N_Z
+            * N_e
+            * std::pow(n, 2.0)
+            * std::exp(-x(s, n))
+            * Gamma(s, n)
+            / (std::pow(s, 2.0) * std::pow(k_B * T_e / Ry, 1.0 / 2.0))
+            / (pow<-3>(centimeter) * pow<-1>(second))
           ;
         },
         x(s, n) >= 1.0 /* && T > 1.0e4 */
       },
-    });
+    }) * pow<-3>(centimeter) * pow<-1>(second);
   };
 
   Eigen::MatrixXd C_CI = Eigen::MatrixXd::Zero(K(S), K(S)); // cm^3 * s^{-1}
   for (int s = 0; s <= S - 2; s++) {
     for (int i = 0; i <= L(s) - 1; i++) {
-      C_CI(i + K(s), L(s) + K(s)) = C_CI_ij(s, n);
+      C_CI(i + K(s), L(s) + K(s)) =
+        + C_CI_ij(s, n)
+        / (pow<-3>(centimeter) * pow<-1>(second))
+      ;
     }
   }
 
   Eigen::MatrixXd R_CI = Eigen::MatrixXd::Zero(K(S), K(S)); // s^{-1}
-  R_CI = C_CI / N_e;
+  R_CI = C_CI / (N_e / pow<-3>(centimeter));
 
   return R_CI;
 }

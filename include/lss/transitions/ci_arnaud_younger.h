@@ -15,12 +15,15 @@
 #include <vector>
 
 #include <boost/math/quadrature/trapezoidal.hpp>
+#include <boost/units/systems/si/codata_constants.hpp>
+#include <boost/units/systems/si.hpp>
+#include <boost/units/pow.hpp>
 #include <Eigen/Dense>
 #include <fm/fm.h>
 
 #include "../data/elements/element.h"
 #include "../data/transitions/ci_arnaud.h"
-#include "../physics/constants.h"
+#include "../physics/units.h"
 
 
 namespace lss {
@@ -41,17 +44,28 @@ Eigen::MatrixXd ci_arnaud_younger_rates(
   double electron_temperature,
   double electron_number_density
 ) {
+  using boost::units::si::constants::codata::k_B;
+  using boost::units::si::kelvin;
+  using boost::units::si::second;
+  using boost::units::pow;
+  using boost::units::static_rational;
+  using lss::units::centimeter;
+  using lss::units::electronvolt;
+
   auto ci_arnaud = CIArnaud();
 
   auto infty = std::numeric_limits<double>::infinity();
-  auto& k_B = BOLTZMANN_CONSTANT; // eV * K^{-1}
-  auto& pi = PI;
 
-  auto& n_e = electron_number_density; // cm^{-3}
+  auto n_e = electron_number_density * pow<-3>(centimeter);
   auto n_a = 1.0; // ?
-  auto& T_e = electron_temperature; // K
-  auto Z = elements[0]->atomic_number(); // 1
-  auto zeta = 6.69e-7; // eV^{-1/2} * cm * s^{-1}
+  auto T_e = electron_temperature * kelvin;
+  auto Z = elements[0]->atomic_number();
+  auto zeta =
+    + 6.69e-7
+    * pow<static_rational<-1, 2>>(electronvolt)
+    * centimeter
+    * pow<-1>(second)
+  ;
 
   int S = elements.size();
   Eigen::VectorXi L(S);
@@ -59,15 +73,15 @@ Eigen::MatrixXd ci_arnaud_younger_rates(
     L(s) = elements[s]->levels().size();
   }
   auto K = [&](int s) -> int {
-    return int(fm::sum(0, s - 1, [&](int z) { return L(z); }));
+    return fm::sum<int>(0, s - 1, [&](int z) { return L(z); });
   };
 
-  auto f_1 = [&](double x /* 1 */) { // 1
+  auto f_1 = [&](double x) {
     return
-      + std::exp(x)                           // 1
-      * boost::math::quadrature::trapezoidal( // 1
-        [&](double t /* 1 */) { // 1
-          return 1.0 / t * std::exp(-t * x) /* * dt */;
+      + std::exp(x)
+      * boost::math::quadrature::trapezoidal(
+        [&](double t) {
+          return 1.0 / t * std::exp(-t * x);
         },
         1.0,
         infty
@@ -75,12 +89,12 @@ Eigen::MatrixXd ci_arnaud_younger_rates(
     ;
   };
 
-  auto f_2 = [&](double x /* 1 */) { // 1
+  auto f_2 = [&](double x) {
     return
-      + std::exp(x)                           // 1
-      * boost::math::quadrature::trapezoidal( // 1
-        [&](double t /* 1 */) { // 1
-          return 1.0 / t * std::exp(-t * x) * std::log(t) /* * dt */;
+      + std::exp(x)
+      * boost::math::quadrature::trapezoidal(
+        [&](double t) {
+          return 1.0 / t * std::exp(-t * x) * std::log(t);
         },
         1.0,
         infty
@@ -111,7 +125,7 @@ Eigen::MatrixXd ci_arnaud_younger_rates(
       C(m) = subshells[m].C * 1.0e-14;
       D(m) = subshells[m].D * 1.0e-14;
       I(m) = subshells[m].E * 1.0e-14;
-      x(m) = I(m) / (k_B * T_e); // 1
+      x(m) = I(m) / ((k_B * T_e) / electronvolt); // 1
       F(m) = // cm^2 * eV^2
         + A(m) * (1.0 - x(m) * f_1(x(m)))                       // cm^2 * eV^2
         + B(m) * (1.0 + x(m) - x(m) * (2.0 + x(m)) * f_1(x(m))) // cm^2 * eV^2
@@ -122,19 +136,20 @@ Eigen::MatrixXd ci_arnaud_younger_rates(
 
     for (int i = 0; i <= L(s) - 1; i++) {
       C_CI(i + K(s), L(s) + K(s)) = // cm^3 * s^{-1}
-        + zeta / std::pow(k_B * T_e, 3.0 / 2.0) // eV^{-2} * cm * s^{-1}
-        * fm::sum(0, M - 1, [&](int m) {        // cm^2 * eV^2
+        + zeta / pow<static_rational<3, 2>>(k_B * T_e) // eV^{-2} * cm * s^{-1}
+        * fm::sum<double>(0, M - 1, [&](int m) {        // cm^2 * eV^2
           return
             + std::exp(-x(m)) / x(m) // 1
             * F(m)                   // cm^2 eV^2
           ;
-        })
+        }) * pow<2>(centimeter) * pow<2>(electronvolt)
+        / (pow<3>(centimeter) * pow<-1>(second))
       ;
     }
   }
 
   Eigen::MatrixXd R_CI = Eigen::MatrixXd::Zero(K(S), K(S)); // s^{-1}
-  R_CI = n_e * n_a * C_CI;
+  R_CI = (n_e / pow<-3>(centimeter)) * n_a * C_CI;
 
   return R_CI;
 }

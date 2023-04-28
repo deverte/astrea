@@ -12,11 +12,14 @@
 #include <memory>
 #include <vector>
 
+#include <boost/units/systems/si.hpp>
+#include <boost/units/pow.hpp>
 #include <Eigen/Dense>
 #include <fm/fm.h>
 
 #include "../data/elements/element.h"
 #include "../data/transitions/rr_badnell.h"
+#include "../physics/units.h"
 
 
 namespace lss {
@@ -36,11 +39,16 @@ inline Eigen::MatrixXd rr_badnell_verner_rates(
   double temperature,
   double electron_number_density
 ) {
+  using boost::units::si::kelvin;
+  using boost::units::si::second;
+  using boost::units::pow;
+  using lss::units::centimeter;
+
   auto rr_badnell = RRBadnell();
 
-  auto& N_e = electron_number_density; // cm^{-3}
-  auto& T = temperature; // K
-  auto Z = elements[0]->atomic_number(); // 1
+  auto N_e = electron_number_density * pow<-3>(centimeter);
+  auto T = temperature * kelvin;
+  auto Z = elements[0]->atomic_number();
 
   int S = elements.size();
   Eigen::VectorXi L(S);
@@ -48,25 +56,25 @@ inline Eigen::MatrixXd rr_badnell_verner_rates(
     L(s) = elements[s]->levels().size();
   }
   auto K = [&](int s) -> int {
-    return int(fm::sum(0, s - 1, [&](int z) { return L(z); }));
+    return fm::sum<int>(0, s - 1, [&](int z) { return L(z); });
   };
 
   Eigen::MatrixXd C_RR = Eigen::MatrixXd::Zero(K(S), K(S)); // cm^3 * s^{-1}
   for (int s = 0; s <= S - 2; s++) {
-    auto A = 0.0; // cm^3 * s^{-1}
-    auto B = 0.0; // 1
-    auto T_0 = 0.0; // K
-    auto T_1 = 0.0; // K
+    auto A = 0.0 * pow<3>(centimeter) * pow<-1>(second);
+    auto B = 0.0;
+    auto T_0 = 0.0 * kelvin;
+    auto T_1 = 0.0 * kelvin;
     for (auto fit : rr_badnell.fit()) {
       if (fit.Z == Z && fit.N == Z - s - 1.0) {
-        A = fit.A;
+        A = fit.A * pow<3>(centimeter) * pow<-1>(second);
         B = fit.B;
-        auto& C = fit.C; // 1
-        T_0 = fit.T0;
-        T_1 = fit.T1;
-        auto& T_2 = fit.T2; // K
+        auto& C = fit.C;
+        T_0 = fit.T0 * kelvin;
+        T_1 = fit.T1 * kelvin;
+        auto T_2 = fit.T2 * kelvin;
 
-        if (C != 0.0 && T_2 != 0.0) {
+        if (C != 0.0 && T_2 != 0.0 * kelvin) {
           B = B + C * std::exp(-T_2 / T);
         }
 
@@ -74,7 +82,7 @@ inline Eigen::MatrixXd rr_badnell_verner_rates(
       }
     }
 
-    auto C_RR_Nj = // cm^3 * s^{-1}
+    auto C_RR_Nj =
       + A
       * std::pow(
         (
@@ -87,12 +95,14 @@ inline Eigen::MatrixXd rr_badnell_verner_rates(
     ;
 
     for (int j = 0; j <= L(s) - 1; j++) {
-      C_RR(L(s) + K(s), j + K(s)) = C_RR_Nj;
+      C_RR(L(s) + K(s), j + K(s)) =
+        C_RR_Nj / (pow<3>(centimeter) * pow<-1>(second))
+      ;
     }
   }
 
   Eigen::MatrixXd R_RR = Eigen::MatrixXd::Zero(K(S), K(S)); // s^{-1}
-  R_RR = N_e * C_RR;
+  R_RR = (N_e / pow<-3>(centimeter)) * C_RR;
 
   return R_RR;
 }

@@ -13,12 +13,16 @@
 #include <memory>
 #include <vector>
 
+#include <boost/units/systems/si/codata_constants.hpp>
+#include <boost/units/systems/si.hpp>
+#include <boost/units/cmath.hpp>
+#include <boost/units/pow.hpp>
 #include <Eigen/Dense>
 #include <fm/fm.h>
 
 #include "../data/elements/element.h"
 #include "../data/transitions/rbb_mashonkina_voigt_o1.h"
-#include "../physics/constants.h"
+#include "../physics/units.h"
 
 
 namespace lss {
@@ -33,10 +37,14 @@ namespace lss {
  */
 inline Eigen::MatrixXd
 rbb_mashonkina_voigt_o1_rates(std::vector<std::shared_ptr<Element>> elements) {
-  auto rbb_mashonkina_voigt = RBBMashonkinaVoigtO1();
+  using boost::units::si::constants::codata::c;
+  using boost::units::si::constants::codata::hbar;
+  using boost::units::si::second;
+  using boost::units::pow;
+  using lss::units::angstrom;
+  using lss::units::electronvolt;
 
-  auto& c = SPEED_OF_LIGHT; // cm * s^{-1}
-  auto& hbar = REDUCED_PLANCK_CONSTANT; // eV * s
+  auto rbb_mashonkina_voigt = RBBMashonkinaVoigtO1();
 
   int S = elements.size();
   Eigen::VectorXi L(S);
@@ -44,7 +52,7 @@ rbb_mashonkina_voigt_o1_rates(std::vector<std::shared_ptr<Element>> elements) {
     L(s) = elements[s]->levels().size();
   }
   auto K = [&](int s) -> int {
-    return int(fm::sum(0, s - 1, [&](int z) { return L(z); }));
+    return fm::sum<int>(0, s - 1, [&](int z) { return L(z); });
   };
 
   Eigen::VectorXd E(K(S)); // eV
@@ -72,12 +80,17 @@ rbb_mashonkina_voigt_o1_rates(std::vector<std::shared_ptr<Element>> elements) {
             auto& f_ij = transition.oscillator_strength; // 1
 
             R_PE(i + K(s), j + K(s)) =
-              + 0.66702
-              / std::pow(
-                c / (std::abs(E(i + K(s)) - E(j + K(s))) / hbar),
-                2.0
+              + (0.66702 * pow<2>(angstrom) * pow<-1>(second))
+              / pow<2>(
+                c
+                / (
+                  + abs(E(i + K(s)) * electronvolt - E(j + K(s)) * electronvolt)
+                  / hbar
+                )
               )
-              * (g(j + K(s)) / g(i + K(s))) * f_ij;
+              * (g(j + K(s)) / g(i + K(s))) * f_ij
+              / pow<-1>(second)
+            ;
           }
         }
       }

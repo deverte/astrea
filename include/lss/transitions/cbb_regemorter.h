@@ -12,11 +12,14 @@
 #include <memory>
 #include <vector>
 
+#include <boost/units/systems/si/codata_constants.hpp>
+#include <boost/units/systems/si.hpp>
+#include <boost/units/pow.hpp>
 #include <Eigen/Dense>
 #include <fm/fm.h>
 
 #include "../data/elements/element.h"
-#include "../physics/constants.h"
+#include "../physics/units.h"
 
 
 namespace lss {
@@ -38,14 +41,25 @@ inline Eigen::MatrixXd cbb_regemorter_rates(
   double electron_temperature,
   double electron_number_density
 ) {
-  auto& k_B = BOLTZMANN_CONSTANT; // eV * K^{-1}
+  using boost::units::si::constants::codata::k_B;
+  using boost::units::si::kelvin;
+  using boost::units::si::second;
+  using boost::units::pow;
+  using boost::units::static_rational;
+  using lss::units::centimeter;
+  using lss::units::electronvolt;
 
-  auto gamma_ij = 1.0; // 1 // effective electron collision strength
-  auto zeta = 8.62913210858377e-6; // cm^3 * s^{-1} * K^{1 / 2}
+  auto gamma_ij = 1.0; // effective electron collision strength
+  auto zeta =
+    + 8.62913210858377e-6
+    * pow<3>(centimeter)
+    * pow<-1>(second)
+    * pow<static_rational<1, 2>>(kelvin)
+  ;
 
-  auto& N_e = electron_number_density; // cm^{-3}
-  auto& T = temperature; // K
-  auto& T_e = electron_temperature; // K
+  auto N_e = electron_number_density * pow<-3>(centimeter);
+  auto T = temperature * kelvin;
+  auto T_e = electron_temperature * kelvin;
 
   int S = elements.size();
   Eigen::VectorXi L(S);
@@ -53,7 +67,7 @@ inline Eigen::MatrixXd cbb_regemorter_rates(
     L(s) = elements[s]->levels().size();
   }
   auto K = [&](int s) -> int {
-    return int(fm::sum(0, s - 1, [&](int z) { return L(z); }));
+    return fm::sum<int>(0, s - 1, [&](int z) { return L(z); });
   };
 
   Eigen::VectorXd E(K(S)); // eV
@@ -69,13 +83,14 @@ inline Eigen::MatrixXd cbb_regemorter_rates(
   for (int s = 0; s <= S - 1; s++) {
     for (int i = 0; i <= L(s) - 1; i++) {
       for (int j = 0; j <= L(s) - 1; j++) {
-        C_CE_CD(i + K(s), j + K(s)) = fm::cases({
+        C_CE_CD(i + K(s), j + K(s)) = fm::cases<double>({
           {
             [&]() {
               return
                 + zeta
-                * std::sqrt(1.0 / T_e)
+                * pow<static_rational<-1, 2>>(T_e)
                 * gamma_ij / g(i + K(s))
+                / (pow<3>(centimeter) * pow<-1>(second))
               ;
             },
             E(i + K(s)) > E(j + K(s))
@@ -84,9 +99,13 @@ inline Eigen::MatrixXd cbb_regemorter_rates(
             [&]() {
               return
                 + zeta
-                * std::sqrt(1.0 / T_e)
+                * pow<static_rational<-1, 2>>(T_e)
                 * gamma_ij / g(i + K(s))
-                * std::exp(-(E(j + K(s)) - E(i + K(s))) / (k_B * T))
+                * std::exp(
+                  - (E(j + K(s)) * electronvolt - E(i + K(s)) * electronvolt)
+                  / (k_B * T)
+                )
+                / (pow<3>(centimeter) * pow<-1>(second))
               ;
             },
             E(i + K(s)) < E(j + K(s))
@@ -98,7 +117,7 @@ inline Eigen::MatrixXd cbb_regemorter_rates(
   }
 
   Eigen::MatrixXd R_CE_CD = Eigen::MatrixXd::Zero(K(S), K(S)); // s^{-1}
-  R_CE_CD = N_e * C_CE_CD;
+  R_CE_CD = (N_e / pow<-3>(centimeter)) * C_CE_CD;
 
   return R_CE_CD;
 }
