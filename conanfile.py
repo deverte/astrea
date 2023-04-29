@@ -4,20 +4,16 @@ from conan import ConanFile
 from conan.tools.files import copy
 
 
-version = os.environ['version']
-project = os.environ['project']
-
-
 class Lss(ConanFile):
-    name = project
-    version = version
+    name = "lss"
+    version = "0.1.7"
     exports_sources = "include/*"
     no_copy_source = True
 
     def requirements(self):
         self.requires("boost/1.81.0", override=True)
         self.requires("eigen/3.4.0", override=True)
-        self.requires("fm/0.1.1")
+        self.requires("fm/0.1.2")
         self.requires("libinterpolate/2.6.2")
 
     def package(self):
