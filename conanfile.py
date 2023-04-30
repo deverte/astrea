@@ -4,9 +4,9 @@ from conan import ConanFile
 from conan.tools.files import copy
 
 
-class Lss(ConanFile):
-    name = "lss"
-    version = "0.1.7"
+class Astrea(ConanFile):
+    name = "astrea"
+    version = "0.2.0" # same as in Makefile
     exports_sources = "include/*"
     no_copy_source = True
 

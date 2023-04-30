@@ -1,5 +1,5 @@
-project = lss
-version = 0.1.7
+project = astrea
+version = 0.2.0 # same as in conanfile.py
 
 
 .PHONY: build

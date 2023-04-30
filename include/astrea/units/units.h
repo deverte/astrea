@@ -1,0 +1,117 @@
+/**
+ * \file astrea/physics/constants.h
+ * Physical (and some mathematical) constants.
+ * 
+ * \copyright GPL
+ * \author Artem Shepelin (4.shepelin@gmail.com)
+ */
+#pragma once
+
+
+#include <boost/units/systems/si/codata_constants.hpp>
+#include <boost/units/systems/si.hpp>
+
+
+namespace astrea::units::si::units {
+
+
+using irradiance_area = boost::units::unit<
+  boost::units::list<
+    boost::units::dim<
+      boost::units::mass_base_dimension,
+      boost::units::static_rational<1L, 1L>
+    >,
+    boost::units::list<
+      boost::units::dim<
+        boost::units::time_base_dimension,
+        boost::units::static_rational<-3L, 1L>
+      >,
+      boost::units::dimensionless_type
+    >
+  >,
+  boost::units::si::system
+>;
+
+
+using transition_rate_coefficient = boost::units::unit<
+  boost::units::list<
+    boost::units::dim<
+      boost::units::length_base_dimension,
+      boost::units::static_rational<3L, 1L>
+    >,
+    boost::units::list<
+      boost::units::dim<
+        boost::units::time_base_dimension,
+        boost::units::static_rational<-1L, 1L>
+      >,
+      boost::units::dimensionless_type
+    >
+  >,
+  boost::units::si::system
+>;
+
+
+}
+
+
+namespace astrea::units::si::quantities {
+
+
+boost::units::quantity<boost::units::si::length> astronomical_unit =
+  1.495978707e11 * boost::units::si::meter
+;
+
+boost::units::quantity<boost::units::si::length> angstrom =
+  1.0e-10 * boost::units::si::meter
+;
+
+boost::units::quantity<boost::units::si::length> centimeter =
+  1.0e-2 * boost::units::si::meter
+;
+
+boost::units::quantity<boost::units::si::mass> dalton =
+  1.0 * boost::units::si::constants::codata::m_u
+;
+
+boost::units::quantity<boost::units::si::energy> electronvolt =
+  boost::units::si::constants::codata::e * 1.0 * boost::units::si::volt
+;
+
+boost::units::quantity<boost::units::si::energy> erg =
+  1.0e-7 * boost::units::si::joule
+;
+
+boost::units::quantity<boost::units::si::length> nanometer =
+  1.0e-9 * boost::units::si::meter
+;
+
+boost::units::quantity<boost::units::si::mass> unified_atomic_mass_unit =
+  dalton
+;
+
+
+}
+
+
+namespace astrea::units::si::constants {
+
+
+auto Ry =
+  boost::units::si::constants::codata::h 
+  * boost::units::si::constants::codata::c
+  * boost::units::si::constants::codata::R_infinity
+;
+
+
+}
+
+
+namespace astrea::units::si {
+
+
+using namespace astrea::units::si::quantities;
+using namespace astrea::units::si::constants;
+using namespace astrea::units::si::units;
+
+
+}

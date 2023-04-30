@@ -1,0 +1,38 @@
+/**
+ * \file astrea/astrea.h
+ * Electrons population LTE and NLTE calculation header-only library.
+ * 
+ * \copyright GPL
+ * \author Artem Shepelin (4.shepelin@gmail.com)
+ */
+#pragma once
+
+
+#include "./calculation/lte.h"
+#include "./calculation/nlte.h"
+#include "./data/elements/element.h"
+#include "./data/elements/h1.h"
+#include "./data/elements/h2.h"
+#include "./data/elements/he1.h"
+#include "./data/elements/he2.h"
+#include "./data/elements/o1_mashonkina.h"
+#include "./data/elements/o2_mashonkina.h"
+#include "./data/spectra/black_body_planck.h"
+#include "./data/spectra/kelt_9_fossati.h"
+#include "./data/spectra/spectrum.h"
+#include "./data/spectra/sun_gueymard.h"
+#include "./transitions/cbb_mashonkina_o1.h"
+#include "./transitions/cbb_regemorter.h"
+#include "./transitions/ci_arnaud_younger.h"
+#include "./transitions/ci_hahn.h"
+#include "./transitions/cti_arnaud.h"
+#include "./transitions/ctr_arnaud.h"
+#include "./transitions/dr_badnell.h"
+#include "./transitions/pi_mashonkina_o1.h"
+#include "./transitions/rbb_mashonkina_doppler_o1.h"
+#include "./transitions/rbb_mashonkina_voigt_o1.h"
+#include "./transitions/rbb_tasitsiomi.h"
+#include "./transitions/rr_badnell_verner.h"
+#include "./transitions/rr_seaton.h"
+#include "./transitions/se_nist_o1.h"
+#include "./transitions/tbr_hahn.h"
