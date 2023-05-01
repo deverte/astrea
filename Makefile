@@ -4,6 +4,7 @@ version = 0.2.0 # same as in conanfile.py
 
 .PHONY: build
 build:
+	conan config install ./remotes.json
 	conan create . --build=missing # build inside Conan cache (~/conan2/p)
 
 
