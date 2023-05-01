@@ -90,5 +90,6 @@
         "latch": "cpp",
         "syncstream": "cpp"
     },
-    "mesonbuild.configureOnOpen": false
+    "mesonbuild.configureOnOpen": false,
+    "svg.preview.background": "white"
 }

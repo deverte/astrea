@@ -1,0 +1,12 @@
+<svg width="400" height="400" xmlns="http://www.w3.org/2000/svg">
+    <g transform="translate(20, 20) scale(0.9)">
+        <path d="M0 200 L140 160 L120 120 L160 140 L200 0 L240 140 L280 120 L260 160 L400 200 L260 240 L280 280 L240 260 L200 400 L160 260 L120 280 L140 240 Z" stroke="black" stroke-width="10" fill="none" />
+        <path d="M0 200 L140 160 L120 120 L160 140 L200 0 L240 140 L280 120 L260 160 L400 200 L260 240 L280 280 L240 260 L200 400 L160 260 L120 280 L140 240 Z" stroke="white" stroke-width="6" fill="none" />
+        <g transform="translate(150 170)">
+            <path d="M0 50 L100 50" stroke="black" stroke-width="10" fill="none" />
+            <path d="M0 50 L100 50" stroke="white" stroke-width="6" fill="none" />
+            <path d="M0 22 L20 22 A1 1 0 1 1 80 22 L100 22" stroke="black" stroke-width="10" fill="none" />
+            <path d="M0 22 L20 22 A1 1 0 1 1 80 22 L100 22" stroke="white" stroke-width="6" fill="none" />
+        </g>
+    </g>
+</svg>
