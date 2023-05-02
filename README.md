@@ -40,7 +40,7 @@ Next, install the following dependencies:
   [Boost.Units](https://github.com/boostorg/units))
 - [Eigen](https://eigen.tuxfamily.org/index.php?title=Main_Page)
 - [fm](https://gitea.zarux.ru/astro/fm)
-- [libInterpolate](https://github.com/CD3/libInterpolate)
+- [ni](https://gitea.zarux.ru/astro/ni)
 
 ## Documentation
 

@@ -16,7 +16,7 @@
 
 #include <boost/units/systems/si.hpp>
 #include <boost/units/pow.hpp>
-#include <libInterpolate/Interpolate.hpp>
+#include <ni/ni.h>
 
 #include "./spectrum.h"
 #include "../../units/units.h"
@@ -76,8 +76,7 @@ class SunGueymard : public Spectrum {
  private:
   boost::units::quantity<boost::units::si::length> distance_;
 
-  std::function<double(double)>
-  interpolant_ = _1D::LinearInterpolator<double>();
+  ni::LinearInterpolant interpolant_;
 
   boost::units::quantity<boost::units::si::length> max_wavelength_;
 
@@ -92,8 +91,10 @@ class SunGueymard : public Spectrum {
 inline SunGueymard::SunGueymard() {
   distance_ = resource_.distance * astrea::units::si::astronomical_unit;
 
-  interpolant_.target<_1D::LinearInterpolator<double>>()
-    ->setData(resource_.wavelengths, resource_.spectral_irradiance);
+  interpolant_.data_points(
+    resource_.wavelengths,
+    resource_.spectral_irradiance
+  );
 
   max_wavelength_ =
     + *std::max_element(

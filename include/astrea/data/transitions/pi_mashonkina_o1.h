@@ -9,7 +9,7 @@
 #pragma once
 
 
-#include <libInterpolate/Interpolate.hpp>
+#include <ni/ni.h>
 
 #include <algorithm>
 #include <functional>
@@ -33,7 +33,7 @@ struct IPIMashonkinaO1Transition {
    * Photoionization cross section function of frequency in \f$s^{-1}\f$,
    * returns result in \f$cm^2\f$.
    */
-  std::function<double(double)> photoionization_cross_section;
+  ni::LinearInterpolant photoionization_cross_section;
   /**
    * Data start index.
    */
@@ -120,11 +120,7 @@ PIMashonkinaO1::PIMashonkinaO1() {
       transition.finish_index - 1
     };
 
-    transition.photoionization_cross_section = // cm^2
-      _1D::LinearInterpolator<double>()
-    ;
-    transition.photoionization_cross_section
-      .target<_1D::LinearInterpolator<double>>()->setData(nu, sigma);
+    transition.photoionization_cross_section.data_points(nu, sigma); // cm^2
   }
 }
 

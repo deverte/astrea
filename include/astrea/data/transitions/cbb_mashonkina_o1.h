@@ -9,7 +9,7 @@
 #pragma once
 
 
-#include <libInterpolate/Interpolate.hpp>
+#include <ni/ni.h>
 
 #include <functional>
 #include <string>
@@ -90,7 +90,7 @@ class CBBMashonkinaO1 {
    * Collision rate coefficient function of temperature in \f$K\f$, returns
    * result in \f$cm^3 * s^{-1}\f$.
    */
-  std::vector<std::function<double(double)>> collision_rate_coefficients_;
+  std::vector<ni::LinearInterpolant> collision_rate_coefficients_;
 };
 
 
@@ -101,11 +101,7 @@ CBBMashonkinaO1::CBBMashonkinaO1() {
     auto T = resource_.transitions[i].temperatures;
     auto C = resource_.transitions[i].collision_rate_coefficients;
 
-    collision_rate_coefficients_[i] = // cm^3 * s^{-1}
-      _1D::LinearInterpolator<double>()
-    ;
-    collision_rate_coefficients_[i]
-      .target<_1D::LinearInterpolator<double>>()->setData(T, C);
+    collision_rate_coefficients_[i].data_points(T, C); // cm^3 * s^{-1}
   }
 }
 
