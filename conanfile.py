@@ -11,8 +11,8 @@ class Astrea(ConanFile):
     no_copy_source = True
 
     def requirements(self):
-        self.requires("boost/1.81.0", override=True)
-        self.requires("eigen/3.4.0", override=True)
+        self.requires("boost/1.81.0")
+        self.requires("eigen/3.4.0")
         self.requires("fm/0.1.2")
         self.requires("ni/0.1.1")
 
