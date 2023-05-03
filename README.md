@@ -35,9 +35,9 @@ git clone https://gitea.zarux.ru/astro/astrea
 
 Next, install the following dependencies:
 
-- [Boost](https://www.boost.org/) (or only
-  [Boost.Math](https://github.com/boostorg/math),
-  [Boost.Units](https://github.com/boostorg/units))
+- [Boost](https://www.boost.org/) (or header-only versions
+  [Boost.Math](https://gitea.zarux.ru/astro/boost-math),
+  [Boost.Units](https://gitea.zarux.ru/astro/boost-units))
 - [Eigen](https://eigen.tuxfamily.org/index.php?title=Main_Page)
 - [fm](https://gitea.zarux.ru/astro/fm)
 - [ni](https://gitea.zarux.ru/astro/ni)
@@ -64,10 +64,10 @@ distribution and Saha ionization equation. Resulting population has the
 `Eigen::VectorXd` type.
 
 Further it will be assumed that [Elements](#elements) and [Spectrum](#spectrum)
-are initialized and the library is included.
+are initialized and the library is included (`#include <astrea/astrea.h>`).
 
 ```c++
-auto temperature = 1.0e4;
+auto temperature = 1.0e4; // kelvin
 auto boltzmann = astrea::lte_boltzmann_population(elements, temperature);
 
 auto temperature = 1.0e4; // kelvin
@@ -94,7 +94,7 @@ Eigen::VectorXd population_1;
 population_1 << /* Size must be equal to sum of all elements' keys */;
 auto delta_time = 1.0e-2; // second
 auto rates_matrix = /* See Transitions section */;
-auto population_2 = nlte_population(
+auto population_2 = astrea::nlte_population(
   population_1,
   delta_time,
   rates_matrix
@@ -155,8 +155,6 @@ Elements typically passed to statistical equilibrium functions as a
 #include <memory>
 #include <vector>
 
-#include <astrea/astrea.h>
-
 auto o1_mashonkina = std::make_shared<astrea::O1Mashonkina>();
 o1_mashonkina->keys({"12P3P4", "12P1D4"}); // Select only two levels
 auto o2_mashonkina = std::make_shared<astrea::O2Mashonkina>();
@@ -183,9 +181,6 @@ Spectrum typically passed to statistical equilibrium functions as a
 
 ```c++
 #include <memory>
-
-#include <astrea/astrea.h>
-
 
 auto spectrum = std::make_shared<astrea::SunGueymard>();
 ```
