@@ -140,8 +140,10 @@ inline double SunGueymard::spectral_irradiance(double wavelength) {
   using boost::units::si::watt;
   using boost::units::pow;
 
+  auto lambda = wavelength * nanometer;
+
   auto E_e_lambda =
-    + interpolant_(wavelength)
+    + interpolant_((lambda / nanometer).value())
     * watt * pow<-2>(meter) * pow<-1>(nanometer) * pow<2>(astronomical_unit)
     * pow<2>(astronomical_unit)
   ;

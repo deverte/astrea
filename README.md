@@ -9,6 +9,8 @@ bound-bound transitions, photoionization-radiative recombination-dielectronic
 recombination, charge transfer ionization-recombination, and spontaneous
 emission.
 
+> Notice: library is under development, some functionality may be invalid.
+
 ## Installation
 
 ### Using Conan
@@ -142,6 +144,7 @@ The following transitions rates functions are available:
 - `astrea::rbb_mashonkina_voigt_o1_rates`
 - `astrea::rbb_tasitsiomi_rates`
 - `astrea::rr_badnell_verner_rates`
+- `astrea::rr_dr_mashonkina_o1_rates`
 - `astrea::rr_seaton_rates`
 - `astrea::se_nist_o1_rates`
 - `astrea::tbr_hahn_rates`

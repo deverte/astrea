@@ -15,6 +15,7 @@
 #include <vector>
 
 #include <boost/units/systems/si.hpp>
+#include <boost/units/systems/si/codata_constants.hpp>
 #include <boost/units/pow.hpp>
 #include <ni/ni.h>
 
@@ -137,17 +138,22 @@ inline double Kelt9Fossati::spectral_irradiance(double wavelength) {
   using astrea::units::si::centimeter;
   using astrea::units::si::erg;
   using astrea::units::si::nanometer;
+  using boost::units::si::constants::codata::c;
+  using boost::units::si::constants::codata::h;
   using boost::units::si::meter;
   using boost::units::si::second;
   using boost::units::si::watt;
   using boost::units::pow;
 
+  auto D = distance_;
+  auto lambda = wavelength * nanometer;
+  auto nu = c / lambda;
+
   auto E_e_lambda =
-    + interpolant_(wavelength)
-    * erg * pow<-1>(second) * pow<-2>(centimeter) * pow<-1>(angstrom)
+    + (h * nu) * interpolant_((lambda / nanometer).value())
+    * pow<-1>(second) * pow<-2>(centimeter) * pow<-1>(angstrom)
     * pow<2>(astronomical_unit)
   ;
-  auto D = distance_;
 
   auto E = E_e_lambda / pow<2>(D);
 
