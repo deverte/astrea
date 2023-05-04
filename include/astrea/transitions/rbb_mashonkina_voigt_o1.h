@@ -64,7 +64,7 @@ rbb_mashonkina_voigt_o1_rates(std::vector<std::shared_ptr<Element>> elements) {
     }
   }
 
-  Eigen::MatrixXd R_PE = Eigen::MatrixXd::Zero(K(S), K(S)); // s^{-1}
+  Eigen::MatrixXd R_RBB = Eigen::MatrixXd::Zero(K(S), K(S)); // s^{-1}
   for (int s = 0; s <= S - 1; s++) {
     for (int i = 0; i <= L(s) - 1; i++) {
       auto initial = elements[s]->levels()[i];
@@ -79,7 +79,7 @@ rbb_mashonkina_voigt_o1_rates(std::vector<std::shared_ptr<Element>> elements) {
           ) {
             auto& f_ij = transition.oscillator_strength; // 1
 
-            R_PE(i + K(s), j + K(s)) =
+            R_RBB(i + K(s), j + K(s)) =
               + (0.66702 * pow<2>(angstrom) * pow<-1>(second))
               / pow<2>(
                 c
@@ -97,7 +97,7 @@ rbb_mashonkina_voigt_o1_rates(std::vector<std::shared_ptr<Element>> elements) {
     }
   }
 
-  return R_PE;
+  return R_RBB;
 }
 
 

@@ -65,7 +65,7 @@ inline Eigen::MatrixXd rbb_mashonkina_doppler_o1_rates(
     }
   }
 
-  Eigen::MatrixXd R_PE = Eigen::MatrixXd::Zero(K(S), K(S)); // s^{-1}
+  Eigen::MatrixXd R_RBB = Eigen::MatrixXd::Zero(K(S), K(S)); // s^{-1}
   for (int s = 0; s <= S - 1; s++) {
     for (int i = 0; i <= L(s) - 1; i++) {
       auto initial = elements[s]->levels()[i];
@@ -80,7 +80,7 @@ inline Eigen::MatrixXd rbb_mashonkina_doppler_o1_rates(
           ) {
             auto& f_ij = transition.oscillator_strength; // 1
 
-            R_PE(i + K(s), j + K(s)) =
+            R_RBB(i + K(s), j + K(s)) =
               + (0.66702 * pow<2>(angstrom) * pow<-1>(second))
               / pow<2>(
                 c
@@ -98,7 +98,7 @@ inline Eigen::MatrixXd rbb_mashonkina_doppler_o1_rates(
     }
   }
 
-  return R_PE;
+  return R_RBB;
 }
 
 

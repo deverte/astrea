@@ -84,19 +84,19 @@ inline Eigen::MatrixXd rr_dr_mashonkina_o1_rates(
     ;
   };
 
-  Eigen::MatrixXd R_PI_RR_DR = Eigen::MatrixXd::Zero(K(S), K(S)); // s^{-1}
+  Eigen::MatrixXd R_RR_DR = Eigen::MatrixXd::Zero(K(S), K(S)); // s^{-1}
   for (int s = 0; s <= S - 2; s++) {
-    for (int i = 0; i <= L(s) - 1; i++) {
-      auto initial = elements[s]->levels()[i];
+    for (int j = 0; j <= L(s) - 1; j++) {
+      auto final = elements[s]->levels()[j];
 
       auto sigma = [&](quantity<frequency> frequency) {
         return pi_mashonkina_o1.photoionization_cross_section(
-          initial.term,
+          final.term,
           frequency / pow<-1>(second)
         ) * pow<2>(centimeter);
       };
 
-      R_PI_RR_DR(i + K(s), L(s) + K(s)) =
+      R_RR_DR(L(s) + K(s), j + K(s)) =
         4.0 * pi<double>() * boost::math::quadrature::trapezoidal( // s^{-1}
           [&](double nu) -> double {
             auto nu_ = nu * pow<-1>(second);
@@ -118,7 +118,7 @@ inline Eigen::MatrixXd rr_dr_mashonkina_o1_rates(
     }
   }
 
-  return R_PI_RR_DR;
+  return R_RR_DR;
 }
 
 

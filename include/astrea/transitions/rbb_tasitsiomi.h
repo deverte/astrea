@@ -111,7 +111,7 @@ inline Eigen::MatrixXd rbb_tasitsiomi_rates(
     }
   }
 
-  Eigen::MatrixXd R_PE_PD = Eigen::MatrixXd::Zero(K(S), K(S)); // s^{-1}
+  Eigen::MatrixXd R_RBB = Eigen::MatrixXd::Zero(K(S), K(S)); // s^{-1}
   for (int s = 0; s <= S - 1; s++) {
     for (int i = 0; i <= L(s) - 1; i++) {
       for (int j = 0; j <= L(s) - 1; j++) {
@@ -202,7 +202,7 @@ inline Eigen::MatrixXd rbb_tasitsiomi_rates(
           ;
         };
 
-        R_PE_PD(i + K(s), j + K(s)) = fm::cases<quantity<frequency>>({
+        R_RBB(i + K(s), j + K(s)) = fm::cases<quantity<frequency>>({
           {
             [&]() {
               return 4.0 * pi<double>() * boost::math::quadrature::trapezoidal(
@@ -252,7 +252,7 @@ inline Eigen::MatrixXd rbb_tasitsiomi_rates(
     }
   }
 
-  return R_PE_PD;
+  return R_RBB;
 }
 
 

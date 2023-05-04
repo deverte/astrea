@@ -79,7 +79,7 @@ inline Eigen::MatrixXd pi_mashonkina_o1_rates(
     ;
   };
 
-  Eigen::MatrixXd R_PI_RR_DR = Eigen::MatrixXd::Zero(K(S), K(S)); // s^{-1}
+  Eigen::MatrixXd R_PI = Eigen::MatrixXd::Zero(K(S), K(S)); // s^{-1}
   for (int s = 0; s <= S - 2; s++) {
     for (int i = 0; i <= L(s) - 1; i++) {
       auto initial = elements[s]->levels()[i];
@@ -91,7 +91,7 @@ inline Eigen::MatrixXd pi_mashonkina_o1_rates(
         ) * pow<2>(centimeter);
       };
 
-      R_PI_RR_DR(i + K(s), L(s) + K(s)) =
+      R_PI(i + K(s), L(s) + K(s)) =
         4.0 * pi<double>() * boost::math::quadrature::trapezoidal( // s^{-1}
           [&](double nu) -> double {
             auto nu_ = nu * pow<-1>(second);
@@ -112,7 +112,7 @@ inline Eigen::MatrixXd pi_mashonkina_o1_rates(
     }
   }
 
-  return R_PI_RR_DR;
+  return R_PI;
 }
 
 

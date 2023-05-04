@@ -60,7 +60,7 @@ inline Eigen::MatrixXd cbb_mashonkina_o1_rates(
     return fm::sum<int>(0, s - 1, [&](int z) { return L(z); });
   };
 
-  Eigen::MatrixXd C_CE_CD = Eigen::MatrixXd::Zero(K(S), K(S)); // cm^3 * s^{-1}
+  Eigen::MatrixXd C_CBB = Eigen::MatrixXd::Zero(K(S), K(S)); // cm^3 * s^{-1}
   for (int s = 0; s <= S - 1; s++) {
 
     for (int i = 0; i <= L(s) - 1; i++) {
@@ -69,7 +69,7 @@ inline Eigen::MatrixXd cbb_mashonkina_o1_rates(
       for (int j = 0; j <= L(s) - 1; j++) {
         auto final = elements[s]->levels()[j];
 
-        auto C_CE_CD_ij = [&](quantity<temperature_> temperature) {
+        auto C_CBB_ij = [&](quantity<temperature_> temperature) {
           return cbb_mashonkina_o1.collision_rate_coefficient(
             initial.term,
             final.term,
@@ -77,17 +77,17 @@ inline Eigen::MatrixXd cbb_mashonkina_o1_rates(
           ) * pow<3>(centimeter) * pow<-1>(second);
         };
 
-        C_CE_CD(i + K(s), j + K(s)) =
-          C_CE_CD_ij(T) / (pow<3>(centimeter) * pow<-1>(second))
+        C_CBB(i + K(s), j + K(s)) =
+          C_CBB_ij(T) / (pow<3>(centimeter) * pow<-1>(second))
         ;
       }
     }
   }
 
-  Eigen::MatrixXd R_CE_CD = Eigen::MatrixXd::Zero(K(S), K(S)); // s^{-1}
-  R_CE_CD = (N_e / pow<-3>(centimeter)) * C_CE_CD;
+  Eigen::MatrixXd R_CBB = Eigen::MatrixXd::Zero(K(S), K(S)); // s^{-1}
+  R_CBB = (N_e / pow<-3>(centimeter)) * C_CBB;
 
-  return R_CE_CD;
+  return R_CBB;
 }
 
 

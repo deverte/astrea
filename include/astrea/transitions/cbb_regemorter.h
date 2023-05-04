@@ -81,11 +81,11 @@ inline Eigen::MatrixXd cbb_regemorter_rates(
     }
   }
 
-  Eigen::MatrixXd C_CE_CD = Eigen::MatrixXd::Zero(K(S), K(S)); // cm^3 * s^{-1}
+  Eigen::MatrixXd C_CBB = Eigen::MatrixXd::Zero(K(S), K(S)); // cm^3 * s^{-1}
   for (int s = 0; s <= S - 1; s++) {
     for (int i = 0; i <= L(s) - 1; i++) {
       for (int j = 0; j <= L(s) - 1; j++) {
-        C_CE_CD(i + K(s), j + K(s)) =
+        C_CBB(i + K(s), j + K(s)) =
           fm::cases<quantity<transition_rate_coefficient>>({
             {
               [&]() {
@@ -118,10 +118,10 @@ inline Eigen::MatrixXd cbb_regemorter_rates(
     }
   }
 
-  Eigen::MatrixXd R_CE_CD = Eigen::MatrixXd::Zero(K(S), K(S)); // s^{-1}
-  R_CE_CD = (N_e / pow<-3>(centimeter)) * C_CE_CD;
+  Eigen::MatrixXd R_CBB = Eigen::MatrixXd::Zero(K(S), K(S)); // s^{-1}
+  R_CBB = (N_e / pow<-3>(centimeter)) * C_CBB;
 
-  return R_CE_CD;
+  return R_CBB;
 }
 
 
