@@ -70,9 +70,9 @@ inline Eigen::MatrixXd rr_mashonkina_o1_rates(
 
   int S = elements.size();
   Eigen::VectorXi L(S);
-  for (int s = 0; s <= S - 1; s++) {
+  fm::family(0, S - 1, [&](int s) {
     L(s) = elements[s]->levels().size();
-  }
+  });
   auto K = [&](int s) -> int {
     return fm::sum<int>(0, s - 1, [&](int z) { return L(z); });
   };
@@ -84,7 +84,9 @@ inline Eigen::MatrixXd rr_mashonkina_o1_rates(
     ;
   };
 
-  Eigen::MatrixXd R_RR_DR = Eigen::MatrixXd::Zero(K(S), K(S)); // s^{-1}
+  std::pair<Eigen::MatrixXd, frequency> R_RR;
+  R_RR.first = Eigen::MatrixXd::Zero(K(S), K(S));
+  R_RR.second = pow<-1>(second);
   for (int s = 0; s <= S - 2; s++) {
     for (int j = 0; j <= L(s) - 1; j++) {
       auto final = elements[s]->levels()[j];
@@ -96,7 +98,7 @@ inline Eigen::MatrixXd rr_mashonkina_o1_rates(
         ) * pow<2>(centimeter);
       };
 
-      R_RR_DR(L(s) + K(s), j + K(s)) =
+      R_RR.first(L(s) + K(s), j + K(s)) =
         4.0 * pi<double>() * boost::math::quadrature::trapezoidal( // s^{-1}
           [&](double nu) -> double {
             auto nu_ = nu * pow<-1>(second);
@@ -118,7 +120,7 @@ inline Eigen::MatrixXd rr_mashonkina_o1_rates(
     }
   }
 
-  return R_RR_DR;
+  return R_RR.first;
 }
 
 

@@ -10,6 +10,7 @@
 
 #include <cmath>
 #include <memory>
+#include <utility>
 #include <vector>
 
 #include <boost/units/systems/si.hpp>
@@ -41,6 +42,7 @@ inline Eigen::MatrixXd dr_badnell_rates(
 ) {
   using astrea::units::si::centimeter;
   using astrea::units::si::transition_rate_coefficient;
+  using boost::units::si::frequency;
   using boost::units::si::kelvin;
   using boost::units::si::second;
   using boost::units::pow;
@@ -55,14 +57,16 @@ inline Eigen::MatrixXd dr_badnell_rates(
 
   int S = elements.size();
   Eigen::VectorXi L(S);
-  for (int s = 0; s <= S - 1; s++) {
+  fm::family(0, S - 1, [&](int s) {
     L(s) = elements[s]->levels().size();
-  }
+  });
   auto K = [&](int s) -> int {
     return fm::sum<int>(0, s - 1, [&](int z) { return L(z); });
   };
 
-  Eigen::MatrixXd C_DR = Eigen::MatrixXd::Zero(K(S), K(S)); // cm^3 * s^{-1}
+  std::pair<Eigen::MatrixXd, quantity<transition_rate_coefficient>> C_DR;
+  C_DR.first = Eigen::MatrixXd::Zero(K(S), K(S));
+  C_DR.second = pow<3>(centimeter) * pow<-1>(second);
   for (int s = 0; s <= S - 2; s++) {
     std::vector<double> C; // cm^3 * s^{-1} * K^{3/2}
     std::vector<double> E; // K
@@ -94,16 +98,15 @@ inline Eigen::MatrixXd dr_badnell_rates(
     );
 
     for (int j = 0; j <= L(s) - 1; j++) {
-      C_DR(L(s) + K(s), j + K(s)) =
-        C_DR_Nj / (pow<3>(centimeter) * pow<-1>(second))
-      ;
+      C_DR.first(L(s) + K(s), j + K(s)) = C_DR_Nj / C_DR.second;
     }
   }
 
-  Eigen::MatrixXd R_DR = Eigen::MatrixXd::Zero(K(S), K(S)); // s^{-1}
-  R_DR = (N_e / pow<-3>(centimeter)) * C_DR;
+  std::pair<Eigen::MatrixXd, frequency> R_DR;
+  R_DR.second = pow<-1>(second);
+  R_DR.first = N_e * C_DR.second / R_DR.second * C_DR.first;
 
-  return R_DR;
+  return R_DR.first;
 }
 
 

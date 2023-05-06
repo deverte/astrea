@@ -10,6 +10,7 @@
 
 #include <cmath>
 #include <memory>
+#include <utility>
 #include <vector>
 
 #include <boost/units/systems/si/codata_constants.hpp>
@@ -43,6 +44,7 @@ inline Eigen::MatrixXd ci_hahn_rates(
   using astrea::units::si::Ry;
   using astrea::units::si::transition_rate_coefficient;
   using boost::units::si::constants::codata::k_B;
+  using boost::units::si::frequency;
   using boost::units::si::kelvin;
   using boost::units::si::second;
   using boost::units::pow;
@@ -57,9 +59,9 @@ inline Eigen::MatrixXd ci_hahn_rates(
 
   int S = elements.size();
   Eigen::VectorXi L(S);
-  for (int s = 0; s <= S - 1; s++) {
+  fm::family(0, S - 1, [&](int s) {
     L(s) = elements[s]->levels().size();
-  }
+  });
   auto K = [&](int s) -> int {
     return fm::sum<int>(0, s - 1, [&](int z) { return L(z); });
   };
@@ -103,19 +105,20 @@ inline Eigen::MatrixXd ci_hahn_rates(
     });
   };
 
-  Eigen::MatrixXd C_CI = Eigen::MatrixXd::Zero(K(S), K(S)); // cm^3 * s^{-1}
-  for (int s = 0; s <= S - 2; s++) {
-    for (int i = 0; i <= L(s) - 1; i++) {
-      C_CI(i + K(s), L(s) + K(s)) =
-        C_CI_ij(s, n) / (pow<3>(centimeter) * pow<-1>(second))
-      ;
-    }
-  }
+  std::pair<Eigen::MatrixXd, quantity<transition_rate_coefficient>> C_CI;
+  C_CI.first = Eigen::MatrixXd::Zero(K(S), K(S));
+  C_CI.second = pow<3>(centimeter) * pow<-1>(second);
+  fm::family(0, S - 2, [&](int s) {
+    fm::family(0, L(s) - 1, [&](int i) {
+      C_CI.first(i + K(s), L(s) + K(s)) = C_CI_ij(s, n) / C_CI.second;
+    });
+  });
 
-  Eigen::MatrixXd R_CI = Eigen::MatrixXd::Zero(K(S), K(S)); // s^{-1}
-  R_CI = C_CI * (N_e / pow<-3>(centimeter));
+  std::pair<Eigen::MatrixXd, frequency> R_CI;
+  R_CI.second = pow<-1>(second);
+  R_CI.first = N_e * C_CI.second / R_CI.second * C_CI.first;
 
-  return R_CI;
+  return R_CI.first;
 }
 
 

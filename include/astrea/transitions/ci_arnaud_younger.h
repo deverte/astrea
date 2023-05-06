@@ -12,6 +12,7 @@
 #include <cmath>
 #include <limits>
 #include <memory>
+#include <utility>
 #include <vector>
 
 #include <boost/math/quadrature/trapezoidal.hpp>
@@ -46,10 +47,13 @@ Eigen::MatrixXd ci_arnaud_younger_rates(
 ) {
   using astrea::units::si::centimeter;
   using astrea::units::si::electronvolt;
+  using astrea::units::si::transition_rate_coefficient;
   using boost::units::si::constants::codata::k_B;
+  using boost::units::si::frequency;
   using boost::units::si::kelvin;
   using boost::units::si::second;
   using boost::units::pow;
+  using boost::units::quantity;
   using boost::units::static_rational;
 
   auto ci_arnaud = CIArnaud();
@@ -69,9 +73,9 @@ Eigen::MatrixXd ci_arnaud_younger_rates(
 
   int S = elements.size();
   Eigen::VectorXi L(S);
-  for (int s = 0; s <= S - 1; s++) {
+  fm::family(0, S - 1, [&](int s) {
     L(s) = elements[s]->levels().size();
-  }
+  });
   auto K = [&](int s) -> int {
     return fm::sum<int>(0, s - 1, [&](int z) { return L(z); });
   };
@@ -102,7 +106,9 @@ Eigen::MatrixXd ci_arnaud_younger_rates(
     ;
   };
 
-  Eigen::MatrixXd C_CI = Eigen::MatrixXd::Zero(K(S), K(S)); // cm^3 * s^{-1}
+  std::pair<Eigen::MatrixXd, quantity<transition_rate_coefficient>> C_CI;
+  C_CI.first = Eigen::MatrixXd::Zero(K(S), K(S));
+  C_CI.second = pow<3>(centimeter) * pow<-1>(second);
   for (int s = 0; s <= S - 2; s++) {
     std::vector<ICIArnaudFit> subshells;
     for (auto fit : ci_arnaud.fit()) {
@@ -135,7 +141,7 @@ Eigen::MatrixXd ci_arnaud_younger_rates(
     }
 
     for (int i = 0; i <= L(s) - 1; i++) {
-      C_CI(i + K(s), L(s) + K(s)) = // cm^3 * s^{-1}
+      C_CI.first(i + K(s), L(s) + K(s)) = // cm^3 * s^{-1}
         + zeta / pow<static_rational<3, 2>>(k_B * T_e) // eV^{-2} * cm * s^{-1}
         * fm::sum<double>(0, M - 1, [&](int m) {        // cm^2 * eV^2
           return
@@ -148,10 +154,11 @@ Eigen::MatrixXd ci_arnaud_younger_rates(
     }
   }
 
-  Eigen::MatrixXd R_CI = Eigen::MatrixXd::Zero(K(S), K(S)); // s^{-1}
-  R_CI = (n_e / pow<-3>(centimeter)) * n_a * C_CI;
+  std::pair<Eigen::MatrixXd, frequency> R_CI;
+  R_CI.second = pow<-1>(second);
+  R_CI.first = n_e * C_CI.second / R_CI.second * n_a * C_CI.first;
 
-  return R_CI;
+  return R_CI.first;
 }
 
 

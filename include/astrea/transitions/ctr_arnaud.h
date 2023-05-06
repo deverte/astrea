@@ -11,6 +11,7 @@
 
 #include <cmath>
 #include <memory>
+#include <utility>
 #include <vector>
 
 #include <boost/units/systems/si.hpp>
@@ -43,9 +44,12 @@ inline Eigen::MatrixXd ctr_arnaud_rates(
   double electron_number_density
 ) {
   using astrea::units::si::centimeter;
+  using astrea::units::si::transition_rate_coefficient;
+  using boost::units::si::frequency;
   using boost::units::si::kelvin;
   using boost::units::si::second;
   using boost::units::pow;
+  using boost::units::quantity;
 
   auto ctr_arnaud = CTRArnaud();
 
@@ -58,15 +62,19 @@ inline Eigen::MatrixXd ctr_arnaud_rates(
 
   int S = elements.size();
   Eigen::VectorXi L(S);
-  for (int s = 0; s <= S - 1; s++) {
+  fm::family(0, S - 1, [&](int s) {
     L(s) = elements[s]->levels().size();
-  }
+  });
   auto K = [&](int s) -> int {
     return fm::sum<int>(0, s - 1, [&](int z) { return L(z); });
   };
 
-  Eigen::MatrixXd R_CTR = Eigen::MatrixXd::Zero(K(S), K(S)); // s^{-1}
-  Eigen::MatrixXd C_CTR = Eigen::MatrixXd::Zero(K(S), K(S)); // cm^3 * s^{-1}
+  std::pair<Eigen::MatrixXd, frequency> R_CTR;
+  R_CTR.first = Eigen::MatrixXd::Zero(K(S), K(S));
+  R_CTR.second = pow<-1>(second);
+  std::pair<Eigen::MatrixXd, quantity<transition_rate_coefficient>> C_CTR;
+  C_CTR.first = Eigen::MatrixXd::Zero(K(S), K(S));
+  C_CTR.second = pow<3>(centimeter) * pow<-1>(second);
   for (int s = 0; s <= S - 2; s++) {
     auto a = 0.0 * pow<3>(centimeter) * pow<-1>(second);
     auto b = 0.0;
@@ -105,7 +113,7 @@ inline Eigen::MatrixXd ctr_arnaud_rates(
       }
     }
     if (T < T_min || T > T_max) {
-      return R_CTR;
+      return R_CTR.first;
     }
 
     auto C_CTR_Nj =
@@ -113,16 +121,13 @@ inline Eigen::MatrixXd ctr_arnaud_rates(
     ;
 
     for (int j = 0; j <= L(s) - 1; j++) {
-      C_CTR(L(s) + K(s), j + K(s)) =
-        + C_CTR_Nj
-        / (pow<3>(centimeter) * pow<-1>(second))
-      ;
+      C_CTR.first(L(s) + K(s), j + K(s)) = C_CTR_Nj / C_CTR.second;
     }
   }
 
-  R_CTR = (N_e / pow<-3>(centimeter)) * C_CTR;
+  R_CTR.first = N_e * C_CTR.second / R_CTR.second * C_CTR.first;
 
-  return R_CTR;
+  return R_CTR.first;
 }
 
 

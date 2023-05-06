@@ -10,6 +10,7 @@
 
 #include <cmath>
 #include <memory>
+#include <utility>
 #include <vector>
 
 #include <boost/units/systems/si/codata_constants.hpp>
@@ -46,6 +47,7 @@ inline Eigen::MatrixXd cti_arnaud_rates(
   using astrea::units::si::electronvolt;
   using astrea::units::si::transition_rate_coefficient;
   using boost::units::si::constants::codata::k_B;
+  using boost::units::si::frequency;
   using boost::units::si::kelvin;
   using boost::units::si::second;
   using boost::units::pow;
@@ -62,14 +64,16 @@ inline Eigen::MatrixXd cti_arnaud_rates(
 
   int S = elements.size();
   Eigen::VectorXi L(S);
-  for (int s = 0; s <= S - 1; s++) {
+  fm::family(0, S - 1, [&](int s) {
     L(s) = elements[s]->levels().size();
-  }
+  });
   auto K = [&](int s) -> int {
     return fm::sum<int>(0, s - 1, [&](int z) { return L(z); });
   };
 
-  Eigen::MatrixXd C_CTI = Eigen::MatrixXd::Zero(K(S), K(S)); // cm^3 * s^{-1}
+  std::pair<Eigen::MatrixXd, quantity<transition_rate_coefficient>> C_CTI;
+  C_CTI.first = Eigen::MatrixXd::Zero(K(S), K(S));
+  C_CTI.second = pow<3>(centimeter) * pow<-1>(second);
   for (int s = 0; s <= S - 2; s++) {
     auto a = 0.0 * pow<3>(centimeter) * pow<-1>(second);
     auto b = 0.0;
@@ -133,17 +137,15 @@ inline Eigen::MatrixXd cti_arnaud_rates(
     });
 
     for (int i = 0; i <= L(s) - 1; i++) {
-      C_CTI(i + K(s), L(s) + K(s)) =
-        + C_CTI_iN
-        / (pow<3>(centimeter) * pow<-1>(second))
-      ;
+      C_CTI.first(i + K(s), L(s) + K(s)) = C_CTI_iN / C_CTI.second;
     }
   }
 
-  Eigen::MatrixXd R_CTI = Eigen::MatrixXd::Zero(K(S), K(S)); // s^{-1}
-  R_CTI = (N_e / pow<-3>(centimeter)) * C_CTI;
+  std::pair<Eigen::MatrixXd, frequency> R_CTI;
+  R_CTI.second = pow<-1>(second);
+  R_CTI.first = N_e * C_CTI.second / R_CTI.second * C_CTI.first;
 
-  return R_CTI;
+  return R_CTI.first;
 }
 
 

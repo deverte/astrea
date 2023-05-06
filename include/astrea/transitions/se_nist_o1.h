@@ -40,14 +40,16 @@ se_nist_o1_rates(std::vector<std::shared_ptr<Element>> elements) {
 
   int S = elements.size();
   Eigen::VectorXi L(S);
-  for (int s = 0; s <= S - 1; s++) {
+  fm::family(0, S - 1, [&](int s) {
     L(s) = elements[s]->levels().size();
-  }
+  });
   auto K = [&](int s) {
     return fm::sum<int>(0, s - 1, [&](int z) { return L(z); });
   };
 
-  Eigen::MatrixXd R_SE = Eigen::MatrixXd::Zero(K(S), K(S)); // s^{-1}
+  std::pair<Eigen::MatrixXd, frequency> R_SE;
+  R_SE.first = Eigen::MatrixXd::Zero(K(S), K(S));
+  R_SE.second = pow<-1>(second);
   for (int s = 0; s <= S - 1; s++) {
     for (int i = 0; i <= L(s) - 1; i++) {
       for (int j = 0; j <= L(s) - 1; j++) {
@@ -72,7 +74,7 @@ se_nist_o1_rates(std::vector<std::shared_ptr<Element>> elements) {
           J(m) = transitions[m].initial_total_angular_momentum_quantum_number;
         }
 
-        R_SE(i + K(s), j + K(s)) = fm::cases<quantity<frequency>>({
+        R_SE.first(i + K(s), j + K(s)) = fm::cases<quantity<frequency>>({
           {[&]() { return 0.0 * pow<-1>(second); }, (i == j) || (M <= 0)},
           {
             [&]() {
@@ -87,12 +89,12 @@ se_nist_o1_rates(std::vector<std::shared_ptr<Element>> elements) {
             },
             (i != j) || (M > 0)
           },
-        }) / pow<-1>(second);
+        }) / R_SE.second;
       }
     }
   }
 
-  return R_SE;
+  return R_SE.first;
 }
 
 

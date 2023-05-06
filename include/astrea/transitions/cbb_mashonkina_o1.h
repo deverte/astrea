@@ -10,6 +10,7 @@
 
 
 #include <memory>
+#include <utility>
 #include <vector>
 
 #include <boost/units/systems/si.hpp>
@@ -40,6 +41,8 @@ inline Eigen::MatrixXd cbb_mashonkina_o1_rates(
   double electron_number_density
 ) {
   using astrea::units::si::centimeter;
+  using astrea::units::si::transition_rate_coefficient;
+  using boost::units::si::frequency;
   using boost::units::si::kelvin;
   using boost::units::si::second;
   using temperature_ = boost::units::si::temperature;
@@ -53,41 +56,37 @@ inline Eigen::MatrixXd cbb_mashonkina_o1_rates(
 
   int S = elements.size();
   Eigen::VectorXi L(S);
-  for (int s = 0; s <= S - 1; s++) {
+  fm::family(0, S - 1, [&](int s) {
     L(s) = elements[s]->levels().size();
-  }
+  });
   auto K = [&](int s) -> int {
     return fm::sum<int>(0, s - 1, [&](int z) { return L(z); });
   };
 
-  Eigen::MatrixXd C_CBB = Eigen::MatrixXd::Zero(K(S), K(S)); // cm^3 * s^{-1}
-  for (int s = 0; s <= S - 1; s++) {
-
-    for (int i = 0; i <= L(s) - 1; i++) {
-      auto initial = elements[s]->levels()[i];
-
-      for (int j = 0; j <= L(s) - 1; j++) {
-        auto final = elements[s]->levels()[j];
-
+  std::pair<Eigen::MatrixXd, quantity<transition_rate_coefficient>> C_CBB;
+  C_CBB.first = Eigen::MatrixXd::Zero(K(S), K(S));
+  C_CBB.second = pow<3>(centimeter) * pow<-1>(second);
+  fm::family(0, S - 1, [&](int s) {
+    fm::family(0, L(s) - 1, [&](int i) {
+      fm::family(0, L(s) - 1, [&](int j) {
         auto C_CBB_ij = [&](quantity<temperature_> temperature) {
           return cbb_mashonkina_o1.collision_rate_coefficient(
-            initial.term,
-            final.term,
+            elements[s]->levels()[i].term,
+            elements[s]->levels()[j].term,
             temperature / kelvin
           ) * pow<3>(centimeter) * pow<-1>(second);
         };
 
-        C_CBB(i + K(s), j + K(s)) =
-          C_CBB_ij(T) / (pow<3>(centimeter) * pow<-1>(second))
-        ;
-      }
-    }
-  }
+        C_CBB.first(i + K(s), j + K(s)) = C_CBB_ij(T) / C_CBB.second;
+      });
+    });
+  });
 
-  Eigen::MatrixXd R_CBB = Eigen::MatrixXd::Zero(K(S), K(S)); // s^{-1}
-  R_CBB = (N_e / pow<-3>(centimeter)) * C_CBB;
+  std::pair<Eigen::MatrixXd, frequency> R_CBB;
+  R_CBB.second = pow<-1>(second);
+  R_CBB.first = N_e * C_CBB.second / R_CBB.second * C_CBB.first;
 
-  return R_CBB;
+  return R_CBB.first;
 }
 
 

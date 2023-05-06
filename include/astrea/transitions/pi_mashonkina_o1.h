@@ -11,6 +11,7 @@
 
 #include <cmath>
 #include <memory>
+#include <utility>
 #include <vector>
 
 #include <boost/math/constants/constants.hpp>
@@ -66,9 +67,9 @@ inline Eigen::MatrixXd pi_mashonkina_o1_rates(
 
   int S = elements.size();
   Eigen::VectorXi L(S);
-  for (int s = 0; s <= S - 1; s++) {
+  fm::family(0, S - 1, [&](int s) {
     L(s) = elements[s]->levels().size();
-  }
+  });
   auto K = [&](int s) -> int {
     return fm::sum<int>(0, s - 1, [&](int z) { return L(z); });
   };
@@ -80,7 +81,9 @@ inline Eigen::MatrixXd pi_mashonkina_o1_rates(
     ;
   };
 
-  Eigen::MatrixXd R_PI = Eigen::MatrixXd::Zero(K(S), K(S)); // s^{-1}
+  std::pair<Eigen::MatrixXd, frequency> R_PI;
+  R_PI.first = Eigen::MatrixXd::Zero(K(S), K(S));
+  R_PI.second = pow<-1>(second);
   for (int s = 0; s <= S - 2; s++) {
     for (int i = 0; i <= L(s) - 1; i++) {
       auto initial = elements[s]->levels()[i];
@@ -92,7 +95,7 @@ inline Eigen::MatrixXd pi_mashonkina_o1_rates(
         ) * pow<2>(centimeter);
       };
 
-      R_PI(i + K(s), L(s) + K(s)) =
+      R_PI.first(i + K(s), L(s) + K(s)) =
         4.0 * pi<double>() * boost::math::quadrature::trapezoidal( // s^{-1}
           [&](double nu) -> double {
             auto nu_ = nu * pow<-1>(second);
@@ -113,7 +116,7 @@ inline Eigen::MatrixXd pi_mashonkina_o1_rates(
     }
   }
 
-  return R_PI;
+  return R_PI.first;
 }
 
 

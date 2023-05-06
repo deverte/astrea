@@ -43,6 +43,7 @@ inline Eigen::MatrixXd tbr_hahn_rates(
   using astrea::units::si::Ry;
   using astrea::units::si::transition_rate_coefficient;
   using boost::units::si::constants::codata::k_B;
+  using boost::units::si::frequency;
   using boost::units::si::kelvin;
   using boost::units::si::second;
   using boost::units::pow;
@@ -58,9 +59,9 @@ inline Eigen::MatrixXd tbr_hahn_rates(
 
   int S = elements.size();
   Eigen::VectorXi L(S);
-  for (int s = 0; s <= S - 1; s++) {
+  fm::family(0, S - 1, [&](int s) {
     L(s) = elements[s]->levels().size();
-  }
+  });
   auto K = [&](int s) -> int {
     return fm::sum<int>(0, s - 1, [&](int z) { return L(z); });
   };
@@ -101,19 +102,20 @@ inline Eigen::MatrixXd tbr_hahn_rates(
     });
   };
 
-  Eigen::MatrixXd C_TBR = Eigen::MatrixXd::Zero(K(S), K(S)); // cm^3 * s^{-1}
+  std::pair<Eigen::MatrixXd, quantity<transition_rate_coefficient>> C_TBR;
+  C_TBR.first = Eigen::MatrixXd::Zero(K(S), K(S));
+  C_TBR.second = pow<3>(centimeter) * pow<-1>(second);
   for (int s = 0; s <= S - 2; s++) {
     for (int j = 0; j <= L(s) - 1; j++) {
-      C_TBR(L(s) + K(s), j + K(s)) =
-        C_TBR_Nj(s, n) / (pow<3>(centimeter) * pow<-1>(second))
-      ;
+      C_TBR.first(L(s) + K(s), j + K(s)) = C_TBR_Nj(s, n) / C_TBR.second;
     }
   }
 
-  Eigen::MatrixXd R_TBR = Eigen::MatrixXd::Zero(K(S), K(S)); // s^{-1}
-  R_TBR = C_TBR * (N_e / pow<-3>(centimeter));
+  std::pair<Eigen::MatrixXd, frequency> R_TBR;
+  R_TBR.second = pow<-1>(second);
+  R_TBR.first = N_e * C_TBR.second / R_TBR.second * C_TBR.first;
 
-  return R_TBR;
+  return R_TBR.first;
 }
 
 

@@ -10,6 +10,7 @@
 
 #include <cmath>
 #include <memory>
+#include <utility>
 #include <vector>
 
 #include <boost/units/systems/si/codata_constants.hpp>
@@ -45,6 +46,8 @@ inline Eigen::MatrixXd cbb_regemorter_rates(
   using astrea::units::si::electronvolt;
   using astrea::units::si::transition_rate_coefficient;
   using boost::units::si::constants::codata::k_B;
+  using boost::units::si::energy;
+  using boost::units::si::frequency;
   using boost::units::si::kelvin;
   using boost::units::si::second;
   using boost::units::pow;
@@ -65,27 +68,33 @@ inline Eigen::MatrixXd cbb_regemorter_rates(
 
   int S = elements.size();
   Eigen::VectorXi L(S);
-  for (int s = 0; s <= S - 1; s++) {
+  fm::family(0, S - 1, [&](int s) {
     L(s) = elements[s]->levels().size();
-  }
+  });
   auto K = [&](int s) -> int {
     return fm::sum<int>(0, s - 1, [&](int z) { return L(z); });
   };
 
-  Eigen::VectorXd E(K(S)); // eV
-  Eigen::VectorXd g(K(S)); // 1
-  for (int s = 0; s <= S - 1; s++) {
-    for (int i = 0; i <= L(s) - 1; i++) {
-      E(i + K(s)) = elements[s]->levels()[i].energy;
+  Eigen::Vector<quantity<energy>, Eigen::Dynamic> E(K(S));
+  fm::family(0, S - 1, [&](int s) {
+    fm::family(0, L(s) - 1, [&](int i) {
+      E(i + K(s)) = elements[s]->levels()[i].energy * electronvolt;
+    });
+  });
+  Eigen::VectorXd g(K(S));
+  fm::family(0, S - 1, [&](int s) {
+    fm::family(0, L(s) - 1, [&](int i) {
       g(i + K(s)) = elements[s]->levels()[i].statistical_weight;
-    }
-  }
+    });
+  });
 
-  Eigen::MatrixXd C_CBB = Eigen::MatrixXd::Zero(K(S), K(S)); // cm^3 * s^{-1}
-  for (int s = 0; s <= S - 1; s++) {
-    for (int i = 0; i <= L(s) - 1; i++) {
-      for (int j = 0; j <= L(s) - 1; j++) {
-        C_CBB(i + K(s), j + K(s)) =
+  std::pair<Eigen::MatrixXd, quantity<transition_rate_coefficient>> C_CBB;
+  C_CBB.first = Eigen::MatrixXd::Zero(K(S), K(S));
+  C_CBB.second = pow<3>(centimeter) * pow<-1>(second);
+  fm::family(0, S - 1, [&](int s) {
+    fm::family(0, L(s) - 1, [&](int i) {
+      fm::family(0, L(s) - 1, [&](int j) {
+        C_CBB.first(i + K(s), j + K(s)) =
           fm::cases<quantity<transition_rate_coefficient>>({
             {
               [&]() {
@@ -104,7 +113,7 @@ inline Eigen::MatrixXd cbb_regemorter_rates(
                   * pow<static_rational<-1, 2>>(T_e)
                   * gamma_ij / g(i + K(s))
                   * std::exp(
-                    - (E(j + K(s)) * electronvolt - E(i + K(s)) * electronvolt)
+                    - (E(j + K(s)) - E(i + K(s)))
                     / (k_B * T)
                   )
                 ;
@@ -112,16 +121,17 @@ inline Eigen::MatrixXd cbb_regemorter_rates(
               E(i + K(s)) < E(j + K(s))
             },
             {[]() { return 0.0 * pow<3>(centimeter) * pow<-1>(second); }, true},
-          }) / (pow<3>(centimeter) * pow<-1>(second))
+          }) / C_CBB.second
         ;
-      }
-    }
-  }
+      });
+    });
+  });
 
-  Eigen::MatrixXd R_CBB = Eigen::MatrixXd::Zero(K(S), K(S)); // s^{-1}
-  R_CBB = (N_e / pow<-3>(centimeter)) * C_CBB;
+  std::pair<Eigen::MatrixXd, frequency> R_CBB;
+  R_CBB.second = pow<-1>(second);
+  R_CBB.first = N_e * C_CBB.second / R_CBB.second * C_CBB.first;
 
-  return R_CBB;
+  return R_CBB.first;
 }
 
 

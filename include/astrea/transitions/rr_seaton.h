@@ -40,10 +40,13 @@ Eigen::MatrixXd rr_seaton_rates(
   double electron_number_density
 ) {
   using astrea::units::si::centimeter;
+  using astrea::units::si::transition_rate_coefficient;
   using boost::units::si::constants::codata::k_B;
+  using boost::units::si::frequency;
   using boost::units::si::kelvin;
   using boost::units::si::second;
   using boost::units::pow;
+  using boost::units::quantity;
 
   auto n_e = electron_number_density * pow<-3>(centimeter);
   auto T_e = electron_temperature * kelvin;
@@ -56,9 +59,9 @@ Eigen::MatrixXd rr_seaton_rates(
 
   int S = elements.size();
   Eigen::VectorXi L(S);
-  for (int s = 0; s <= S - 1; s++) {
+  fm::family(0, S - 1, [&](int s) {
     L(s) = elements[s]->levels().size();
-  }
+  });
   auto K = [&](int s) -> int {
     return fm::sum<int>(0, s - 1, [&](int z) { return L(z); });
   };
@@ -76,19 +79,20 @@ Eigen::MatrixXd rr_seaton_rates(
     )
   ;
 
-  Eigen::MatrixXd C_RR = Eigen::MatrixXd::Zero(K(S), K(S)); // cm^3 * s^{-1}
+  std::pair<Eigen::MatrixXd, quantity<transition_rate_coefficient>> C_RR;
+  C_RR.first = Eigen::MatrixXd::Zero(K(S), K(S));
+  C_RR.second = pow<3>(centimeter) * pow<-1>(second);
   for (int s = 0; s <= S - 2; s++) {
     for (int j = 0; j <= L(s) - 1; j++) {
-      C_RR(L(s) + K(s), j + K(s)) =
-        C_RR_Nj / (pow<3>(centimeter) * pow<-1>(second))
-      ;
+      C_RR.first(L(s) + K(s), j + K(s)) = C_RR_Nj / C_RR.second;
     }
   }
 
-  Eigen::MatrixXd R_RR = Eigen::MatrixXd::Zero(K(S), K(S)); // s^{-1}
-  R_RR = (n_e / pow<-3>(centimeter)) * C_RR;
+  std::pair<Eigen::MatrixXd, frequency> R_RR;
+  R_RR.second = pow<-1>(second);
+  R_RR.first = n_e * C_RR.second / R_RR.second * C_RR.first;
 
-  return R_RR;
+  return R_RR.first;
 }
 
 

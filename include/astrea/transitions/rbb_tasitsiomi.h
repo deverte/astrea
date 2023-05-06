@@ -11,6 +11,7 @@
 #include <algorithm>
 #include <cmath>
 #include <memory>
+#include <utility>
 #include <vector>
 
 #include <boost/math/constants/constants.hpp>
@@ -60,6 +61,7 @@ inline Eigen::MatrixXd rbb_tasitsiomi_rates(
   using boost::units::si::constants::codata::h;
   using boost::units::si::constants::codata::k_B;
   using boost::units::si::constants::codata::m_e;
+  using boost::units::si::energy;
   using boost::units::si::frequency;
   using boost::units::si::kelvin;
   using boost::units::si::length;
@@ -82,9 +84,9 @@ inline Eigen::MatrixXd rbb_tasitsiomi_rates(
 
   int S = elements.size();
   Eigen::VectorXi L(S);
-  for (int s = 0; s <= S - 1; s++) {
+  fm::family(0, S - 1, [&](int s) {
     L(s) = elements[s]->levels().size();
-  }
+  });
   auto K = [&](int s) {
     return fm::sum<int>(0, s - 1, [&](int z) { return L(z); });
   };
@@ -102,22 +104,26 @@ inline Eigen::MatrixXd rbb_tasitsiomi_rates(
     ;
   };
 
-  Eigen::VectorXd E(K(S)); // eV
-  Eigen::VectorXd g(K(S)); // 1
-  for (int s = 0; s <= S - 1; s++) {
-    for (int i = 0; i <= L(s) - 1; i++) {
-      E(i + K(s)) = elements[s]->levels()[i].energy;
+  Eigen::Vector<quantity<energy>, Eigen::Dynamic> E(K(S));
+  fm::family(0, S - 1, [&](int s) {
+    fm::family(0, L(s) - 1, [&](int i) {
+      E(i + K(s)) = elements[s]->levels()[i].energy * electronvolt;
+    });
+  });
+  Eigen::VectorXd g(K(S));
+  fm::family(0, S - 1, [&](int s) {
+    fm::family(0, L(s) - 1, [&](int i) {
       g(i + K(s)) = elements[s]->levels()[i].statistical_weight;
-    }
-  }
+    });
+  });
 
-  Eigen::MatrixXd R_RBB = Eigen::MatrixXd::Zero(K(S), K(S)); // s^{-1}
+  std::pair<Eigen::MatrixXd, frequency> R_RBB;
+  R_RBB.first = Eigen::MatrixXd::Zero(K(S), K(S));
+  R_RBB.second = pow<-1>(second);
   for (int s = 0; s <= S - 1; s++) {
     for (int i = 0; i <= L(s) - 1; i++) {
       for (int j = 0; j <= L(s) - 1; j++) {
-        auto nu_0 =
-          abs(E(j + K(s)) * electronvolt - E(i + K(s)) * electronvolt) / h
-        ;
+        auto nu_0 = abs(E(j + K(s)) - E(i + K(s))) / h;
 
         auto f_ij = [&](quantity<frequency> nu) {
           auto lambda = c / nu;
@@ -191,7 +197,7 @@ inline Eigen::MatrixXd rbb_tasitsiomi_rates(
           ;
         };
 
-        auto sigma = [&](quantity<frequency> nu) { // m^2
+        auto sigma = [&](quantity<frequency> nu) {
           return
             + 1.0
             / (4.0 * pi<double>() * epsilon_0)
@@ -202,7 +208,7 @@ inline Eigen::MatrixXd rbb_tasitsiomi_rates(
           ;
         };
 
-        R_RBB(i + K(s), j + K(s)) = fm::cases<quantity<frequency>>({
+        R_RBB.first(i + K(s), j + K(s)) = fm::cases<quantity<frequency>>({
           {
             [&]() {
               return 4.0 * pi<double>() * boost::math::quadrature::trapezoidal(
@@ -247,12 +253,12 @@ inline Eigen::MatrixXd rbb_tasitsiomi_rates(
             i > j
           },
           {[]() { return 0.0 * pow<-1>(second); }, i == j},
-        }) / pow<-1>(second);
+        }) / R_RBB.second;
       }
     }
   }
 
-  return R_RBB;
+  return R_RBB.first;
 }
 
 
