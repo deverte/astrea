@@ -6,7 +6,7 @@ from conan.tools.files import copy
 
 class Astrea(ConanFile):
     name = "astrea"
-    version = "0.2.3" # same as in Makefile
+    version = "0.2.4" # same as in Makefile
     exports_sources = "include/*"
     no_copy_source = True
 
@@ -14,7 +14,7 @@ class Astrea(ConanFile):
         self.requires("boost-math/1.82.0")
         self.requires("boost-units/1.82.0")
         self.requires("eigen/3.4.0")
-        self.requires("fm/0.1.2")
+        self.requires("fm/0.1.3")
         self.requires("ni/0.1.1")
 
     def package(self):

@@ -1,6 +1,7 @@
 /**
  * \file astrea/transitions/pi_mashonkina_o1.h
- * Photoionization transitions rates using Mashonkina data.
+ * Photoionization transition for electrically neutral oxygen using Mashonkina
+ * data.
  * 
  * \copyright GPL
  * \author Artem Shepelin (4.shepelin@gmail.com)
@@ -22,7 +23,7 @@
 
 #include "../data/elements/element.h"
 #include "../data/spectra/spectrum.h"
-#include "../data/transitions/pi_mashonkina_o1.h"
+#include "../data/transitions/rbf_mashonkina_o1.h"
 #include "../units/units.h"
 
 
@@ -30,8 +31,8 @@ namespace astrea {
 
 
 /**
- * Photoionization transitions rates using Mashonkina data (from private
- * communication).
+ * Pphotoionization transition for electrically neutral oxygen using Mashonkina
+ * data (from private communication).
  * 
  * \param elements Elements.
  * \param spectrum Spectrum.
@@ -56,10 +57,10 @@ inline Eigen::MatrixXd pi_mashonkina_o1_rates(
   using boost::units::pow;
   using boost::units::quantity;
 
-  auto pi_mashonkina_o1 = PIMashonkinaO1();
+  auto rbf_mashonkina_o1 = RBFMashonkinaO1();
 
-  auto infty = pi_mashonkina_o1.max_frequency() * pow<-1>(second);
-  auto nu_0 = pi_mashonkina_o1.min_frequency() * pow<-1>(second);
+  auto infty = rbf_mashonkina_o1.max_frequency() * pow<-1>(second);
+  auto nu_0 = rbf_mashonkina_o1.min_frequency() * pow<-1>(second);
 
   auto& tau = optical_depth;
 
@@ -85,7 +86,7 @@ inline Eigen::MatrixXd pi_mashonkina_o1_rates(
       auto initial = elements[s]->levels()[i];
 
       auto sigma = [&](quantity<frequency> frequency) {
-        return pi_mashonkina_o1.photoionization_cross_section(
+        return rbf_mashonkina_o1.rbf_cross_section(
           initial.term,
           frequency / pow<-1>(second)
         ) * pow<2>(centimeter);

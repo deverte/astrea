@@ -1,5 +1,5 @@
 project = astrea
-version = 0.2.3 # same as in conanfile.py
+version = 0.2.4 # same as in conanfile.py
 
 
 .PHONY: build

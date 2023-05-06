@@ -61,21 +61,28 @@ equilibrium).
 
 #### LTE
 
-LTE can be calculated using only Boltzmann distribution, or Boltzmann
-distribution and Saha ionization equation. Resulting population has the
-`Eigen::VectorXd` type.
+LTE can be calculated using only Boltzmann distribution (with manually set
+elements population), or Boltzmann distribution and Saha ionization equation.
+Resulting population has the `Eigen::VectorXd` type.
 
 Further it will be assumed that [Elements](#elements) and [Spectrum](#spectrum)
 are initialized and the library is included (`#include <astrea/astrea.h>`).
 
-```c++
+```cpp
 auto temperature = 1.0e4; // kelvin
-auto boltzmann = astrea::lte_boltzmann_population(elements, temperature);
+Eigen::VectorXd elements_population {
+  /* Size must be equal to elements number */
+};
+auto electrons_population = astrea::lte_boltzmann_population(
+  elements,
+  elements_population,
+  temperature
+);
 
 auto temperature = 1.0e4; // kelvin
 auto electron_temperature = 1.0e4; // kelvin
 auto electron_number_density = 1.0e5; // centimeter^{-3}
-auto boltzmann_saha = astrea::lte_boltzmann_saha_population(
+auto electrons_population = astrea::lte_boltzmann_saha_population(
   elements,
   temperature
   electron_temperature,
@@ -85,19 +92,43 @@ auto boltzmann_saha = astrea::lte_boltzmann_saha_population(
 
 #### NLTE
 
-NLTE calculation of current electron population requires rates matrix that can
-be composed using [Transitions](#transitions), time step, and previus electron
-population.
+NLTE calculation of current electron population
+**with automatic calculation of elements population** requires rates matrix that
+can be composed using [Transitions](#transitions), time step, and previus
+electron population.
 
-```c++
+```cpp
 #include <Eigen/Dense>
 
-Eigen::VectorXd population_1;
-population_1 << /* Size must be equal to sum of all elements' keys */;
+Eigen::VectorXd electrons_population_1 {
+  /* Size must be equal to sum of elements' keys */
+};
 auto delta_time = 1.0e-2; // second
 auto rates_matrix = /* See Transitions section */;
-auto population_2 = astrea::nlte_population(
-  population_1,
+auto electrons_population_2 = astrea::nlte_population_full(
+  electrons_population_1,
+  delta_time,
+  rates_matrix
+);
+```
+
+NLTE also can be calculated **with manually set of elements population**.
+
+```cpp
+#include <Eigen/Dense>
+
+Eigen::VectorXd elements_population {
+  /* Size must be equal to elements number */
+};
+Eigen::VectorXd electrons_population_1 {
+  /* Size must be equal to sum of elements' keys */
+};
+auto delta_time = 1.0e-2; // second
+auto rates_matrix = /* See Transitions section */;
+auto electrons_population_2 = astrea::nlte_population_per_elements(
+  elements,
+  elements_population,
+  electrons_population_1,
   delta_time,
   rates_matrix
 );
@@ -109,12 +140,12 @@ Here will be used the following abbreviations: **CBB** - collisional
 bound-bound, **CI** - collisional ionization, **CTI** - charge transfer
 ionization, **CTR** - charge transfer recombination, **DR** - dielectronic
 recombination, **PI** - photoionization, **RBB** - radiative bound-bound,
-**RR** - radiative recombination, **SE** - spontaneous emission, **TBR** -
-three-body recombination.
+**RBF** - radiative bound-bound, **RR** - radiative recombination,
+**SE** - spontaneous emission, **TBR** - three-body recombination.
 
 Final rates matrix is a sum of per-process rate matrix:
 
-```c++
+```cpp
 auto ci = astrea::ci_hahn_rates(
   elements,
   electron_temperature,
@@ -144,7 +175,7 @@ The following transitions rates functions are available:
 - `astrea::rbb_mashonkina_voigt_o1_rates`
 - `astrea::rbb_tasitsiomi_rates`
 - `astrea::rr_badnell_verner_rates`
-- `astrea::rr_dr_mashonkina_o1_rates`
+- `astrea::rr_mashonkina_o1_rates`
 - `astrea::rr_seaton_rates`
 - `astrea::se_nist_o1_rates`
 - `astrea::tbr_hahn_rates`
@@ -154,7 +185,7 @@ The following transitions rates functions are available:
 Elements typically passed to statistical equilibrium functions as a
 `std::vector` of `std::shared_ptr`.
 
-```c++
+```cpp
 #include <memory>
 #include <vector>
 
@@ -182,7 +213,7 @@ The following elements are available:
 Spectrum typically passed to statistical equilibrium functions as a
 `std::shared_ptr`.
 
-```c++
+```cpp
 #include <memory>
 
 auto spectrum = std::make_shared<astrea::SunGueymard>();

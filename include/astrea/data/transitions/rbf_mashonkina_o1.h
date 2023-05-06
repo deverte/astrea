@@ -1,5 +1,5 @@
 /**
- * \file astrea/data/transitions/pi_mashonkina_o1.h
+ * \file astrea/data/transitions/rbf_mashonkina_o1.h
  * Photoionization transition for electrically neutral oxygen using Mashonkina
  * data.
  * 
@@ -21,19 +21,20 @@ namespace astrea {
 
 
 /**
- * Photoionization transition for electrically neutral oxygen using Mashonkina
+ * Radiative bound-free (photoionization, spontaneous and induced radiative
+ * recombination) transition for electrically neutral oxygen using Mashonkina
  * data (from private communication).
  */
-struct IPIMashonkinaO1Transition {
+struct IRBFMashonkinaO1Transition {
   /**
    * Initial level.
    */
   const std::string initial;
   /**
-   * Photoionization cross section function of frequency in \f$s^{-1}\f$,
+   * Radiative bound-free cross section function of frequency in \f$s^{-1}\f$,
    * returns result in \f$cm^2\f$.
    */
-  ni::LinearInterpolant photoionization_cross_section;
+  ni::LinearInterpolant rbf_cross_section;
   /**
    * Data start index.
    */
@@ -46,36 +47,39 @@ struct IPIMashonkinaO1Transition {
 
 
 /**
- * Photoionization transition for electrically neutral oxygen using Mashonkina
+ * Radiative bound-free (photoionization, spontaneous and induced radiative
+ * recombination) transition for electrically neutral oxygen using Mashonkina
  * data interface.
  */
-struct IPIMashonkinaO1 {
+struct IRBFMashonkinaO1 {
   /**
    * Transitions.
    */
-  std::vector<IPIMashonkinaO1Transition> transitions;
+  std::vector<IRBFMashonkinaO1Transition> transitions;
   /**
    * Frequencies in \f$s^{-1}\f$.
    */
   std::vector<double> frequencies;
   /**
-   * Photoionization cross sections in \f$cm^2\f$.
+   * Radiative bound-free cross sections in \f$cm^2\f$.
    */
-  std::vector<double> photoionization_cross_sections;
+  std::vector<double> rbf_cross_sections;
 };
 
 
 /**
- * Photoionization transitions for electrically neutral oxygen using Mashonkina
+ * Radiative bound-free (photoionization, spontaneous and induced radiative
+ * recombination) transition for electrically neutral oxygen using Mashonkina
  * data (from private communication).
  */
-class PIMashonkinaO1 {
+class RBFMashonkinaO1 {
  public:
   /**
-   * Photoionization transitions for electrically neutral oxygen using Mashonkina
+   * Radiative bound-free (photoionization, spontaneous and induced radiative
+   * recombination) transition for electrically neutral oxygen using Mashonkina
    * data (from private communication).
    */
-  PIMashonkinaO1();
+  RBFMashonkinaO1();
 
   /**
    * Maximum frequency.
@@ -92,40 +96,40 @@ class PIMashonkinaO1 {
   double min_frequency();
 
   /**
-   * Photoionization cross-section.
+   * Radiative bound-free cross-section.
    * 
    * \param initial Initial term.
    * \param frequency Frequency in \f$s^{-1}\f$.
-   * \return Photoionization cross-section in \f$cm^2\f$.
+   * \return Radiative bound-free cross-section in \f$cm^2\f$.
    */
-  double photoionization_cross_section(std::string initial, double frequency);
+  double rbf_cross_section(std::string initial, double frequency);
 
  private:
-  IPIMashonkinaO1 resource_ =
-    #include "../../resources/transitions/pi_mashonkina_o1.yaml"
+  IRBFMashonkinaO1 resource_ =
+    #include "../../resources/transitions/rbf_mashonkina_o1.yaml"
   ;
 };
 
 
-PIMashonkinaO1::PIMashonkinaO1() {
+RBFMashonkinaO1::RBFMashonkinaO1() {
   for (auto& transition : resource_.transitions) {
     std::vector<double> nu = {
       resource_.frequencies.begin() + transition.start_index - 1,
       resource_.frequencies.begin() + transition.finish_index - 1
     };
     std::vector<double> sigma = {
-      resource_.photoionization_cross_sections.begin() +
+      resource_.rbf_cross_sections.begin() +
       transition.start_index - 1,
-      resource_.photoionization_cross_sections.begin() +
+      resource_.rbf_cross_sections.begin() +
       transition.finish_index - 1
     };
 
-    transition.photoionization_cross_section.data_points(nu, sigma); // cm^2
+    transition.rbf_cross_section.data_points(nu, sigma); // cm^2
   }
 }
 
 
-double PIMashonkinaO1::max_frequency() {
+double RBFMashonkinaO1::max_frequency() {
   return *std::max_element(
     resource_.frequencies.begin(),
     resource_.frequencies.end()
@@ -133,7 +137,7 @@ double PIMashonkinaO1::max_frequency() {
 }
 
 
-double PIMashonkinaO1::min_frequency() {
+double RBFMashonkinaO1::min_frequency() {
   return *std::min_element(
     resource_.frequencies.begin(),
     resource_.frequencies.end()
@@ -141,7 +145,7 @@ double PIMashonkinaO1::min_frequency() {
 }
 
 
-double PIMashonkinaO1::photoionization_cross_section(
+double RBFMashonkinaO1::rbf_cross_section(
   std::string initial,
   double frequency
 ) {
@@ -154,7 +158,7 @@ double PIMashonkinaO1::photoionization_cross_section(
       frequency >= min_frequency &&
       frequency <= max_frequency
     ) {
-      return transition.photoionization_cross_section(frequency);
+      return transition.rbf_cross_section(frequency);
     }
   }
   return 0.0;

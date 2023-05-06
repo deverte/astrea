@@ -1,6 +1,6 @@
 /**
  * \file astrea/astrea.h
- * Electrons population LTE and NLTE calculation header-only library.
+ * Statistical equilibrium (LTE and NLTE) calculation header-only library.
  * 
  * \copyright GPL
  * \author Artem Shepelin (4.shepelin@gmail.com)
@@ -33,7 +33,7 @@
 #include "./transitions/rbb_mashonkina_voigt_o1.h"
 #include "./transitions/rbb_tasitsiomi.h"
 #include "./transitions/rr_badnell_verner.h"
-#include "./transitions/rr_dr_mashonkina_o1.h"
+#include "./transitions/rr_mashonkina_o1.h"
 #include "./transitions/rr_seaton.h"
 #include "./transitions/se_nist_o1.h"
 #include "./transitions/tbr_hahn.h"

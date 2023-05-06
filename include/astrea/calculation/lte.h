@@ -10,6 +10,7 @@
 
 #include <cmath>
 #include <memory>
+#include <stdexcept>
 #include <vector>
 
 #include <boost/math/constants/constants.hpp>
@@ -28,20 +29,33 @@ namespace astrea {
 
 
 /**
- * Calculates LTE electrons population using Boltzmann distribution.
+ * Calculates LTE electrons population using Boltzmann distribution. Elements
+ * population is set manually.
  * 
  * \param elements Elements.
+ * \param elements_population Elements population in \f$1\f$.
  * \param temperature Temperature in \f$K\f$.
+ * \exception length_error \p elements and \p elements_population must have the
+ * same size.
  * \return Electrons population in \f$1\f$.
  */
 inline Eigen::VectorXd lte_boltzmann_population(
   std::vector<std::shared_ptr<Element>> elements,
+  Eigen::VectorXd elements_population,
   double temperature
 ) {
+  if (elements.size() != elements_population.size()) {
+    throw std::length_error(
+      "astrea::lte_boltzmann_population error: "
+      "elements and elements_population must have the same size."
+    );
+  }
+
   using astrea::units::si::electronvolt;
   using boost::units::si::constants::codata::k_B;
   using boost::units::si::kelvin;
 
+  auto& N = elements_population;
   auto T = temperature * kelvin;
 
   int S = elements.size();
@@ -74,7 +88,7 @@ inline Eigen::VectorXd lte_boltzmann_population(
             g(j + K(s)) * std::exp(-E(j + K(s)) * electronvolt / (k_B * T))
           ;
         })
-        * 1.0
+        * N(s)
       ;
     }
   }
@@ -84,8 +98,8 @@ inline Eigen::VectorXd lte_boltzmann_population(
 
 
 /**
- * Calculates LTE electrons population using Boltzmann distribution and Saha
- * ionization equation.
+ * Calculates LTE electrons and elements population using Boltzmann distribution
+ * and Saha ionization equation.
  * 
  * \param elements Elements.
  * \param temperature Temperature in \f$K\f$.

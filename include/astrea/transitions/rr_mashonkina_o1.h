@@ -1,6 +1,6 @@
 /**
- * \file astrea/transitions/rr_dr_mashonkina_o1.h
- * Radiative and dielectronic transitions rates using Mashonkina data.
+ * \file astrea/transitions/rr_mashonkina_o1.h
+ * Radiative recombination transitions rates using Mashonkina data.
  * 
  * \copyright GPL
  * \author Artem Shepelin (4.shepelin@gmail.com)
@@ -22,7 +22,7 @@
 
 #include "../data/elements/element.h"
 #include "../data/spectra/spectrum.h"
-#include "../data/transitions/pi_mashonkina_o1.h"
+#include "../data/transitions/rbf_mashonkina_o1.h"
 #include "../units/units.h"
 
 
@@ -30,8 +30,8 @@ namespace astrea {
 
 
 /**
- * Radiative recombination and dielectronic recombination transitions rates
- * using Mashonkina data (from private communication).
+ * Radiative recombination recombination transitions rates using Mashonkina data
+ * (from private communication).
  * 
  * \param elements Elements.
  * \param spectrum Spectrum.
@@ -39,7 +39,7 @@ namespace astrea {
  * \param optical_depth Optical depth in \f$1\f$.
  * \return Transitions rates in \f$s^{-1}\f$.
  */
-inline Eigen::MatrixXd rr_dr_mashonkina_o1_rates(
+inline Eigen::MatrixXd rr_mashonkina_o1_rates(
   std::vector<std::shared_ptr<Element>> elements,
   std::shared_ptr<Spectrum> spectrum,
   double temperature,
@@ -60,10 +60,10 @@ inline Eigen::MatrixXd rr_dr_mashonkina_o1_rates(
   using boost::units::pow;
   using boost::units::quantity;
 
-  auto pi_mashonkina_o1 = PIMashonkinaO1();
+  auto rbf_mashonkina_o1 = RBFMashonkinaO1();
 
-  auto infty = pi_mashonkina_o1.max_frequency() * pow<-1>(second);
-  auto nu_0 = pi_mashonkina_o1.min_frequency() * pow<-1>(second);
+  auto infty = rbf_mashonkina_o1.max_frequency() * pow<-1>(second);
+  auto nu_0 = rbf_mashonkina_o1.min_frequency() * pow<-1>(second);
 
   auto T = temperature * kelvin;
   auto& tau = optical_depth;
@@ -90,7 +90,7 @@ inline Eigen::MatrixXd rr_dr_mashonkina_o1_rates(
       auto final = elements[s]->levels()[j];
 
       auto sigma = [&](quantity<frequency> frequency) {
-        return pi_mashonkina_o1.photoionization_cross_section(
+        return rbf_mashonkina_o1.rbf_cross_section(
           final.term,
           frequency / pow<-1>(second)
         ) * pow<2>(centimeter);
