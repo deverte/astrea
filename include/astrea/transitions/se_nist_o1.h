@@ -30,71 +30,125 @@ namespace astrea {
  * \return Transitions rates in \f$s^{-1}\f$.
  */
 inline Eigen::MatrixXd
-se_nist_o1_rates(std::vector<std::shared_ptr<Element>> elements) {
+se_nist_o1_rates(const std::vector<std::shared_ptr<Element>> elements) {
   using boost::units::si::frequency;
   using boost::units::si::second;
   using boost::units::pow;
   using boost::units::quantity;
 
-  auto se_nist_o1 = SENistO1();
+  const auto se_nist_o1 = SENistO1();
 
-  int S = elements.size();
-  Eigen::VectorXi L(S);
-  fm::family(0, S - 1, [&](int s) {
-    L(s) = elements[s]->levels().size();
+  const int Z = elements.size();
+
+  Eigen::VectorXi k(Z);
+  fm::family(0, Z - 1, [&](int z) {
+    k(z) = elements[z]->levels().size();
   });
-  auto K = [&](int s) {
-    return fm::sum<int>(0, s - 1, [&](int z) { return L(z); });
+
+  const auto K = [=](int z) {
+    return fm::sum<int>(0, z - 1, [=](int z_) -> int { return k(z_); });
   };
 
-  std::pair<Eigen::MatrixXd, frequency> R_SE;
-  R_SE.first = Eigen::MatrixXd::Zero(K(S), K(S));
-  R_SE.second = pow<-1>(second);
-  for (int s = 0; s <= S - 1; s++) {
-    for (int i = 0; i <= L(s) - 1; i++) {
-      for (int j = 0; j <= L(s) - 1; j++) {
-        auto initial = elements[s]->levels()[i];
-        auto final = elements[s]->levels()[j];
+  const auto M = [=](int z) {
+    return [=](int i, int j) {
+      int size = 0;
+      for (const auto transition : se_nist_o1.transitions()) {
+        if (
+          (transition.initial == elements[z]->levels()[i].term) &&
+          (transition.final == elements[z]->levels()[j].term)
+        ) {
+          size++;
+        }
+      }
 
+      return size;
+    };
+  };
+
+  const auto A_ = [=](int z) {
+    return [=](int j, int i) {
+      return [=](int m) {
         std::vector<ISENistO1Transition> transitions;
-        for (auto transition : se_nist_o1.transitions()) {
+        for (const auto transition : se_nist_o1.transitions()) {
           if (
-            (transition.initial == initial.term) &&
-            (transition.final == final.term)
+            (transition.initial == elements[z]->levels()[j].term) &&
+            (transition.final == elements[z]->levels()[i].term)
           ) {
             transitions.push_back(transition);
           }
         }
 
-        int M = transitions.size();
-        Eigen::VectorXd R(M);
-        Eigen::VectorXd J(M);
-        for (int m = 0; m <= M - 1; m++) {
-          R(m) = transitions[m].rate;
-          J(m) = transitions[m].initial_total_angular_momentum_quantum_number;
+        const auto M_ = transitions.size();
+
+        Eigen::Vector<quantity<frequency>, Eigen::Dynamic> vec(M_);
+        for (int m_ = 0; m_ <= M_ - 1; m_++) {
+          vec(m_) = transitions[m_].rate * pow<-1>(second);
         }
 
-        R_SE.first(i + K(s), j + K(s)) = fm::cases<quantity<frequency>>({
-          {[&]() { return 0.0 * pow<-1>(second); }, (i == j) || (M <= 0)},
+        return vec(m);
+      };
+    };
+  };
+
+  const auto J = [=](int z) {
+    return [=](int i, int j) {
+      return [=](int m) {
+        std::vector<ISENistO1Transition> transitions;
+        for (const auto transition : se_nist_o1.transitions()) {
+          if (
+            (transition.initial == elements[z]->levels()[i].term) &&
+            (transition.final == elements[z]->levels()[j].term)
+          ) {
+            transitions.push_back(transition);
+          }
+        }
+
+        const auto M_ = transitions.size();
+
+        Eigen::VectorXd vec(M_);
+        for (int m_ = 0; m_ <= M_ - 1; m_++) {
+          vec(m_) =
+            transitions[m_].initial_total_angular_momentum_quantum_number
+          ;
+        }
+
+        return vec(m);
+      };
+    };
+  };
+
+  Eigen::MatrixXd A_v = Eigen::MatrixXd::Zero(K(Z), K(Z));
+  const auto A_u = pow<-1>(second);
+  const auto A = [&](int z) {
+    return [&](int j, int i) -> double& {
+      return A_v(j + K(z), i + K(z));
+    };
+  };
+
+  fm::family(0, Z - 1, [=](int z) {
+    fm::family(0, k(z) - 1, [=](int i) {
+      fm::family(i + 1, k(z) - 1, [=](int j) {
+        A(z)(j, i) = fm::cases<quantity<frequency>>({
           {
-            [&]() {
+            [=]() {
               return
-                + fm::sum<quantity<frequency>>(0, M - 1, [&](int m) {
-                  return (R(m) * pow<-1>(second)) * (2.0 * J(m) + 1.0);
+                + fm::sum<quantity<frequency>>(0, M(z)(j, i) - 1, [=](int m) {
+                  return A_(z)(j, i)(m) * (2.0 * J(z)(j, i)(m) + 1.0);
                 })
-                / fm::sum<double>(0, M - 1, [&](int m) {
-                  return 2.0 * J(m) + 1.0;
+                / fm::sum<double>(0, M(z)(j, i) - 1, [=](int m) {
+                  return 2.0 * J(z)(j, i)(m) + 1.0;
                 })
               ;
             },
-            (i != j) || (M > 0)
+            M(z)(j, i) - 1 > 0,
           },
-        }) / R_SE.second;
-      }
-    }
-  }
+          { []() { return 0.0 * pow<-1>(second); }, true },
+        }) / A_u;
+      });
+    });
+  });
 
-  return R_SE.first;
+  return A_v;
 }
 
 

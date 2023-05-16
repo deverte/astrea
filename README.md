@@ -9,6 +9,11 @@ bound-bound transitions, photoionization-radiative recombination-dielectronic
 recombination, charge transfer ionization-recombination, and spontaneous
 emission.
 
+> See also Python version [astrea_py](https://gitea.zarux.ru/astro/astrea_py)
+> and high-level API [urania](https://gitea.zarux.ru/astro/urania) with Jupyter
+> Notebook
+> [examples](https://gitea.zarux.ru/astro/urania/src/branch/main/examples).
+
 > Notice: library is under development, some functionality may be invalid.
 
 ## Installation
@@ -165,20 +170,14 @@ The following transitions rates functions are available:
 
 - `astrea::cbb_mashonkina_o1_rates`
 - `astrea::cbb_regemorter_rates`
-- `astrea::ci_arnaud_younger_rates`
-- `astrea::ci_hahn_rates`
-- `astrea::cti_arnaud_rates`
-- `astrea::ctr_arnaud_rates`
-- `astrea::dr_badnell_rates`
+- `astrea::ci_mashonkina_o1_seaton_rates`
 - `astrea::pi_mashonkina_o1_rates`
 - `astrea::rbb_mashonkina_doppler_o1_rates`
 - `astrea::rbb_mashonkina_voigt_o1_rates`
 - `astrea::rbb_tasitsiomi_rates`
-- `astrea::rr_badnell_verner_rates`
 - `astrea::rr_mashonkina_o1_rates`
-- `astrea::rr_seaton_rates`
 - `astrea::se_nist_o1_rates`
-- `astrea::tbr_hahn_rates`
+- `astrea::tbr_mashonkina_o1_seaton_rates`
 
 ### Elements
 

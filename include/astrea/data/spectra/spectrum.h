@@ -43,7 +43,7 @@ class Spectrum {
    * 
    * \return Distance in \f$au\f$.
    */
-  virtual double distance() = 0;
+  virtual double distance() const = 0;
 
   /**
    * Distance to radiation source.
@@ -57,14 +57,14 @@ class Spectrum {
    * 
    * \return Wavelength in \f$nm\f$.
    */
-  virtual double max_wavelength() = 0;
+  virtual double max_wavelength() const = 0;
 
   /**
    * Minimal wavelength of the spectrum.
    * 
    * \return Wavelength in \f$nm\f$.
    */
-  virtual double min_wavelength() = 0;
+  virtual double min_wavelength() const = 0;
 
   /**
    * Spectral irradiance.
@@ -72,7 +72,7 @@ class Spectrum {
    * \param wavelength Wavelength in \f$nm\f$.
    * \return Spectral irradiance in \f$W \cdot m^{-2} \cdot nm^{-1}\f$.
    */
-  virtual double spectral_irradiance(double wavelength) = 0;
+  virtual double spectral_irradiance(double wavelength) const = 0;
 };
 
 

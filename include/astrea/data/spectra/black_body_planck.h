@@ -33,7 +33,7 @@ class BlackBodyPlanck : public Spectrum {
    * 
    * \return Distance in \f$au\f$.
    */
-  double distance();
+  double distance() const override;
 
   /**
    * Distance to radiation source.
@@ -47,14 +47,14 @@ class BlackBodyPlanck : public Spectrum {
    * 
    * \return Wavelength in \f$nm\f$.
    */
-  double max_wavelength() override;
+  double max_wavelength() const override;
 
   /**
    * Minimal wavelength of the spectrum.
    * 
    * \return Wavelength in \f$nm\f$.
    */
-  double min_wavelength() override;
+  double min_wavelength() const override;
 
   /**
    * Spectral irradiance.
@@ -62,14 +62,14 @@ class BlackBodyPlanck : public Spectrum {
    * \param wavelength Wavelength in \f$nm\f$.
    * \return Spectral irradiance in \f$W \cdot m^{-2} \cdot nm^{-1}\f$.
    */
-  double spectral_irradiance(double wavelength) override;
+  double spectral_irradiance(double wavelength) const override;
 
   /**
    * Black body temperature.
    * 
    * \return Temperature in \f$K\f$.
    */
-  double temperature();
+  double temperature() const;
 
   /**
    * Black body temperature.
@@ -83,7 +83,7 @@ class BlackBodyPlanck : public Spectrum {
    * 
    * \return Spectral irradiance area in \f$W \cdot m^{-2}\f$.
    */
-  double total_area();
+  double total_area() const;
 
   /**
    * Spectral irradiance total area.
@@ -122,7 +122,7 @@ class BlackBodyPlanck : public Spectrum {
 };
 
 
-inline double BlackBodyPlanck::distance() {
+inline double BlackBodyPlanck::distance() const {
   return distance_ / astrea::units::si::astronomical_unit;
 }
 
@@ -132,18 +132,19 @@ inline void BlackBodyPlanck::distance(double value) {
 }
 
 
-inline double BlackBodyPlanck::max_wavelength() {
+inline double BlackBodyPlanck::max_wavelength() const {
   return max_wavelength_ / astrea::units::si::nanometer;
 }
 
 
-inline double BlackBodyPlanck::min_wavelength() {
+inline double BlackBodyPlanck::min_wavelength() const {
   return min_wavelength_ / astrea::units::si::nanometer;
 }
 
 
-inline double BlackBodyPlanck::spectral_irradiance(double wavelength) {
+inline double BlackBodyPlanck::spectral_irradiance(double wavelength) const {
   using astrea::units::si::astronomical_unit;
+  using astrea::units::si::irradiance;
   using astrea::units::si::nanometer;
   using boost::math::constants::pi;
   using boost::units::si::constants::codata::c;
@@ -163,7 +164,8 @@ inline double BlackBodyPlanck::spectral_irradiance(double wavelength) {
   auto lambda = wavelength * nanometer;
   auto T = temperature_;
 
-  auto R_lambda = [&](quantity<length> lambda, quantity<temperature> T) {
+  auto R_lambda = [&](quantity<length> lambda, quantity<temperature> T)
+    -> quantity<decltype(irradiance() * pow<2>(length()))> {
     return
       + 2.0 * pi<double>() * h * pow<2>(c)
       / pow<5>(lambda)
@@ -172,7 +174,8 @@ inline double BlackBodyPlanck::spectral_irradiance(double wavelength) {
     ;
   };
 
-  auto E_e_lambda = [&](quantity<length> lambda, quantity<temperature> T) {
+  auto E_e_lambda = [&](quantity<length> lambda, quantity<temperature> T)
+    -> quantity<decltype(irradiance() * pow<2>(length()))> {
     return E_e * R_lambda(lambda, T) / J;
   };
 
@@ -183,7 +186,7 @@ inline double BlackBodyPlanck::spectral_irradiance(double wavelength) {
 }
 
 
-inline double BlackBodyPlanck::temperature() {
+inline double BlackBodyPlanck::temperature() const {
   return temperature_ / boost::units::si::kelvin;
 }
 
@@ -205,7 +208,7 @@ inline void BlackBodyPlanck::temperature(double value) {
 }
 
 
-inline double BlackBodyPlanck::total_area() {
+inline double BlackBodyPlanck::total_area() const {
   return
     + total_area_
     / (boost::units::si::watt * boost::units::pow<-2>(boost::units::si::meter))

@@ -79,7 +79,7 @@ class CBBMashonkinaO1 {
     std::string initial,
     std::string final,
     double temperature
-  );
+  ) const;
 
  private:
   ICBBMashonkinaO1 resource_ =
@@ -110,7 +110,7 @@ double CBBMashonkinaO1::collision_rate_coefficient(
   std::string initial,
   std::string final,
   double temperature
-) {
+) const {
   for (int i = 0; i < resource_.transitions.size(); i++) {
     if (
       resource_.transitions[i].initial == initial &&

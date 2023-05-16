@@ -11,7 +11,6 @@
 
 #include <cmath>
 #include <memory>
-#include <utility>
 #include <vector>
 
 #include <boost/units/systems/si/codata_constants.hpp>
@@ -36,8 +35,9 @@ namespace astrea {
  * \param elements Elements.
  * \return Transitions rates in \f$s^{-1}\f$.
  */
-inline Eigen::MatrixXd
-rbb_mashonkina_voigt_o1_rates(std::vector<std::shared_ptr<Element>> elements) {
+inline Eigen::MatrixXd rbb_mashonkina_voigt_o1_rates(
+  const std::vector<std::shared_ptr<Element>> elements
+) {
   using astrea::units::si::angstrom;
   using astrea::units::si::electronvolt;
   using boost::units::si::constants::codata::c;
@@ -48,60 +48,81 @@ rbb_mashonkina_voigt_o1_rates(std::vector<std::shared_ptr<Element>> elements) {
   using boost::units::pow;
   using boost::units::quantity;
 
-  auto rbb_mashonkina_voigt = RBBMashonkinaVoigtO1();
+  const auto rbb_mashonkina_voigt_o1 = RBBMashonkinaVoigtO1();
 
-  int S = elements.size();
-  Eigen::VectorXi L(S);
-  for (int s = 0; s <= S - 1; s++) {
-    L(s) = elements[s]->levels().size();
-  }
-  auto K = [&](int s) -> int {
-    return fm::sum<int>(0, s - 1, [&](int z) { return L(z); });
+  const int Z = elements.size();
+
+  const auto Lambda = 0.66702 * pow<2>(angstrom) * pow<-1>(second);
+
+  Eigen::VectorXi k(Z);
+  fm::family(0, Z - 1, [&](int z) {
+    k(z) = elements[z]->levels().size();
+  });
+
+  const auto K = [=](int z) -> int {
+    return fm::sum<int>(0, z - 1, [=](int z_) -> int { return k(z_); });
   };
 
-  Eigen::Vector<quantity<energy>, Eigen::Dynamic> E(K(S));
-  fm::family(0, S - 1, [&](int s) {
-    fm::family(0, L(s) - 1, [&](int i) {
-      E(i + K(s)) = elements[s]->levels()[i].energy * electronvolt;
-    });
-  });
-  Eigen::VectorXd g(K(S));
-  fm::family(0, S - 1, [&](int s) {
-    fm::family(0, L(s) - 1, [&](int i) {
-      g(i + K(s)) = elements[s]->levels()[i].statistical_weight;
+  Eigen::Vector<quantity<energy>, Eigen::Dynamic> E_v(K(Z));
+  const auto E = [&](int z) {
+    return [&](int i) -> quantity<energy>& { return E_v(i + K(z)); };
+  };
+  fm::family(0, Z - 1, [=](int z) {
+    fm::family(0, k(z) - 1, [=](int i) {
+      E(z)(i) = elements[z]->levels()[i].energy * electronvolt;
     });
   });
 
-  std::pair<Eigen::MatrixXd, frequency> R_RBB;
-  R_RBB.first = Eigen::MatrixXd::Zero(K(S), K(S));
-  R_RBB.second = pow<-1>(second);
-  for (int s = 0; s <= S - 1; s++) {
-    for (int i = 0; i <= L(s) - 1; i++) {
-      auto initial = elements[s]->levels()[i];
+  Eigen::VectorXd g_v(K(Z));
+  const auto g = [&](int z) {
+    return [&](int i) -> double& { return g_v(i + K(z)); };
+  };
+  fm::family(0, Z - 1, [=](int z) {
+    fm::family(0, k(z) - 1, [=](int i) {
+      g(z)(i) = elements[z]->levels()[i].statistical_weight;
+    });
+  });
 
-      for (int j = 0; j < L(s); j++) {
-        auto final = elements[s]->levels()[j];
-
-        for (auto transition : rbb_mashonkina_voigt.transitions()) {
-          if (
-            transition.initial == initial.term &&
-            transition.final == final.term
-          ) {
-            auto& f_ij = transition.oscillator_strength; // 1
-
-            R_RBB.first(i + K(s), j + K(s)) =
-              + (0.66702 * pow<2>(angstrom) * pow<-1>(second))
-              / pow<2>(c / (abs(E(i + K(s)) - E(j + K(s))) / hbar))
-              * (g(j + K(s)) / g(i + K(s))) * f_ij
-              / R_RBB.second
-            ;
-          }
+  const auto f = [&](int z) {
+    return [&](int i, int j) -> double {
+      for (const auto transition : rbb_mashonkina_voigt_o1.transitions()) {
+        if (
+          transition.initial == elements[z]->levels()[i].term &&
+          transition.final == elements[z]->levels()[j].term
+        ) {
+          return transition.oscillator_strength;
         }
       }
-    }
-  }
+      return 0.0;
+    };
+  };
 
-  return R_RBB.first;
+  Eigen::MatrixXd R_v = Eigen::MatrixXd::Zero(K(Z), K(Z));
+  const auto R_u = pow<-1>(second);
+  const auto R = [&](int z) {
+    return [&](int i, int j) -> double& { return R_v(i + K(z), j + K(z)); };
+  };
+  fm::family(0, Z - 1, [=](int z) {
+    fm::family(0, k(z) - 1, [=](int i) {
+      fm::family(i + 1, k(z) - 1, [=](int j) {
+        R(z)(i, j) =
+          + Lambda
+          / pow<2>(c / (abs(E(z)(i) - E(z)(j)) / hbar))
+          * (g(z)(j) / g(z)(i)) * f(z)(i, j)
+          / R_u
+        ;
+
+        R(z)(j, i) =
+          + Lambda
+          / pow<2>(c / (abs(E(z)(j) - E(z)(i)) / hbar))
+          * (g(z)(i) / g(z)(j)) * f(z)(j, i)
+          / R_u
+        ;
+      });
+    });
+  });
+
+  return R_v;
 }
 
 

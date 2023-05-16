@@ -40,17 +40,19 @@ namespace astrea {
  * \return Transitions rates in \f$s^{-1}\f$.
  */
 inline Eigen::MatrixXd rr_mashonkina_o1_rates(
-  std::vector<std::shared_ptr<Element>> elements,
-  std::shared_ptr<Spectrum> spectrum,
-  double temperature,
-  double optical_depth
+  const std::vector<std::shared_ptr<Element>> elements,
+  const std::shared_ptr<Spectrum> spectrum,
+  const double temperature,
+  const double optical_depth
 ) {
   using astrea::units::si::centimeter;
+  using astrea::units::si::irradiance;
   using astrea::units::si::nanometer;
   using boost::math::constants::pi;
   using boost::units::si::constants::codata::c;
   using boost::units::si::constants::codata::h;
   using boost::units::si::constants::codata::k_B;
+  using boost::units::si::area;
   using boost::units::si::frequency;
   using boost::units::si::kelvin;
   using boost::units::si::length;
@@ -60,53 +62,61 @@ inline Eigen::MatrixXd rr_mashonkina_o1_rates(
   using boost::units::pow;
   using boost::units::quantity;
 
-  auto rbf_mashonkina_o1 = RBFMashonkinaO1();
+  const auto rbf_mashonkina_o1 = RBFMashonkinaO1();
 
-  auto infty = rbf_mashonkina_o1.max_frequency() * pow<-1>(second);
-  auto nu_0 = rbf_mashonkina_o1.min_frequency() * pow<-1>(second);
+  const auto infty = rbf_mashonkina_o1.max_frequency() * pow<-1>(second);
 
-  auto T = temperature * kelvin;
-  auto& tau = optical_depth;
+  const auto nu_0 = rbf_mashonkina_o1.min_frequency() * pow<-1>(second);
 
-  int S = elements.size();
-  Eigen::VectorXi L(S);
-  fm::family(0, S - 1, [&](int s) {
-    L(s) = elements[s]->levels().size();
+  const auto T = temperature * kelvin;
+
+  const auto& tau = optical_depth;
+
+  const int Z = elements.size();
+
+  Eigen::VectorXi k(Z);
+  fm::family(0, Z - 1, [&](int z) {
+    k(z) = elements[z]->levels().size();
   });
-  auto K = [&](int s) -> int {
-    return fm::sum<int>(0, s - 1, [&](int z) { return L(z); });
+
+  const auto K = [=](int z) -> int {
+    return fm::sum<int>(0, z - 1, [=](int z_) -> int { return k(z_); });
   };
 
-  auto F_lambda = [&](quantity<length> lambda) {
+  const auto F_lambda = [=](quantity<length> lambda) -> quantity<irradiance> {
     return
       + spectrum->spectral_irradiance(lambda / nanometer)
       * watt * pow<-2>(meter) * pow<-1>(nanometer)
     ;
   };
 
-  std::pair<Eigen::MatrixXd, frequency> R_RR;
-  R_RR.first = Eigen::MatrixXd::Zero(K(S), K(S));
-  R_RR.second = pow<-1>(second);
-  for (int s = 0; s <= S - 2; s++) {
-    for (int j = 0; j <= L(s) - 1; j++) {
-      auto final = elements[s]->levels()[j];
-
-      auto sigma = [&](quantity<frequency> frequency) {
+  const auto alpha = [&](int z) {
+    return [&](int j) {
+      return [&](quantity<frequency> frequency) -> quantity<area> {
         return rbf_mashonkina_o1.rbf_cross_section(
-          final.term,
+          elements[z]->levels()[j].term,
           frequency / pow<-1>(second)
         ) * pow<2>(centimeter);
       };
+    };
+  };
 
-      R_RR.first(L(s) + K(s), j + K(s)) =
-        4.0 * pi<double>() * boost::math::quadrature::trapezoidal( // s^{-1}
-          [&](double nu) -> double {
-            auto nu_ = nu * pow<-1>(second);
-            auto lambda = c / nu_;
-            auto F_nu = c / pow<2>(nu_) * F_lambda(lambda);
+  Eigen::MatrixXd R_v = Eigen::MatrixXd::Zero(K(Z), K(Z));
+  const auto R_u = pow<-1>(second);
+  const auto R = [&](int z) {
+    return [&](int i, int j) -> double& { return R_v(i + K(z), j + K(z)); };
+  };
+  fm::family(0, Z - 2, [=](int z) {
+    fm::family(0, k(z) - 1, [=](int i) {
+      R(z)(k(z), i) =
+        4.0 * pi<double>() * boost::math::quadrature::trapezoidal(
+          [=](double nu) -> double {
+            const auto nu_ = nu * pow<-1>(second);
+            const auto lambda = c / nu_;
+            const auto F_nu = c / pow<2>(nu_) * F_lambda(lambda);
 
             return (
-              + sigma(nu_)
+              + alpha(z)(i)(nu_)
               / (h * nu_)
               * ((2.0 * h * pow<3>(nu_) / pow<2>(c)) + F_nu)
               * std::exp(-(h * nu_) / (k_B * T))
@@ -117,10 +127,10 @@ inline Eigen::MatrixXd rr_mashonkina_o1_rates(
           (infty / pow<-1>(second)).value()
         )
       ;
-    }
-  }
+    });
+  });
 
-  return R_RR.first;
+  return R_v;
 }
 
 

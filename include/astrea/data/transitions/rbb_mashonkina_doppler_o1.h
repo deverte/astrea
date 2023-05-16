@@ -59,7 +59,7 @@ class RBBMashonkinaDopplerO1 {
    * 
    * \return Radiative bound-bound transitions.
    */
-  const std::vector<IRBBMashonkinaDopplerO1Transition>& transitions();
+  const std::vector<IRBBMashonkinaDopplerO1Transition>& transitions() const;
 
  private:
   IRBBMashonkinaDopplerO1 resource_ =
@@ -69,7 +69,7 @@ class RBBMashonkinaDopplerO1 {
 
 
 inline const std::vector<IRBBMashonkinaDopplerO1Transition>&
-RBBMashonkinaDopplerO1::transitions() {
+RBBMashonkinaDopplerO1::transitions() const {
   return resource_.transitions;
 }
 

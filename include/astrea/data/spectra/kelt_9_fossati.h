@@ -41,7 +41,7 @@ class Kelt9Fossati : public Spectrum {
    * 
    * \return Distance in \f$au\f$.
    */
-  double distance();
+  double distance() const override;
 
   /**
    * Distance to radiation source.
@@ -55,14 +55,14 @@ class Kelt9Fossati : public Spectrum {
    * 
    * \return Wavelength in \f$nm\f$.
    */
-  double max_wavelength() override;
+  double max_wavelength() const override;
 
   /**
    * Minimal wavelength of the spectrum.
    * 
    * \return Wavelength in \f$nm\f$.
    */
-  double min_wavelength() override;
+  double min_wavelength() const override;
 
   /**
    * Spectral irradiance.
@@ -70,7 +70,7 @@ class Kelt9Fossati : public Spectrum {
    * \param wavelength Wavelength in \f$nm\f$.
    * \return Spectral irradiance in \f$W \cdot m^{-2} \cdot nm^{-1}\f$.
    */
-  double spectral_irradiance(double wavelength) override;
+  double spectral_irradiance(double wavelength) const override;
 
  private:
   boost::units::quantity<boost::units::si::length> distance_;
@@ -112,7 +112,7 @@ inline Kelt9Fossati::Kelt9Fossati() {
 }
 
 
-inline double Kelt9Fossati::distance() {
+inline double Kelt9Fossati::distance() const {
   return distance_ / astrea::units::si::astronomical_unit;
 }
 
@@ -122,17 +122,17 @@ inline void Kelt9Fossati::distance(double value) {
 }
 
 
-inline double Kelt9Fossati::max_wavelength() {
+inline double Kelt9Fossati::max_wavelength() const {
   return max_wavelength_ / astrea::units::si::nanometer;
 }
 
 
-inline double Kelt9Fossati::min_wavelength() {
+inline double Kelt9Fossati::min_wavelength() const {
   return min_wavelength_ / astrea::units::si::nanometer;
 }
 
 
-inline double Kelt9Fossati::spectral_irradiance(double wavelength) {
+inline double Kelt9Fossati::spectral_irradiance(double wavelength) const {
   using astrea::units::si::angstrom;
   using astrea::units::si::astronomical_unit;
   using astrea::units::si::centimeter;

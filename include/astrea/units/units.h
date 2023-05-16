@@ -15,40 +15,20 @@
 namespace astrea::units::si::units {
 
 
-using irradiance_area = boost::units::unit<
-  boost::units::list<
-    boost::units::dim<
-      boost::units::mass_base_dimension,
-      boost::units::static_rational<1L, 1L>
-    >,
-    boost::units::list<
-      boost::units::dim<
-        boost::units::time_base_dimension,
-        boost::units::static_rational<-3L, 1L>
-      >,
-      boost::units::dimensionless_type
-    >
-  >,
-  boost::units::si::system
->;
+using irradiance = decltype(
+  boost::units::si::power() * boost::units::pow<-3>(boost::units::si::length())
+);
 
 
-using transition_rate_coefficient = boost::units::unit<
-  boost::units::list<
-    boost::units::dim<
-      boost::units::length_base_dimension,
-      boost::units::static_rational<3L, 1L>
-    >,
-    boost::units::list<
-      boost::units::dim<
-        boost::units::time_base_dimension,
-        boost::units::static_rational<-1L, 1L>
-      >,
-      boost::units::dimensionless_type
-    >
-  >,
-  boost::units::si::system
->;
+using irradiance_area = decltype(
+  boost::units::si::power() * boost::units::pow<-2>(boost::units::si::length())
+);
+
+
+using transition_rate_coefficient = decltype(
+  + boost::units::pow<3>(boost::units::si::length())
+  * boost::units::pow<-1>(boost::units::si::time())
+);
 
 
 }

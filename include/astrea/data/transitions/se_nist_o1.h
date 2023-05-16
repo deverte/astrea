@@ -67,7 +67,7 @@ class SENistO1 {
    * 
    * \return Spontaneous emission transitions.
    */
-  const std::vector<ISENistO1Transition>& transitions();
+  const std::vector<ISENistO1Transition>& transitions() const;
 
  private:
   ISENistO1 resource_ =
@@ -76,7 +76,7 @@ class SENistO1 {
 };
 
 
-inline const std::vector<ISENistO1Transition>& SENistO1::transitions() {
+inline const std::vector<ISENistO1Transition>& SENistO1::transitions() const {
   return resource_.transitions;
 }
 

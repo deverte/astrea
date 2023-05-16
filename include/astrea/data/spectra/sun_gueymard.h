@@ -42,7 +42,7 @@ class SunGueymard : public Spectrum {
    * 
    * \return Distance in \f$au\f$.
    */
-  double distance();
+  double distance() const override;
 
   /**
    * Distance to radiation source.
@@ -56,14 +56,14 @@ class SunGueymard : public Spectrum {
    * 
    * \return Wavelength in \f$nm\f$.
    */
-  double max_wavelength() override;
+  double max_wavelength() const override;
 
   /**
    * Minimal wavelength of the spectrum.
    * 
    * \return Wavelength in \f$nm\f$.
    */
-  double min_wavelength() override;
+  double min_wavelength() const override;
 
   /**
    * Spectral irradiance.
@@ -71,7 +71,7 @@ class SunGueymard : public Spectrum {
    * \param wavelength Wavelength in \f$nm\f$.
    * \return Spectral irradiance in \f$W \cdot m^{-2} \cdot nm^{-1}\f$.
    */
-  double spectral_irradiance(double wavelength) override;
+  double spectral_irradiance(double wavelength) const override;
 
  private:
   boost::units::quantity<boost::units::si::length> distance_;
@@ -113,7 +113,7 @@ inline SunGueymard::SunGueymard() {
 }
 
 
-inline double SunGueymard::distance() {
+inline double SunGueymard::distance() const {
   return distance_ / astrea::units::si::astronomical_unit;
 }
 
@@ -123,17 +123,17 @@ inline void SunGueymard::distance(double value) {
 }
 
 
-inline double SunGueymard::max_wavelength() {
+inline double SunGueymard::max_wavelength() const {
   return max_wavelength_ / astrea::units::si::nanometer;
 }
 
 
-inline double SunGueymard::min_wavelength() {
+inline double SunGueymard::min_wavelength() const {
   return min_wavelength_ / astrea::units::si::nanometer;
 }
 
 
-inline double SunGueymard::spectral_irradiance(double wavelength) {
+inline double SunGueymard::spectral_irradiance(double wavelength) const {
   using astrea::units::si::astronomical_unit;
   using astrea::units::si::nanometer;
   using boost::units::si::meter;

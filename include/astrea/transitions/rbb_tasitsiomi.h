@@ -11,7 +11,6 @@
 #include <algorithm>
 #include <cmath>
 #include <memory>
-#include <utility>
 #include <vector>
 
 #include <boost/math/constants/constants.hpp>
@@ -44,16 +43,17 @@ namespace astrea {
  * \return Transitions rates in \f$s^{-1}\f$.
  */
 inline Eigen::MatrixXd rbb_tasitsiomi_rates(
-  std::vector<std::shared_ptr<Element>> elements,
-  std::shared_ptr<Spectrum> spectrum,
-  double optical_depth,
-  double temperature,
-  Eigen::MatrixXd spontaneous_emission_rates
+  const std::vector<std::shared_ptr<Element>> elements,
+  const std::shared_ptr<Spectrum> spectrum,
+  const double optical_depth,
+  const double temperature,
+  const Eigen::MatrixXd spontaneous_emission_rates
 ) {
   using astrea::units::si::angstrom;
   using astrea::units::si::dalton;
   using astrea::units::si::electronvolt;
   using astrea::units::si::nanometer;
+  using astrea::units::si::irradiance;
   using boost::math::constants::pi;
   using boost::units::si::constants::codata::c;
   using boost::units::si::constants::codata::e;
@@ -61,6 +61,7 @@ inline Eigen::MatrixXd rbb_tasitsiomi_rates(
   using boost::units::si::constants::codata::h;
   using boost::units::si::constants::codata::k_B;
   using boost::units::si::constants::codata::m_e;
+  using boost::units::si::area;
   using boost::units::si::energy;
   using boost::units::si::frequency;
   using boost::units::si::kelvin;
@@ -71,194 +72,239 @@ inline Eigen::MatrixXd rbb_tasitsiomi_rates(
   using boost::units::pow;
   using boost::units::quantity;
 
-  auto Lambda = 6.6702e15 * pow<2>(angstrom) * pow<-1>(second);
+  const auto Lambda = 6.6702e15 * pow<2>(angstrom) * pow<-1>(second);
 
-  auto chi = 21.0;
-  auto epsilon = 1.77245385;
-  auto kappa_0 = 0.1117;
-  auto kappa_1 = 4.421;
-  auto kappa_2 = -9.207;
-  auto kappa_3 = 5.674;
-  auto zeta_0 = 0.855;
-  auto zeta_1 = 3.42;
+  const auto chi = 21.0;
 
-  int S = elements.size();
-  Eigen::VectorXi L(S);
-  fm::family(0, S - 1, [&](int s) {
-    L(s) = elements[s]->levels().size();
+  const auto epsilon = 1.77245385;
+
+  const auto kappa_0 = 0.1117;
+
+  const auto kappa_1 = 4.421;
+
+  const auto kappa_2 = -9.207;
+
+  const auto kappa_3 = 5.674;
+
+  const auto zeta_0 = 0.855;
+
+  const auto zeta_1 = 3.42;
+
+  const int Z = elements.size();
+
+  Eigen::VectorXi k(Z);
+  fm::family(0, Z - 1, [&](int z) {
+    k(z) = elements[z]->levels().size();
   });
-  auto K = [&](int s) {
-    return fm::sum<int>(0, s - 1, [&](int z) { return L(z); });
+
+  const auto K = [=](int z) {
+    return fm::sum<int>(0, z - 1, [=](int z_) -> int { return k(z_); });
   };
 
-  auto m_i = elements[0]->mass() * dalton;
-  auto& R_SE = spontaneous_emission_rates;
-  auto T = temperature * kelvin;
-  auto& tau = optical_depth;
-  auto infty = c / (spectrum->min_wavelength() * nanometer);
+  const auto m_i = elements[0]->mass() * dalton;
 
-  auto F_lambda = [&](quantity<length> lambda) {
+  const auto& A_v = spontaneous_emission_rates;
+  const auto A = [&](int z) {
+    return [&](int i, int j) -> double {
+      return A_v(i + K(z), j + K(z));
+    };
+  };
+
+  const auto T = temperature * kelvin;
+
+  const auto& tau = optical_depth;
+
+  const auto infty = c / (spectrum->min_wavelength() * nanometer);
+
+  const auto F_lambda = [=](quantity<length> lambda) -> quantity<irradiance> {
     return
       + spectrum->spectral_irradiance(lambda / nanometer)
       * watt * pow<-2>(meter) * pow<-1>(nanometer)
     ;
   };
 
-  Eigen::Vector<quantity<energy>, Eigen::Dynamic> E(K(S));
-  fm::family(0, S - 1, [&](int s) {
-    fm::family(0, L(s) - 1, [&](int i) {
-      E(i + K(s)) = elements[s]->levels()[i].energy * electronvolt;
-    });
-  });
-  Eigen::VectorXd g(K(S));
-  fm::family(0, S - 1, [&](int s) {
-    fm::family(0, L(s) - 1, [&](int i) {
-      g(i + K(s)) = elements[s]->levels()[i].statistical_weight;
+  Eigen::Vector<quantity<energy>, Eigen::Dynamic> E_v(K(Z));
+  const auto E = [&](int z) {
+    return [&](int i) -> quantity<energy>& { return E_v(i + K(z)); };
+  };
+  fm::family(0, Z - 1, [=](int z) {
+    fm::family(0, k(z) - 1, [=](int i) {
+      E(z)(i) = elements[z]->levels()[i].energy * electronvolt;
     });
   });
 
-  std::pair<Eigen::MatrixXd, frequency> R_RBB;
-  R_RBB.first = Eigen::MatrixXd::Zero(K(S), K(S));
-  R_RBB.second = pow<-1>(second);
-  for (int s = 0; s <= S - 1; s++) {
-    for (int i = 0; i <= L(s) - 1; i++) {
-      for (int j = 0; j <= L(s) - 1; j++) {
-        auto nu_0 = abs(E(j + K(s)) - E(i + K(s))) / h;
+  Eigen::VectorXd g_v(K(Z));
+  const auto g = [&](int z) {
+    return [&](int i) -> double& { return g_v(i + K(z)); };
+  };
+  fm::family(0, Z - 1, [=](int z) {
+    fm::family(0, k(z) - 1, [=](int i) {
+      g(z)(i) = elements[z]->levels()[i].statistical_weight;
+    });
+  });
 
-        auto f_ij = [&](quantity<frequency> nu) {
-          auto lambda = c / nu;
+  const auto nu_0 = [=](int z) {
+    return [=](int i, int j) {
+      return abs(E(z)(j) - E(z)(i)) / h;
+    };
+  };
 
-          return
-            + (
-              + R_SE(i + K(s), j + K(s)) * pow<-1>(second)
-              + R_SE(j + K(s), i + K(s)) * pow<-1>(second)
-            )
-            * g(j + K(s)) / g(i + K(s))
-            * pow<2>(lambda) / Lambda
-          ;
-        };
+  const auto f = [=](int z) {
+    return [=](int i, int j) {
+      return [=](quantity<frequency> nu) -> double {
+        const auto lambda = c / nu;
 
-        auto delta_nu_L = [&]() {
-          return 3.0 * m_i * pow<3>(c) * epsilon_0 / pow<2>(e);
-        };
+        return
+          + (
+            + A(z)(i, j) * pow<-1>(second)
+            + A(z)(j, i) * pow<-1>(second)
+          )
+          * g(z)(j) / g(z)(i)
+          * pow<2>(lambda) / Lambda
+        ;
+      };
+    };
+  };
 
-        auto delta_nu_D = [&]() {
-          return nu_0 * std::sqrt(2.0 * k_B * T / (m_i * pow<2>(c)));
-        };
+  const auto delta_nu_L = 3.0 * m_i * pow<3>(c) * epsilon_0 / pow<2>(e);
 
-        auto x = [&](quantity<frequency> nu) {
-          return (nu - nu_0) / delta_nu_D();
-        };
+  const auto delta_nu_D = [=](int z) {
+    return [=](int i, int j) -> quantity<frequency> {
+      return nu_0(z)(i, j) * std::sqrt(2.0 * k_B * T / (m_i * pow<2>(c)));
+    };
+  };
 
-        auto z = [&](quantity<frequency> nu) {
-          return
-            + (std::pow(x(nu), 2.0) - zeta_0)
-            / (std::pow(x(nu), 2.0) + zeta_1)
-          ;
-        };
+  const auto x = [=](int z) {
+    return [=](int i, int j) {
+      return [=](quantity<frequency> nu) -> double {
+        return (nu - nu_0(z)(i, j)) / delta_nu_D(z)(i, j);
+      };
+    };
+  };
 
-        auto alpha = [&]() {
-          return delta_nu_L() / (2.0 * delta_nu_D());
-        };
+  const auto zeta = [=](int z) {
+    return [=](int i, int j) {
+      return [=](quantity<frequency> nu) -> double {
+        return
+          + (std::pow(x(z)(i, j)(nu), 2.0) - zeta_0)
+          / (std::pow(x(z)(i, j)(nu), 2.0) + zeta_1)
+        ;
+      };
+    };
+  };
 
-        auto q = [&](quantity<frequency> nu) {
-          return fm::cases<double>({
-            {
-              [&]() {
-                return
-                  + z(nu)
-                  * (1.0 + chi / std::pow(x(nu), 2.0))
-                  * alpha()
-                  / (pi<double>() * (std::pow(x(nu), 2.0) + 1))
+  const auto gamma = [=](int z) {
+    return [=](int i, int j) {
+      return delta_nu_L / (2.0 * delta_nu_D(z)(i, j));
+    };
+  };
+
+  const auto q = [=](int z) {
+    return [=](int i, int j) {
+      return [=](quantity<frequency> nu) -> double {
+        return fm::cases<double>({
+          {
+            [=]() -> double {
+              return
+                + zeta(z)(i, j)(nu)
+                * (1.0 + chi / std::pow(x(z)(i, j)(nu), 2.0))
+                * gamma(z)(i, j)
+                / (pi<double>() * (std::pow(x(z)(i, j)(nu), 2.0) + 1))
+                * (
+                  + kappa_0
+                  + zeta(z)(i, j)(nu)
                   * (
-                    + kappa_0
-                    + z(nu)
-                    * (
-                      + kappa_1
-                      + z(nu)
-                      * (kappa_2 + kappa_3 * z(nu))
-                    )
+                    + kappa_1
+                    + zeta(z)(i, j)(nu)
+                    * (kappa_2 + kappa_3 * zeta(z)(i, j)(nu))
                   )
-                ;
-              },
-              z(nu) > 0.0
+                )
+              ;
             },
-            {[]() { return 0.0; }, z(nu) <= 0.0}
-          });
-        };
-
-        auto H = [&](quantity<frequency> nu) {
-          return
-            + std::sqrt(pi<double>())
-            * (
-              + q(nu)
-              + std::exp(-std::pow(x(nu), 2.0)) / epsilon
-            )
-          ;
-        };
-
-        auto sigma = [&](quantity<frequency> nu) {
-          return
-            + 1.0
-            / (4.0 * pi<double>() * epsilon_0)
-            * f_ij(nu)
-            * std::sqrt(pi<double>()) * pow<2>(e)
-            / (m_e * c * delta_nu_D())
-            * H(nu)
-          ;
-        };
-
-        R_RBB.first(i + K(s), j + K(s)) = fm::cases<quantity<frequency>>({
-          {
-            [&]() {
-              return 4.0 * pi<double>() * boost::math::quadrature::trapezoidal(
-                [&](double nu) { // s^{-1}
-                  auto nu_ = nu * pow<-1>(second);
-                  auto lambda = c / nu_;
-                  auto F_nu = c / pow<2>(nu_) * F_lambda(lambda);
-
-                  return (
-                    + sigma(nu_)
-                    / (h * nu_)
-                    * F_nu
-                    * std::exp(-tau)
-                  ).value();
-                },
-                (nu_0 / pow<-1>(second)).value(),
-                (infty / pow<-1>(second)).value()
-              ) * pow<-1>(second);
-            },
-            i < j
+            zeta(z)(i, j)(nu) > 0.0
           },
-          {
-            [&]() {
-              return 4.0 * pi<double>() * boost::math::quadrature::trapezoidal(
-                [&](double nu) { // s^{-1}
-                  auto nu_ = nu * pow<-1>(second);
-                  auto lambda = c / nu_;
-                  auto F_nu = c / pow<2>(nu_) * F_lambda(lambda);
+          {[]() -> double { return 0.0; }, zeta(z)(i, j)(nu) <= 0.0}
+        });
+      };
+    };
+  };
 
-                  return (
-                    + sigma(nu_)
-                    / (h * nu_)
-                    * ((2.0 * h * pow<3>(nu_) / pow<2>(c)) + F_nu)
-                    * std::exp(-(h * nu_) / (k_B * T))
-                    * std::exp(-tau)
-                  ).value();
-                },
-                (nu_0 / pow<-1>(second)).value(),
-                (infty / pow<-1>(second)).value()
-              ) * pow<-1>(second);
-            },
-            i > j
+  const auto H = [=](int z) {
+    return [=](int i, int j) {
+      return [=](quantity<frequency> nu) -> double {
+        return
+          + std::sqrt(pi<double>())
+          * (
+            + q(z)(i, j)(nu)
+            + std::exp(-std::pow(x(z)(i, j)(nu), 2.0)) / epsilon
+          )
+        ;
+      };
+    };
+  };
+
+  const auto alpha = [=](int z) {
+    return [=](int i, int j) {
+      return [=](quantity<frequency> nu) -> quantity<area> {
+        return
+          + 1.0
+          / (4.0 * pi<double>() * epsilon_0)
+          * f(z)(i, j)(nu)
+          * std::sqrt(pi<double>()) * pow<2>(e)
+          / (m_e * c * delta_nu_D(z)(i, j))
+          * H(z)(i, j)(nu)
+        ;
+      };
+    };
+  };
+
+  Eigen::MatrixXd R_v = Eigen::MatrixXd::Zero(K(Z), K(Z));
+  const auto R_u = pow<-1>(second);
+  const auto R = [&](int z) {
+    return [&](int i, int j) -> double& { return R_v(i + K(z), j + K(z)); };
+  };
+  fm::family(0, Z - 1, [=](int z) {
+    fm::family(0, k(z) - 1, [=](int i) {
+      fm::family(i + 1, k(z) - 1, [=](int j) {
+        R(z)(i, j) = 4.0 * pi<double>() * boost::math::quadrature::trapezoidal(
+          [=](double nu) {
+            const auto nu_ = nu * pow<-1>(second);
+            const auto lambda = c / nu_;
+            const auto F_nu = c / pow<2>(nu_) * F_lambda(lambda);
+
+            return (
+              + alpha(z)(i, j)(nu_)
+              / (h * nu_)
+              * F_nu
+              * std::exp(-tau)
+            ).value();
           },
-          {[]() { return 0.0 * pow<-1>(second); }, i == j},
-        }) / R_RBB.second;
-      }
-    }
-  }
+          (nu_0(z)(i, j) / pow<-1>(second)).value(),
+          (infty / pow<-1>(second)).value()
+        ) * pow<-1>(second) / R_u;
 
-  return R_RBB.first;
+        R(z)(j, i) = 4.0 * pi<double>() * boost::math::quadrature::trapezoidal(
+          [=](double nu) {
+            const auto nu_ = nu * pow<-1>(second);
+            const auto lambda = c / nu_;
+            const auto F_nu = c / pow<2>(nu_) * F_lambda(lambda);
+
+            return (
+              + alpha(z)(j, i)(nu_)
+              / (h * nu_)
+              * ((2.0 * h * pow<3>(nu_) / pow<2>(c)) + F_nu)
+              * std::exp(-(h * nu_) / (k_B * T))
+              * std::exp(-tau)
+            ).value();
+          },
+          (nu_0(z)(j, i) / pow<-1>(second)).value(),
+          (infty / pow<-1>(second)).value()
+        ) * pow<-1>(second) / R_u;
+      });
+    });
+  });
+
+  return R_v;
 }
 
 

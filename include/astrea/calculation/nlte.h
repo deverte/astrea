@@ -9,7 +9,6 @@
 
 
 #include <memory>
-#include <utility>
 #include <vector>
 
 #include <boost/units/systems/si.hpp>
@@ -29,30 +28,29 @@ namespace astrea {
  * \param rates_matrix Rates matrix in \f$s^{-1}\f$.
  * \return Transition operator in \f$1\f$.
  */
-inline Eigen::MatrixXd nlte_transition_operator(Eigen::MatrixXd rates_matrix) {
+inline Eigen::MatrixXd
+nlte_transition_operator(const Eigen::MatrixXd rates_matrix) {
   using boost::units::si::frequency;
   using boost::units::si::second;
   using boost::units::pow;
   using boost::units::quantity;
 
-  std::pair<Eigen::MatrixXd, frequency> R;
-  R.first = rates_matrix;
-  R.second = pow<-1>(second);
+  const Eigen::MatrixXd R = rates_matrix;
+  const auto R_u = pow<-1>(second);
 
-  std::pair<Eigen::MatrixXd, frequency> Q;
-  Q.first = Eigen::MatrixXd(R.first.rows(), R.first.cols());
-  Q.second = pow<-1>(second);
-  auto K = Q.first.cols();
+  const auto K = R.cols();
 
+  Eigen::MatrixXd Q = Eigen::MatrixXd(K, K);
+  const auto Q_u = pow<-1>(second);
   fm::family(0, K - 1, [&](int i) {
     fm::family(0, K - 1, [&](int j) {
-      Q.first(i, j) = fm::cases<quantity<frequency>>({
+      Q(i, j) = fm::cases<quantity<frequency>>({
         {
-          [&]() {
+          [=]() -> quantity<frequency> {
             return
-              - fm::sum<quantity<frequency>>(0, K - 1, [&](int k) {
+              - fm::sum<quantity<frequency>>(0, K - 1, [=](int k) {
                 return fm::cases<quantity<frequency>>({
-                  {[&]() { return R.first(i, k) * R.second; }, i != k},
+                  {[=]() { return R(i, k) * R_u; }, i != k},
                   {[]() { return 0.0 * pow<-1>(second); }, i == k},
                 });
               })
@@ -60,12 +58,15 @@ inline Eigen::MatrixXd nlte_transition_operator(Eigen::MatrixXd rates_matrix) {
           },
           i == j
         },
-        {[&]() { return R.first(j, i) * R.second; }, i != j},
-      }) / Q.second;
+        {
+          [=]() -> quantity<frequency> { return R(j, i) * R_u; },
+          i != j
+        },
+      }) / Q_u;
     });
   });
 
-  return Q.first;
+  return Q;
 }
 
 
@@ -80,28 +81,30 @@ inline Eigen::MatrixXd nlte_transition_operator(Eigen::MatrixXd rates_matrix) {
  * \return Electrons population in \f$1\f$.
  */
 inline Eigen::VectorXd nlte_population_full(
-  Eigen::VectorXd electrons_population,
-  double delta_time,
-  Eigen::MatrixXd rates_matrix
+  const Eigen::VectorXd electrons_population,
+  const double delta_time,
+  const Eigen::MatrixXd rates_matrix
 ) {
   using boost::units::si::frequency;
   using boost::units::si::second;
   using boost::units::pow;
 
-  std::pair<Eigen::MatrixXd, frequency> Q_tot;
-  Q_tot.first = nlte_transition_operator(rates_matrix);
-  Q_tot.second = pow<-1>(second);
-  auto dt = delta_time * second;
-  auto I = Eigen::MatrixXd::Identity(Q_tot.first.rows(), Q_tot.first.cols());
-  auto& n_t = electrons_population;
+  const Eigen::MatrixXd Q = nlte_transition_operator(rates_matrix);
+  const auto Q_u = pow<-1>(second);
 
-  auto P = (I - Q_tot.first * (dt * Q_tot.second)).inverse();
+  const auto dt = delta_time * second;
 
-  auto n_t_plus_dt = P * n_t;
+  const auto I = Eigen::MatrixXd::Identity(Q.rows(), Q.cols());
 
-  auto norm_n_t_plus_dt = n_t_plus_dt / n_t_plus_dt.sum();
+  const auto& n_t = electrons_population;
 
-  return norm_n_t_plus_dt;
+  const auto P = (I - Q * (dt * Q_u)).inverse();
+
+  const auto n_t_plus_dt_ = P * n_t;
+
+  const auto n_t_plus_dt = n_t_plus_dt_ / n_t_plus_dt_.sum();
+
+  return n_t_plus_dt;
 }
 
 
@@ -120,11 +123,11 @@ inline Eigen::VectorXd nlte_population_full(
  * \return Electrons population in \f$1\f$.
  */
 inline Eigen::VectorXd nlte_population_per_elements(
-  std::vector<std::shared_ptr<Element>> elements,
-  Eigen::VectorXd elements_population,
-  Eigen::VectorXd electrons_population,
-  double delta_time,
-  Eigen::MatrixXd rates_matrix
+  const std::vector<std::shared_ptr<Element>> elements,
+  const Eigen::VectorXd elements_population,
+  const Eigen::VectorXd electrons_population,
+  const double delta_time,
+  const Eigen::MatrixXd rates_matrix
 ) {
   if (elements.size() != elements_population.size()) {
     throw std::length_error(
@@ -135,34 +138,64 @@ inline Eigen::VectorXd nlte_population_per_elements(
 
   using boost::units::si::second;
 
-  int S = elements.size();
-  Eigen::VectorXi L(S);
-  fm::family(0, S - 1, [&](int s) {
-    L(s) = elements[s]->levels().size();
+  const int Z = elements.size();
+
+  Eigen::VectorXi k(Z);
+  fm::family(0, Z - 1, [&](int z) {
+    k(z) = elements[z]->levels().size();
   });
-  auto K = [&](int s) {
-    return fm::sum<int>(0, s - 1, [&](int z) { return L(z); });
+
+  const auto K = [=](int z) {
+    return fm::sum<int>(0, z - 1, [=](int z_) -> int { return k(z_); });
   };
 
-  auto& N = elements_population;
-  auto n_t_plus_dt = nlte_population_full(
-    electrons_population,
-    delta_time,
-    rates_matrix
-  );
+  const auto& N = elements_population;
 
-  Eigen::VectorXd norm_n_t_plus_dt(K(S));
-  fm::family(0, S, [&](int s) {
-    fm::family(0, L(s) - 1, [&](int i) {
-      norm_n_t_plus_dt(i + K(s)) =
-        + n_t_plus_dt(i + K(s))
-        / n_t_plus_dt(Eigen::seq(K(s), K(s + 1) - 1)).sum()
-        * N(s)
+  const Eigen::MatrixXd Q = nlte_transition_operator(rates_matrix);
+  const auto Q_u = pow<-1>(second);
+
+  const auto dt = delta_time * second;
+
+  const auto I = Eigen::MatrixXd::Identity(Q.rows(), Q.cols());
+
+  const auto& n_t = electrons_population;
+
+  const auto P = (I - Q * (dt * Q_u)).inverse();
+
+  const auto n_t_plus_dt_ = P * n_t;
+
+  const auto n_t_plus_dt__ = [&](int z) {
+    return [&](int i) -> double {
+      return n_t_plus_dt_(i + K(z));
+    };
+  };
+
+  Eigen::VectorXd n_t_plus_dt_v(K(Z));
+  const auto n_t_plus_dt = [&](int z) {
+    return [&](int i) -> double& { return n_t_plus_dt_v(i + K(z)); };
+  };
+  fm::family(0, Z - 1, [=](int z) {
+    fm::family(0, k(z) - 1, [=](int i) {
+      n_t_plus_dt(z)(i) =
+        + n_t_plus_dt__(z)(i)
+        / fm::sum<double>(0, k(z) - 1, [=](int j) {
+          return n_t_plus_dt__(z)(j);
+        })
+        * N(z)
       ;
     });
   });
 
-  return norm_n_t_plus_dt;
+  // double epsilon bypass
+  for (int z = 0; z < Z - 1; z++) {
+    for (int i = 0; i < k(z) - 1; i++) {
+      if (n_t_plus_dt(z)(i) < 1.0e-100) {
+        n_t_plus_dt(z)(i) = 0.0;
+      }
+    }
+  }
+
+  return n_t_plus_dt_v;
 }
 
 
