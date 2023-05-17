@@ -24,6 +24,7 @@
 #include "./transitions/cbb_mashonkina_o1.h"
 #include "./transitions/cbb_regemorter.h"
 #include "./transitions/ci_mashonkina_o1_seaton.h"
+#include "./transitions/ci_mashonkina_o1.h"
 #include "./transitions/pi_mashonkina_o1.h"
 #include "./transitions/rbb_mashonkina_doppler_o1.h"
 #include "./transitions/rbb_mashonkina_voigt_o1.h"
@@ -31,3 +32,4 @@
 #include "./transitions/rr_mashonkina_o1.h"
 #include "./transitions/se_nist_o1.h"
 #include "./transitions/tbr_mashonkina_o1_seaton.h"
+#include "./transitions/tbr_mashonkina_o1.h"

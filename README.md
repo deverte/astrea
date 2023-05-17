@@ -171,6 +171,7 @@ The following transitions rates functions are available:
 - `astrea::cbb_mashonkina_o1_rates`
 - `astrea::cbb_regemorter_rates`
 - `astrea::ci_mashonkina_o1_seaton_rates`
+- `astrea::ci_mashonkina_o1_rates`
 - `astrea::pi_mashonkina_o1_rates`
 - `astrea::rbb_mashonkina_doppler_o1_rates`
 - `astrea::rbb_mashonkina_voigt_o1_rates`
@@ -178,6 +179,7 @@ The following transitions rates functions are available:
 - `astrea::rr_mashonkina_o1_rates`
 - `astrea::se_nist_o1_rates`
 - `astrea::tbr_mashonkina_o1_seaton_rates`
+- `astrea::tbr_mashonkina_o1_rates`
 
 ### Elements
 
