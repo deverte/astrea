@@ -52,7 +52,7 @@ struct ISENistO1 {
   /**
    * Transitions.
    */
-  std::vector<ISENistO1Transition> transitions;
+  const std::vector<ISENistO1Transition> transitions;
 };
 
 
@@ -70,7 +70,7 @@ class SENistO1 {
   const std::vector<ISENistO1Transition>& transitions() const;
 
  private:
-  ISENistO1 resource_ =
+  const ISENistO1 resource_ =
     #include "../../resources/transitions/se_nist_o1.yaml"
   ;
 };

@@ -40,7 +40,7 @@ class BlackBodyPlanck : public Spectrum {
    * 
    * \param distance Distance in \f$au\f$.
    */
-  void distance(double value) override;
+  void distance(const double value) override;
 
   /**
    * Maximal wavelength of the spectrum.
@@ -62,7 +62,7 @@ class BlackBodyPlanck : public Spectrum {
    * \param wavelength Wavelength in \f$nm\f$.
    * \return Spectral irradiance in \f$W \cdot m^{-2} \cdot nm^{-1}\f$.
    */
-  double spectral_irradiance(double wavelength) const override;
+  double spectral_irradiance(const double wavelength) const override;
 
   /**
    * Black body temperature.
@@ -76,7 +76,7 @@ class BlackBodyPlanck : public Spectrum {
    * 
    * \param value Temperature in \f$K\f$.
    */
-  void temperature(double value);
+  void temperature(const double value);
 
   /**
    * Spectral irradiance total area.
@@ -90,18 +90,18 @@ class BlackBodyPlanck : public Spectrum {
    * 
    * \param value Spectral irradiance area in \f$W \cdot m^{-2}\f$.
    */
-  void total_area(double value);
+  void total_area(const double value);
 
  private:
   boost::units::quantity<boost::units::si::length> distance_ =
     1.0 * astrea::units::si::astronomical_unit
   ;
 
-  boost::units::quantity<boost::units::si::length> max_wavelength_ =
+  const boost::units::quantity<boost::units::si::length> max_wavelength_ =
     1.0e5 * astrea::units::si::nanometer
   ;
 
-  boost::units::quantity<boost::units::si::length> min_wavelength_ =
+  const boost::units::quantity<boost::units::si::length> min_wavelength_ =
     1.0e-1 * astrea::units::si::nanometer
   ;
 
@@ -127,7 +127,7 @@ inline double BlackBodyPlanck::distance() const {
 }
 
 
-inline void BlackBodyPlanck::distance(double value) {
+inline void BlackBodyPlanck::distance(const double value) {
   distance_ = value * astrea::units::si::astronomical_unit;
 }
 
@@ -142,7 +142,8 @@ inline double BlackBodyPlanck::min_wavelength() const {
 }
 
 
-inline double BlackBodyPlanck::spectral_irradiance(double wavelength) const {
+inline double
+BlackBodyPlanck::spectral_irradiance(const double wavelength) const {
   using astrea::units::si::astronomical_unit;
   using astrea::units::si::irradiance;
   using astrea::units::si::nanometer;
@@ -158,13 +159,13 @@ inline double BlackBodyPlanck::spectral_irradiance(double wavelength) const {
   using boost::units::pow;
   using boost::units::quantity;
 
-  auto D = distance_;
-  auto E_e = total_area_;
-  auto J = total_area_temperature_;
-  auto lambda = wavelength * nanometer;
-  auto T = temperature_;
+  const auto D = distance_;
+  const auto E_e = total_area_;
+  const auto J = total_area_temperature_;
+  const auto lambda = wavelength * nanometer;
+  const auto T = temperature_;
 
-  auto R_lambda = [&](quantity<length> lambda, quantity<temperature> T)
+  const auto R_lambda = [&](quantity<length> lambda, quantity<temperature> T)
     -> quantity<decltype(irradiance() * pow<2>(length()))> {
     return
       + 2.0 * pi<double>() * h * pow<2>(c)
@@ -174,7 +175,7 @@ inline double BlackBodyPlanck::spectral_irradiance(double wavelength) const {
     ;
   };
 
-  auto E_e_lambda = [&](quantity<length> lambda, quantity<temperature> T)
+  const auto E_e_lambda = [&](quantity<length> lambda, quantity<temperature> T)
     -> quantity<decltype(irradiance() * pow<2>(length()))> {
     return E_e * R_lambda(lambda, T) / J;
   };
@@ -191,7 +192,7 @@ inline double BlackBodyPlanck::temperature() const {
 }
 
 
-inline void BlackBodyPlanck::temperature(double value) {
+inline void BlackBodyPlanck::temperature(const double value) {
   using boost::units::si::kelvin;
   using boost::units::si::meter;
   using boost::units::si::watt;
@@ -199,10 +200,10 @@ inline void BlackBodyPlanck::temperature(double value) {
 
   temperature_ = value * kelvin;
 
-  auto sigma = 5.67040040e-8 * watt * pow<-2>(meter) * pow<-4>(kelvin);
-  auto T = temperature_;
+  const auto sigma = 5.67040040e-8 * watt * pow<-2>(meter) * pow<-4>(kelvin);
+  const auto T = temperature_;
 
-  auto J = sigma * pow<4>(T);
+  const auto J = sigma * pow<4>(T);
 
   total_area_temperature_ = J;
 }
@@ -216,7 +217,7 @@ inline double BlackBodyPlanck::total_area() const {
 }
 
 
-inline void BlackBodyPlanck::total_area(double value) {
+inline void BlackBodyPlanck::total_area(const double value) {
   total_area_ =
     + value
     * boost::units::si::watt * boost::units::pow<-2>(boost::units::si::meter)

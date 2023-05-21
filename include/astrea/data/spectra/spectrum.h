@@ -50,7 +50,7 @@ class Spectrum {
    * 
    * \param distance Distance in \f$au\f$.
    */
-  virtual void distance(double value) = 0;
+  virtual void distance(const double value) = 0;
 
   /**
    * Maximal wavelength of the spectrum.
@@ -72,7 +72,7 @@ class Spectrum {
    * \param wavelength Wavelength in \f$nm\f$.
    * \return Spectral irradiance in \f$W \cdot m^{-2} \cdot nm^{-1}\f$.
    */
-  virtual double spectral_irradiance(double wavelength) const = 0;
+  virtual double spectral_irradiance(const double wavelength) const = 0;
 };
 
 

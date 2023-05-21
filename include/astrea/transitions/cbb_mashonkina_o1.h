@@ -88,14 +88,14 @@ inline Eigen::MatrixXd cbb_mashonkina_o1_rates(
     });
   });
 
-  const auto q_ = [&](int z) {
-    return [&](int i, int j) {
-      return [&](quantity<temperature_> temperature)
+  const auto q_ = [=](int z) {
+    return [=](int i, int j) {
+      return [=](quantity<temperature_> temperature)
         -> quantity<transition_rate_coefficient> {
         return cbb_mashonkina_o1.collision_rate_coefficient(
           elements[z]->levels()[i].term,
           elements[z]->levels()[j].term,
-          temperature / kelvin
+          (temperature / kelvin).value()
         ) * pow<3>(centimeter) * pow<-1>(second);
       };
     };
@@ -116,7 +116,7 @@ inline Eigen::MatrixXd cbb_mashonkina_o1_rates(
         ;
 
         q(z)(j, i) =
-          + q_(z)(j, i)(T)
+          + q_(z)(i, j)(T) // data has only i -> j
           / g(z)(j)
           * std::exp(-(E(z)(j) - E(z)(i)) / (k_B * T))
           / q_u

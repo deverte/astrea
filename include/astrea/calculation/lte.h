@@ -199,7 +199,7 @@ inline Eigen::VectorXd lte_boltzmann_saha_population(
         return g(z)(i) * std::exp(-E(z)(i) / (k_B * T));
       })
       / fm::sum<double>(0, k(z + 1) - 1, [=](int i) -> double {
-        return g(z)(i) * std::exp(-E(z)(i) / (k_B * T));
+        return g(z + 1)(i) * std::exp(-E(z + 1)(i) / (k_B * T));
       })
       * pow<3>(tilde_lambda) / 2.0
       * std::exp(I(z) / (k_B * T_e))
@@ -207,7 +207,7 @@ inline Eigen::VectorXd lte_boltzmann_saha_population(
   });
 
   Eigen::VectorXd N(Z);
-  fm::family(0, Z - 2, [&](int z) {
+  fm::family(0, Z - 1, [&](int z) {
     N(z) =
       + fm::prod<double>(z, Z - 2, [=](int i) -> double { return r(i); })
       / fm::sum<double>(0, Z - 1, [=](int k) -> double {

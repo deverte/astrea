@@ -68,7 +68,7 @@ inline Eigen::MatrixXd ci_mashonkina_o1_seaton_rates(
 
   const auto g = 1.0; // Gaunt factor // TODO: calculate
 
-  const auto infty = [&]() {
+  const auto infty = [=]() {
     const auto nu = rbf_mashonkina_o1.max_frequency() * pow<-1>(second);
     const auto E = h * nu;
     return pow<static_rational<1, 2>>(2.0 * E / m_e);
@@ -76,7 +76,7 @@ inline Eigen::MatrixXd ci_mashonkina_o1_seaton_rates(
 
   const auto N_e = electron_number_density * pow<-3>(centimeter);
 
-  const auto v_0 = [&]() {
+  const auto v_0 = [=]() {
     const auto nu = rbf_mashonkina_o1.min_frequency() * pow<-1>(second);
     const auto E = h * nu;
     return pow<static_rational<1, 2>>(2.0 * E / m_e);
@@ -113,9 +113,9 @@ inline Eigen::MatrixXd ci_mashonkina_o1_seaton_rates(
     ;
   };
 
-  const auto a = [&](int z) {
-    return [&](int i) {
-      return [&](quantity<energy> E) -> quantity<area> {
+  const auto a = [=](int z) {
+    return [=](int i) {
+      return [=](quantity<energy> E) -> quantity<area> {
         const auto nu = E / h;
 
         return rbf_mashonkina_o1.rbf_cross_section(
@@ -126,7 +126,7 @@ inline Eigen::MatrixXd ci_mashonkina_o1_seaton_rates(
     };
   };
 
-  const auto Q = [=](int z) {
+  const auto sigma = [=](int z) {
     return [=](int i) {
       return [=](quantity<velocity> v) -> quantity<area> {
         const auto E = m_e * pow<2>(v) / 2.0;
@@ -173,7 +173,7 @@ inline Eigen::MatrixXd ci_mashonkina_o1_seaton_rates(
             const auto v_ = v * meter * pow<-1>(second);
 
             return (
-              + Q(z)(i)(v_)
+              + sigma(z)(i)(v_)
               * v_
               * f(v_)
               / pow<2>(centimeter)

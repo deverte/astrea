@@ -37,35 +37,35 @@ using transition_rate_coefficient = decltype(
 namespace astrea::units::si::quantities {
 
 
-boost::units::quantity<boost::units::si::length> astronomical_unit =
+const boost::units::quantity<boost::units::si::length> astronomical_unit =
   1.495978707e11 * boost::units::si::meter
 ;
 
-boost::units::quantity<boost::units::si::length> angstrom =
+const boost::units::quantity<boost::units::si::length> angstrom =
   1.0e-10 * boost::units::si::meter
 ;
 
-boost::units::quantity<boost::units::si::length> centimeter =
+const boost::units::quantity<boost::units::si::length> centimeter =
   1.0e-2 * boost::units::si::meter
 ;
 
-boost::units::quantity<boost::units::si::mass> dalton =
+const boost::units::quantity<boost::units::si::mass> dalton =
   1.0 * boost::units::si::constants::codata::m_u
 ;
 
-boost::units::quantity<boost::units::si::energy> electronvolt =
+const boost::units::quantity<boost::units::si::energy> electronvolt =
   boost::units::si::constants::codata::e * 1.0 * boost::units::si::volt
 ;
 
-boost::units::quantity<boost::units::si::energy> erg =
+const boost::units::quantity<boost::units::si::energy> erg =
   1.0e-7 * boost::units::si::joule
 ;
 
-boost::units::quantity<boost::units::si::length> nanometer =
+const boost::units::quantity<boost::units::si::length> nanometer =
   1.0e-9 * boost::units::si::meter
 ;
 
-boost::units::quantity<boost::units::si::mass> unified_atomic_mass_unit =
+const boost::units::quantity<boost::units::si::mass> unified_atomic_mass_unit =
   dalton
 ;
 
@@ -76,7 +76,7 @@ boost::units::quantity<boost::units::si::mass> unified_atomic_mass_unit =
 namespace astrea::units::si::constants {
 
 
-auto Ry =
+const auto Ry =
   boost::units::si::constants::codata::h 
   * boost::units::si::constants::codata::c
   * boost::units::si::constants::codata::R_infinity

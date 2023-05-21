@@ -90,9 +90,9 @@ inline Eigen::MatrixXd rr_mashonkina_o1_rates(
     ;
   };
 
-  const auto alpha = [&](int z) {
-    return [&](int j) {
-      return [&](quantity<frequency> frequency) -> quantity<area> {
+  const auto alpha = [=](int z) {
+    return [=](int j) {
+      return [=](quantity<frequency> frequency) -> quantity<area> {
         return rbf_mashonkina_o1.rbf_cross_section(
           elements[z]->levels()[j].term,
           frequency / pow<-1>(second)

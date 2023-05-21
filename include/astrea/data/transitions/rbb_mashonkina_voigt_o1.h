@@ -56,7 +56,7 @@ struct IRBBMashonkinaVoigtO1 {
   /**
    * Transitions.
    */
-  std::vector<RBBMashonkinaVoigtO1Transition> transitions;
+  const std::vector<RBBMashonkinaVoigtO1Transition> transitions;
 };
 
 
@@ -74,7 +74,7 @@ class RBBMashonkinaVoigtO1 {
   const std::vector<RBBMashonkinaVoigtO1Transition>& transitions() const;
 
  private:
-  IRBBMashonkinaVoigtO1 resource_ =
+  const IRBBMashonkinaVoigtO1 resource_ =
     #include "../../resources/transitions/rbb_mashonkina_voigt_o1.yaml"
   ;
 };

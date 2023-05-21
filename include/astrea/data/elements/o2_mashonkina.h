@@ -22,13 +22,13 @@ class O2Mashonkina : public Element {
   const IElement& resource() override;
 
  private:
-  IElement resource_ =
+  const IElement resource_ =
     #include "../../resources/elements/o2_mashonkina.yaml"
   ;
 };
 
 
-const IElement& O2Mashonkina::resource() {
+inline const IElement& O2Mashonkina::resource() {
   return resource_;
 }
 

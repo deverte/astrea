@@ -49,7 +49,7 @@ class SunGueymard : public Spectrum {
    * 
    * \param distance Distance in \f$au\f$.
    */
-  void distance(double value) override;
+  void distance(const double value) override;
 
   /**
    * Maximal wavelength of the spectrum.
@@ -71,7 +71,7 @@ class SunGueymard : public Spectrum {
    * \param wavelength Wavelength in \f$nm\f$.
    * \return Spectral irradiance in \f$W \cdot m^{-2} \cdot nm^{-1}\f$.
    */
-  double spectral_irradiance(double wavelength) const override;
+  double spectral_irradiance(const double wavelength) const override;
 
  private:
   boost::units::quantity<boost::units::si::length> distance_;
@@ -82,7 +82,7 @@ class SunGueymard : public Spectrum {
 
   boost::units::quantity<boost::units::si::length> min_wavelength_;
 
-  ISpectrum resource_ =
+  const ISpectrum resource_ =
     #include "../../resources/spectra/sun_gueymard.yaml"
   ;
 };
@@ -118,7 +118,7 @@ inline double SunGueymard::distance() const {
 }
 
 
-inline void SunGueymard::distance(double value) {
+inline void SunGueymard::distance(const double value) {
   distance_ = value * astrea::units::si::astronomical_unit;;
 }
 
@@ -133,23 +133,23 @@ inline double SunGueymard::min_wavelength() const {
 }
 
 
-inline double SunGueymard::spectral_irradiance(double wavelength) const {
+inline double SunGueymard::spectral_irradiance(const double wavelength) const {
   using astrea::units::si::astronomical_unit;
   using astrea::units::si::nanometer;
   using boost::units::si::meter;
   using boost::units::si::watt;
   using boost::units::pow;
 
-  auto lambda = wavelength * nanometer;
+  const auto lambda = wavelength * nanometer;
 
-  auto E_e_lambda =
+  const auto E_e_lambda =
     + interpolant_((lambda / nanometer).value())
     * watt * pow<-2>(meter) * pow<-1>(nanometer) * pow<2>(astronomical_unit)
     * pow<2>(astronomical_unit)
   ;
-  auto D = distance_;
+  const auto D = distance_;
 
-  auto E = E_e_lambda / pow<2>(D);
+  const auto E = E_e_lambda / pow<2>(D);
 
   return
     E / (watt * pow<-2>(meter) * pow<-1>(nanometer) * pow<2>(astronomical_unit))

@@ -66,7 +66,7 @@ struct ICTRArnaud {
   /**
    * Fit.
    */
-  std::vector<ICTRArnaudFit> fit;
+  const std::vector<ICTRArnaudFit> fit;
 };
 
 
@@ -84,7 +84,7 @@ class CTRArnaud {
   const std::vector<ICTRArnaudFit>& fit();
 
  private:
-  ICTRArnaud resource_ =
+  const ICTRArnaud resource_ =
     #include "../../resources/transitions/ctr_arnaud.yaml"
   ;
 };

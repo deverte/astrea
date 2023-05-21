@@ -59,11 +59,11 @@ struct IRBFMashonkinaO1 {
   /**
    * Frequencies in \f$s^{-1}\f$.
    */
-  std::vector<double> frequencies;
+  const std::vector<double> frequencies;
   /**
    * Radiative bound-free cross sections in \f$cm^2\f$.
    */
-  std::vector<double> rbf_cross_sections;
+  const std::vector<double> rbf_cross_sections;
 };
 
 
@@ -102,7 +102,8 @@ class RBFMashonkinaO1 {
    * \param frequency Frequency in \f$s^{-1}\f$.
    * \return Radiative bound-free cross-section in \f$cm^2\f$.
    */
-  double rbf_cross_section(std::string initial, double frequency) const;
+  double
+  rbf_cross_section(const std::string initial, const double frequency) const;
 
  private:
   IRBFMashonkinaO1 resource_ =
@@ -111,7 +112,7 @@ class RBFMashonkinaO1 {
 };
 
 
-RBFMashonkinaO1::RBFMashonkinaO1() {
+inline RBFMashonkinaO1::RBFMashonkinaO1() {
   for (auto& transition : resource_.transitions) {
     std::vector<double> nu = {
       resource_.frequencies.begin() + transition.start_index - 1,
@@ -129,7 +130,7 @@ RBFMashonkinaO1::RBFMashonkinaO1() {
 }
 
 
-double RBFMashonkinaO1::max_frequency() const {
+inline double RBFMashonkinaO1::max_frequency() const {
   return *std::max_element(
     resource_.frequencies.begin(),
     resource_.frequencies.end()
@@ -137,7 +138,7 @@ double RBFMashonkinaO1::max_frequency() const {
 }
 
 
-double RBFMashonkinaO1::min_frequency() const {
+inline double RBFMashonkinaO1::min_frequency() const {
   return *std::min_element(
     resource_.frequencies.begin(),
     resource_.frequencies.end()
@@ -145,9 +146,9 @@ double RBFMashonkinaO1::min_frequency() const {
 }
 
 
-double RBFMashonkinaO1::rbf_cross_section(
-  std::string initial,
-  double frequency
+inline double RBFMashonkinaO1::rbf_cross_section(
+  const std::string initial,
+  const double frequency
 ) const {
   for (auto transition : resource_.transitions) {
     auto max_frequency = resource_.frequencies[transition.finish_index - 1];

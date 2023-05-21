@@ -69,7 +69,7 @@ inline Eigen::MatrixXd tbr_mashonkina_o1_seaton_rates(
 
   const auto gamma = 1.0; // Gaunt factor // TODO: calculate
 
-  const auto infty = [&]() {
+  const auto infty = [=]() {
     const auto nu = rbf_mashonkina_o1.max_frequency() * pow<-1>(second);
     const auto E = h * nu;
     return pow<static_rational<1, 2>>(2.0 * E / m_e);
@@ -77,7 +77,7 @@ inline Eigen::MatrixXd tbr_mashonkina_o1_seaton_rates(
 
   const auto N_e = electron_number_density * pow<-3>(centimeter);
 
-  const auto v_0 = [&]() {
+  const auto v_0 = [=]() {
     const auto nu = rbf_mashonkina_o1.min_frequency() * pow<-1>(second);
     const auto E = h * nu;
     return pow<static_rational<1, 2>>(2.0 * E / m_e);
@@ -136,9 +136,9 @@ inline Eigen::MatrixXd tbr_mashonkina_o1_seaton_rates(
     ;
   };
 
-  const auto a = [&](int z) {
-    return [&](int i) {
-      return [&](quantity<energy> E) -> quantity<area> {
+  const auto a = [=](int z) {
+    return [=](int i) {
+      return [=](quantity<energy> E) -> quantity<area> {
         const auto nu = E / h;
 
         return rbf_mashonkina_o1.rbf_cross_section(
@@ -195,7 +195,7 @@ inline Eigen::MatrixXd tbr_mashonkina_o1_seaton_rates(
         return g(z)(i) * std::exp(-E(z)(i) / (k_B * T));
       })
       / fm::sum<double>(0, k(z + 1) - 1, [=](int i) -> double {
-        return g(z)(i) * std::exp(-E(z)(i) / (k_B * T));
+        return g(z + 1)(i) * std::exp(-E(z + 1)(i) / (k_B * T));
       })
       * pow<3>(tilde_lambda) / 2.0
       * std::exp(I(z)(0) / (k_B * T_e))
@@ -203,7 +203,7 @@ inline Eigen::MatrixXd tbr_mashonkina_o1_seaton_rates(
   });
 
   Eigen::VectorXd N(Z);
-  fm::family(0, Z - 2, [&](int z) {
+  fm::family(0, Z - 1, [&](int z) {
     N(z) =
       + fm::prod<double>(z, Z - 2, [=](int i) -> double { return r(i); })
       / fm::sum<double>(0, Z - 1, [=](int k) -> double {

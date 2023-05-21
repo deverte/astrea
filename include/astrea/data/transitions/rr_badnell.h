@@ -62,7 +62,7 @@ struct IRRBadnell {
   /**
    * Fit.
    */
-  std::vector<IRRBadnellFit> fit;
+  const std::vector<IRRBadnellFit> fit;
 };
 
 
@@ -81,7 +81,7 @@ class RRBadnell {
   const std::vector<IRRBadnellFit>& fit();
 
  private:
-  IRRBadnell resource_ =
+  const IRRBadnell resource_ =
     #include "../../resources/transitions/rr_badnell.yaml"
   ;
 };

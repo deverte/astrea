@@ -44,7 +44,7 @@ struct IRBBMashonkinaDopplerO1 {
   /**
    * Transitions.
    */
-  std::vector<IRBBMashonkinaDopplerO1Transition> transitions;
+  const std::vector<IRBBMashonkinaDopplerO1Transition> transitions;
 };
 
 
@@ -62,7 +62,7 @@ class RBBMashonkinaDopplerO1 {
   const std::vector<IRBBMashonkinaDopplerO1Transition>& transitions() const;
 
  private:
-  IRBBMashonkinaDopplerO1 resource_ =
+  const IRBBMashonkinaDopplerO1 resource_ =
     #include "../../resources/transitions/rbb_mashonkina_doppler_o1.yaml"
   ;
 };

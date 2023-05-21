@@ -92,19 +92,19 @@ inline Eigen::VectorXd nlte_population_full(
   const Eigen::MatrixXd Q = nlte_transition_operator(rates_matrix);
   const auto Q_u = pow<-1>(second);
 
-  const auto dt = delta_time * second;
+  const auto delta_t = delta_time * second;
 
   const auto I = Eigen::MatrixXd::Identity(Q.rows(), Q.cols());
 
   const auto& n_t = electrons_population;
 
-  const auto P = (I - Q * (dt * Q_u)).inverse();
+  const auto P = (I - Q * (delta_t * Q_u)).inverse();
 
-  const auto n_t_plus_dt_ = P * n_t;
+  const auto n_t_plus_delta_t_ = P * n_t;
 
-  const auto n_t_plus_dt = n_t_plus_dt_ / n_t_plus_dt_.sum();
+  const auto n_t_plus_delta_t = n_t_plus_delta_t_ / n_t_plus_delta_t_.sum();
 
-  return n_t_plus_dt;
+  return n_t_plus_delta_t;
 }
 
 
@@ -154,48 +154,39 @@ inline Eigen::VectorXd nlte_population_per_elements(
   const Eigen::MatrixXd Q = nlte_transition_operator(rates_matrix);
   const auto Q_u = pow<-1>(second);
 
-  const auto dt = delta_time * second;
+  const auto delta_t = delta_time * second;
 
   const auto I = Eigen::MatrixXd::Identity(Q.rows(), Q.cols());
 
   const auto& n_t = electrons_population;
 
-  const auto P = (I - Q * (dt * Q_u)).inverse();
+  const auto P = (I - Q * (delta_t * Q_u)).inverse();
 
-  const auto n_t_plus_dt_ = P * n_t;
+  const auto n_t_plus_delta_t_ = P * n_t;
 
-  const auto n_t_plus_dt__ = [&](int z) {
+  const auto n_t_plus_delta_t__ = [&](int z) {
     return [&](int i) -> double {
-      return n_t_plus_dt_(i + K(z));
+      return n_t_plus_delta_t_(i + K(z));
     };
   };
 
-  Eigen::VectorXd n_t_plus_dt_v(K(Z));
-  const auto n_t_plus_dt = [&](int z) {
-    return [&](int i) -> double& { return n_t_plus_dt_v(i + K(z)); };
+  Eigen::VectorXd n_t_plus_delta_t_v(K(Z));
+  const auto n_t_plus_delta_t = [&](int z) {
+    return [&](int i) -> double& { return n_t_plus_delta_t_v(i + K(z)); };
   };
   fm::family(0, Z - 1, [=](int z) {
     fm::family(0, k(z) - 1, [=](int i) {
-      n_t_plus_dt(z)(i) =
-        + n_t_plus_dt__(z)(i)
+      n_t_plus_delta_t(z)(i) =
+        + n_t_plus_delta_t__(z)(i)
         / fm::sum<double>(0, k(z) - 1, [=](int j) {
-          return n_t_plus_dt__(z)(j);
+          return n_t_plus_delta_t__(z)(j);
         })
         * N(z)
       ;
     });
   });
 
-  // double epsilon bypass
-  for (int z = 0; z < Z - 1; z++) {
-    for (int i = 0; i < k(z) - 1; i++) {
-      if (n_t_plus_dt(z)(i) < 1.0e-100) {
-        n_t_plus_dt(z)(i) = 0.0;
-      }
-    }
-  }
-
-  return n_t_plus_dt_v;
+  return n_t_plus_delta_t_v;
 }
 
 

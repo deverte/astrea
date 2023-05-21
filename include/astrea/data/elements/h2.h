@@ -22,13 +22,13 @@ class H2 : public Element {
   const IElement& resource() override;
 
  private:
-  IElement resource_ =
+  const IElement resource_ =
     #include "../../resources/elements/h2.yaml"
   ;
 };
 
 
-const IElement& H2::resource() {
+inline const IElement& H2::resource() {
   return resource_;
 }
 

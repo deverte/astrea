@@ -48,7 +48,7 @@ class Kelt9Fossati : public Spectrum {
    * 
    * \param distance Distance in \f$au\f$.
    */
-  void distance(double value) override;
+  void distance(const double value) override;
 
   /**
    * Maximal wavelength of the spectrum.
@@ -70,7 +70,7 @@ class Kelt9Fossati : public Spectrum {
    * \param wavelength Wavelength in \f$nm\f$.
    * \return Spectral irradiance in \f$W \cdot m^{-2} \cdot nm^{-1}\f$.
    */
-  double spectral_irradiance(double wavelength) const override;
+  double spectral_irradiance(const double wavelength) const override;
 
  private:
   boost::units::quantity<boost::units::si::length> distance_;
@@ -81,7 +81,7 @@ class Kelt9Fossati : public Spectrum {
 
   boost::units::quantity<boost::units::si::length> min_wavelength_;
 
-  ISpectrum resource_ =
+  const ISpectrum resource_ =
     #include "../../resources/spectra/kelt_9_fossati.yaml"
   ;
 };
@@ -117,7 +117,7 @@ inline double Kelt9Fossati::distance() const {
 }
 
 
-inline void Kelt9Fossati::distance(double value) {
+inline void Kelt9Fossati::distance(const double value) {
   distance_ = value * astrea::units::si::astronomical_unit;
 }
 
@@ -132,7 +132,7 @@ inline double Kelt9Fossati::min_wavelength() const {
 }
 
 
-inline double Kelt9Fossati::spectral_irradiance(double wavelength) const {
+inline double Kelt9Fossati::spectral_irradiance(const double wavelength) const {
   using astrea::units::si::angstrom;
   using astrea::units::si::astronomical_unit;
   using astrea::units::si::centimeter;
@@ -145,17 +145,17 @@ inline double Kelt9Fossati::spectral_irradiance(double wavelength) const {
   using boost::units::si::watt;
   using boost::units::pow;
 
-  auto D = distance_;
-  auto lambda = wavelength * nanometer;
-  auto nu = c / lambda;
+  const auto D = distance_;
+  const auto lambda = wavelength * nanometer;
+  const auto nu = c / lambda;
 
-  auto E_e_lambda =
+  const auto E_e_lambda =
     + (h * nu) * interpolant_((lambda / nanometer).value())
     * pow<-1>(second) * pow<-2>(centimeter) * pow<-1>(angstrom)
     * pow<2>(astronomical_unit)
   ;
 
-  auto E = E_e_lambda / pow<2>(D);
+  const auto E = E_e_lambda / pow<2>(D);
 
   return E / (watt * pow<-2>(meter) * pow<-1>(nanometer));
 }

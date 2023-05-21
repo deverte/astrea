@@ -88,7 +88,8 @@
         "rope": "cpp",
         "slist": "cpp",
         "latch": "cpp",
-        "syncstream": "cpp"
+        "syncstream": "cpp",
+        "scoped_allocator": "cpp"
     },
     "mesonbuild.configureOnOpen": false,
     "svg.preview.background": "white"

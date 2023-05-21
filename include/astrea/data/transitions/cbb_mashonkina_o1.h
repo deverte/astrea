@@ -51,7 +51,7 @@ struct ICBBMashonkinaO1 {
   /**
    * Transitions.
    */
-  std::vector<ICBBMashonkinaO1Transition> transitions;
+  const std::vector<ICBBMashonkinaO1Transition> transitions;
 };
 
 
@@ -76,13 +76,13 @@ class CBBMashonkinaO1 {
    * \return Collisional rate coefficient in \f$cm^3 * s^{-1}\f$.
    */
   double collision_rate_coefficient(
-    std::string initial,
-    std::string final,
-    double temperature
+    const std::string initial,
+    const std::string final,
+    const double temperature
   ) const;
 
  private:
-  ICBBMashonkinaO1 resource_ =
+  const ICBBMashonkinaO1 resource_ =
     #include "../../resources/transitions/cbb_mashonkina_o1.yaml"
   ;
 
@@ -94,22 +94,22 @@ class CBBMashonkinaO1 {
 };
 
 
-CBBMashonkinaO1::CBBMashonkinaO1() {
+inline CBBMashonkinaO1::CBBMashonkinaO1() {
   collision_rate_coefficients_.resize(resource_.transitions.size());
 
   for (int i = 0; i < resource_.transitions.size(); i++) {
-    auto T = resource_.transitions[i].temperatures;
-    auto C = resource_.transitions[i].collision_rate_coefficients;
+    const auto T = resource_.transitions[i].temperatures;
+    const auto C = resource_.transitions[i].collision_rate_coefficients;
 
     collision_rate_coefficients_[i].data_points(T, C); // cm^3 * s^{-1}
   }
 }
 
 
-double CBBMashonkinaO1::collision_rate_coefficient(
-  std::string initial,
-  std::string final,
-  double temperature
+inline double CBBMashonkinaO1::collision_rate_coefficient(
+  const std::string initial,
+  const std::string final,
+  const double temperature
 ) const {
   for (int i = 0; i < resource_.transitions.size(); i++) {
     if (
