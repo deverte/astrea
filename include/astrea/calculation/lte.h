@@ -70,16 +70,16 @@ inline Eigen::VectorXd lte_boltzmann_population(
     k(z) = elements[z]->levels().size();
   });
 
-  const auto K = [=](int z) -> int {
-    return fm::sum<int>(0, z - 1, [=](int z_) -> int { return k(z_); });
+  const auto K = [&](int z) -> int {
+    return fm::sum<int>(0, z - 1, [&](int z_) -> int { return k(z_); });
   };
 
   Eigen::Vector<quantity<energy>, Eigen::Dynamic> E_v(K(Z));
   const auto E = [&](int z) {
     return [&](int i) -> quantity<energy>& { return E_v(i + K(z)); };
   };
-  fm::family(0, Z - 1, [=](int z) {
-    fm::family(0, k(z) - 1, [=](int i) {
+  fm::family(0, Z - 1, [&](int z) {
+    fm::family(0, k(z) - 1, [&](int i) {
       E(z)(i) = elements[z]->levels()[i].energy * electronvolt;
     });
   });
@@ -88,8 +88,8 @@ inline Eigen::VectorXd lte_boltzmann_population(
   const auto g = [&](int z) {
     return [&](int i) -> double& { return g_v(i + K(z)); };
   };
-  fm::family(0, Z - 1, [=](int z) {
-    fm::family(0, k(z) - 1, [=](int i) {
+  fm::family(0, Z - 1, [&](int z) {
+    fm::family(0, k(z) - 1, [&](int i) {
       g(z)(i) = elements[z]->levels()[i].statistical_weight;
     });
   });
@@ -99,12 +99,12 @@ inline Eigen::VectorXd lte_boltzmann_population(
   const auto n = [&](int z) {
     return [&](int i) -> double& { return n_v(i + K(z)); };
   };
-  fm::family(0, Z - 1, [=](int z) {
-    fm::family(0, k(z) - 1, [=](int i) {
+  fm::family(0, Z - 1, [&](int z) {
+    fm::family(0, k(z) - 1, [&](int i) {
       n(z)(i) =
         + g(z)(i)
         * std::exp(-E(z)(i) / (k_B * T))
-        / fm::sum<double>(0, k(z) - 1, [=](int j) -> double {
+        / fm::sum<double>(0, k(z) - 1, [&](int j) -> double {
           return g(z)(j) * std::exp(-E(z)(j) / (k_B * T));
         })
         * N(z)
@@ -157,8 +157,8 @@ inline Eigen::VectorXd lte_boltzmann_saha_population(
     k(z) = elements[z]->levels().size();
   });
 
-  const auto K = [=](int z) -> int {
-    return fm::sum<int>(0, z - 1, [=](int z_) -> int { return k(z_); });
+  const auto K = [&](int z) -> int {
+    return fm::sum<int>(0, z - 1, [&](int z_) -> int { return k(z_); });
   };
 
   Eigen::Vector<quantity<energy>, Eigen::Dynamic> I(Z);
@@ -170,8 +170,8 @@ inline Eigen::VectorXd lte_boltzmann_saha_population(
   const auto E = [&](int z) {
     return [&](int i) -> quantity<energy>& { return E_v(i + K(z)); };
   };
-  fm::family(0, Z - 1, [=](int z) {
-    fm::family(0, k(z) - 1, [=](int i) {
+  fm::family(0, Z - 1, [&](int z) {
+    fm::family(0, k(z) - 1, [&](int i) {
       E(z)(i) = elements[z]->levels()[i].energy * electronvolt;
     });
   });
@@ -180,8 +180,8 @@ inline Eigen::VectorXd lte_boltzmann_saha_population(
   const auto g = [&](int z) {
     return [&](int i) -> double& { return g_v(i + K(z)); };
   };
-  fm::family(0, Z - 1, [=](int z) {
-    fm::family(0, k(z) - 1, [=](int i) {
+  fm::family(0, Z - 1, [&](int z) {
+    fm::family(0, k(z) - 1, [&](int i) {
       g(z)(i) = elements[z]->levels()[i].statistical_weight;
     });
   });
@@ -195,10 +195,10 @@ inline Eigen::VectorXd lte_boltzmann_saha_population(
   fm::family(0, Z - 2, [&](int z) {
     r(z) = 
       + N_e
-      * fm::sum<double>(0, k(z) - 1, [=](int i) -> double {
+      * fm::sum<double>(0, k(z) - 1, [&](int i) -> double {
         return g(z)(i) * std::exp(-E(z)(i) / (k_B * T));
       })
-      / fm::sum<double>(0, k(z + 1) - 1, [=](int i) -> double {
+      / fm::sum<double>(0, k(z + 1) - 1, [&](int i) -> double {
         return g(z + 1)(i) * std::exp(-E(z + 1)(i) / (k_B * T));
       })
       * pow<3>(tilde_lambda) / 2.0
@@ -209,9 +209,9 @@ inline Eigen::VectorXd lte_boltzmann_saha_population(
   Eigen::VectorXd N(Z);
   fm::family(0, Z - 1, [&](int z) {
     N(z) =
-      + fm::prod<double>(z, Z - 2, [=](int i) -> double { return r(i); })
-      / fm::sum<double>(0, Z - 1, [=](int k) -> double {
-        return fm::prod<double>(k, Z - 2, [=](int i) { return r(i);});
+      + fm::prod<double>(z, Z - 2, [&](int i) -> double { return r(i); })
+      / fm::sum<double>(0, Z - 1, [&](int k) -> double {
+        return fm::prod<double>(k, Z - 2, [&](int i) { return r(i);});
       })
     ;
   });
@@ -221,12 +221,12 @@ inline Eigen::VectorXd lte_boltzmann_saha_population(
   const auto n = [&](int z) {
     return [&](int i) -> double& { return n_v(i + K(z)); };
   };
-  fm::family(0, Z - 1, [=](int z) {
-    fm::family(0, k(z) - 1, [=](int i) {
+  fm::family(0, Z - 1, [&](int z) {
+    fm::family(0, k(z) - 1, [&](int i) {
       n(z)(i) =
         + g(z)(i)
         * std::exp(-E(z)(i) / (k_B * T))
-        / fm::sum<double>(0, k(z) - 1, [=](int j) -> double {
+        / fm::sum<double>(0, k(z) - 1, [&](int j) -> double {
           return g(z)(j) * std::exp(-E(z)(j) / (k_B * T));
         })
         * N(z)

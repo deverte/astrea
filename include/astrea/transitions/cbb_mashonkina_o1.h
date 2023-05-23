@@ -64,16 +64,16 @@ inline Eigen::MatrixXd cbb_mashonkina_o1_rates(
     k(z) = elements[z]->levels().size();
   });
 
-  const auto K = [=](int z) -> int {
-    return fm::sum<int>(0, z - 1, [=](int z_) -> int { return k(z_); });
+  const auto K = [&](int z) -> int {
+    return fm::sum<int>(0, z - 1, [&](int z_) -> int { return k(z_); });
   };
 
   Eigen::Vector<quantity<energy>, Eigen::Dynamic> E_v(K(Z));
   const auto E = [&](int z) {
     return [&](int i) -> quantity<energy>& { return E_v(i + K(z)); };
   };
-  fm::family(0, Z - 1, [=](int z) {
-    fm::family(0, k(z) - 1, [=](int i) {
+  fm::family(0, Z - 1, [&](int z) {
+    fm::family(0, k(z) - 1, [&](int i) {
       E(z)(i) = elements[z]->levels()[i].energy * electronvolt;
     });
   });
@@ -82,14 +82,14 @@ inline Eigen::MatrixXd cbb_mashonkina_o1_rates(
   const auto g = [&](int z) {
     return [&](int i) -> double& { return g_v(i + K(z)); };
   };
-  fm::family(0, Z - 1, [=](int z) {
-    fm::family(0, k(z) - 1, [=](int i) {
+  fm::family(0, Z - 1, [&](int z) {
+    fm::family(0, k(z) - 1, [&](int i) {
       g(z)(i) = elements[z]->levels()[i].statistical_weight;
     });
   });
 
-  const auto q_ = [=](int z) {
-    return [=](int i, int j) {
+  const auto q_ = [&](int z) {
+    return [&](int i, int j) {
       return [=](quantity<temperature_> temperature)
         -> quantity<transition_rate_coefficient> {
         return cbb_mashonkina_o1.collision_rate_coefficient(
@@ -106,9 +106,9 @@ inline Eigen::MatrixXd cbb_mashonkina_o1_rates(
   const auto q = [&](int z) {
     return [&](int i, int j) -> double& { return q_v(i + K(z), j + K(z)); };
   };
-  fm::family(0, Z - 1, [=](int z) {
-    fm::family(0, k(z) - 1, [=](int i) {
-      fm::family(i + 1, k(z) - 1, [=](int j) {
+  fm::family(0, Z - 1, [&](int z) {
+    fm::family(0, k(z) - 1, [&](int i) {
+      fm::family(i + 1, k(z) - 1, [&](int j) {
         q(z)(i, j) =
           + q_(z)(i, j)(T)
           / g(z)(i)

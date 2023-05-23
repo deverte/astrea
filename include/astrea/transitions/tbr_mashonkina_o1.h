@@ -63,7 +63,7 @@ inline Eigen::MatrixXd tbr_mashonkina_o1_rates(
 
   const auto rbf_mashonkina_o1 = RBFMashonkinaO1();
 
-  const auto infty = [=]() {
+  const auto infty = [&]() {
     const auto nu = rbf_mashonkina_o1.max_frequency() * pow<-1>(second);
     const auto E = h * nu;
     return pow<static_rational<1, 2>>(2.0 * E / m_e);
@@ -71,7 +71,7 @@ inline Eigen::MatrixXd tbr_mashonkina_o1_rates(
 
   const auto N_e = electron_number_density * pow<-3>(centimeter);
 
-  const auto v_0 = [=]() {
+  const auto v_0 = [&]() {
     const auto nu = rbf_mashonkina_o1.min_frequency() * pow<-1>(second);
     const auto E = h * nu;
     return pow<static_rational<1, 2>>(2.0 * E / m_e);
@@ -88,16 +88,16 @@ inline Eigen::MatrixXd tbr_mashonkina_o1_rates(
     k(z) = elements[z]->levels().size();
   });
 
-  const auto K = [=](int z) -> int {
-    return fm::sum<int>(0, z - 1, [=](int z_) { return k(z_); });
+  const auto K = [&](int z) -> int {
+    return fm::sum<int>(0, z - 1, [&](int z_) { return k(z_); });
   };
 
   Eigen::Vector<quantity<energy>, Eigen::Dynamic> E_v(K(Z));
   const auto E = [&](int z) {
     return [&](int i) -> quantity<energy>& { return E_v(i + K(z)); };
   };
-  fm::family(0, Z - 1, [=](int z) {
-    fm::family(0, k(z) - 1, [=](int i) {
+  fm::family(0, Z - 1, [&](int z) {
+    fm::family(0, k(z) - 1, [&](int i) {
       E(z)(i) = elements[z]->levels()[i].energy * electronvolt;
     });
   });
@@ -106,8 +106,8 @@ inline Eigen::MatrixXd tbr_mashonkina_o1_rates(
   const auto g = [&](int z) {
     return [&](int i) -> double& { return g_v(i + K(z)); };
   };
-  fm::family(0, Z - 1, [=](int z) {
-    fm::family(0, k(z) - 1, [=](int i) {
+  fm::family(0, Z - 1, [&](int z) {
+    fm::family(0, k(z) - 1, [&](int i) {
       g(z)(i) = elements[z]->levels()[i].statistical_weight;
     });
   });
@@ -116,13 +116,13 @@ inline Eigen::MatrixXd tbr_mashonkina_o1_rates(
   const auto I = [&](int z) {
     return [&](int i) -> quantity<energy>& { return I_v(i + K(z)); };
   };
-  fm::family(0, Z - 1, [=](int z) {
-    fm::family(0, k(z) - 1, [=](int i) {
+  fm::family(0, Z - 1, [&](int z) {
+    fm::family(0, k(z) - 1, [&](int i) {
       I(z)(i) = elements[z]->levels()[i].ionization_energy * electronvolt;
     });
   });
 
-  const auto f = [=](quantity<velocity> v)
+  const auto f = [&](quantity<velocity> v)
     -> quantity<decltype(pow<-1>(velocity()))> {
     return
       + pow<static_rational<1, 2>>(m_e / (2.0 * pi<double>() * k_B * T_e))
@@ -130,8 +130,8 @@ inline Eigen::MatrixXd tbr_mashonkina_o1_rates(
     ;
   };
 
-  const auto sigma = [=](int z) {
-    return [=](int i) {
+  const auto sigma = [&](int z) {
+    return [&](int i) {
       return [=](quantity<velocity> v) -> quantity<area> {
         const auto E = m_e * pow<2>(v) / 2.0;
         const auto nu = E / h;
@@ -152,10 +152,10 @@ inline Eigen::MatrixXd tbr_mashonkina_o1_rates(
   fm::family(0, Z - 2, [&](int z) {
     r(z) = 
       + N_e
-      * fm::sum<double>(0, k(z) - 1, [=](int i) -> double {
+      * fm::sum<double>(0, k(z) - 1, [&](int i) -> double {
         return g(z)(i) * std::exp(-E(z)(i) / (k_B * T));
       })
-      / fm::sum<double>(0, k(z + 1) - 1, [=](int i) -> double {
+      / fm::sum<double>(0, k(z + 1) - 1, [&](int i) -> double {
         return g(z + 1)(i) * std::exp(-E(z + 1)(i) / (k_B * T));
       })
       * pow<3>(tilde_lambda) / 2.0
@@ -166,9 +166,9 @@ inline Eigen::MatrixXd tbr_mashonkina_o1_rates(
   Eigen::VectorXd N(Z);
   fm::family(0, Z - 1, [&](int z) {
     N(z) =
-      + fm::prod<double>(z, Z - 2, [=](int i) -> double { return r(i); })
-      / fm::sum<double>(0, Z - 1, [=](int k) -> double {
-        return fm::prod<double>(k, Z - 2, [=](int i) { return r(i); });
+      + fm::prod<double>(z, Z - 2, [&](int i) -> double { return r(i); })
+      / fm::sum<double>(0, Z - 1, [&](int k) -> double {
+        return fm::prod<double>(k, Z - 2, [&](int i) { return r(i); });
       })
     ;
   });
@@ -178,11 +178,11 @@ inline Eigen::MatrixXd tbr_mashonkina_o1_rates(
   const auto C = [&](int z) {
     return [&](int i, int j) -> double& { return C_v(i + K(z), j + K(z)); };
   };
-  fm::family(0, Z - 2, [=](int z) {
-    fm::family(0, k(z) - 1, [=](int i) {
+  fm::family(0, Z - 2, [&](int z) {
+    fm::family(0, k(z) - 1, [&](int i) {
       C(z)(k(z), i) =
         N_e * boost::math::quadrature::trapezoidal(
-          [=](double v) -> double {
+          [&](double v) -> double {
             const auto v_ = v * meter * pow<-1>(second);
 
             return (

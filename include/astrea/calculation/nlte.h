@@ -46,11 +46,11 @@ nlte_transition_operator(const Eigen::MatrixXd rates_matrix) {
     fm::family(0, K - 1, [&](int j) {
       Q(i, j) = fm::cases<quantity<frequency>>({
         {
-          [=]() -> quantity<frequency> {
+          [&]() -> quantity<frequency> {
             return
-              - fm::sum<quantity<frequency>>(0, K - 1, [=](int k) {
+              - fm::sum<quantity<frequency>>(0, K - 1, [&](int k) {
                 return fm::cases<quantity<frequency>>({
-                  {[=]() { return R(i, k) * R_u; }, i != k},
+                  {[&]() { return R(i, k) * R_u; }, i != k},
                   {[]() { return 0.0 * pow<-1>(second); }, i == k},
                 });
               })
@@ -59,7 +59,7 @@ nlte_transition_operator(const Eigen::MatrixXd rates_matrix) {
           i == j
         },
         {
-          [=]() -> quantity<frequency> { return R(j, i) * R_u; },
+          [&]() -> quantity<frequency> { return R(j, i) * R_u; },
           i != j
         },
       }) / Q_u;
@@ -145,8 +145,8 @@ inline Eigen::VectorXd nlte_population_per_elements(
     k(z) = elements[z]->levels().size();
   });
 
-  const auto K = [=](int z) {
-    return fm::sum<int>(0, z - 1, [=](int z_) -> int { return k(z_); });
+  const auto K = [&](int z) {
+    return fm::sum<int>(0, z - 1, [&](int z_) -> int { return k(z_); });
   };
 
   const auto& N = elements_population;
@@ -174,11 +174,11 @@ inline Eigen::VectorXd nlte_population_per_elements(
   const auto n_t_plus_delta_t = [&](int z) {
     return [&](int i) -> double& { return n_t_plus_delta_t_v(i + K(z)); };
   };
-  fm::family(0, Z - 1, [=](int z) {
-    fm::family(0, k(z) - 1, [=](int i) {
+  fm::family(0, Z - 1, [&](int z) {
+    fm::family(0, k(z) - 1, [&](int i) {
       n_t_plus_delta_t(z)(i) =
         + n_t_plus_delta_t__(z)(i)
-        / fm::sum<double>(0, k(z) - 1, [=](int j) {
+        / fm::sum<double>(0, k(z) - 1, [&](int j) {
           return n_t_plus_delta_t__(z)(j);
         })
         * N(z)

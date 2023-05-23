@@ -59,16 +59,16 @@ inline Eigen::MatrixXd rbb_mashonkina_doppler_o1_rates(
     k(z) = elements[z]->levels().size();
   });
 
-  const auto K = [=](int z) -> int {
-    return fm::sum<int>(0, z - 1, [=](int z_) -> int { return k(z_); });
+  const auto K = [&](int z) -> int {
+    return fm::sum<int>(0, z - 1, [&](int z_) -> int { return k(z_); });
   };
 
   Eigen::Vector<quantity<energy>, Eigen::Dynamic> E_v(K(Z));
   const auto E = [&](int z) {
     return [&](int i) -> quantity<energy>& { return E_v(i + K(z)); };
   };
-  fm::family(0, Z - 1, [=](int z) {
-    fm::family(0, k(z) - 1, [=](int i) {
+  fm::family(0, Z - 1, [&](int z) {
+    fm::family(0, k(z) - 1, [&](int i) {
       E(z)(i) = elements[z]->levels()[i].energy * electronvolt;
     });
   });
@@ -77,8 +77,8 @@ inline Eigen::MatrixXd rbb_mashonkina_doppler_o1_rates(
   const auto g = [&](int z) {
     return [&](int i) -> double& { return g_v(i + K(z)); };
   };
-  fm::family(0, Z - 1, [=](int z) {
-    fm::family(0, k(z) - 1, [=](int i) {
+  fm::family(0, Z - 1, [&](int z) {
+    fm::family(0, k(z) - 1, [&](int i) {
       g(z)(i) = elements[z]->levels()[i].statistical_weight;
     });
   });
@@ -102,9 +102,9 @@ inline Eigen::MatrixXd rbb_mashonkina_doppler_o1_rates(
   const auto R = [&](int z) {
     return [&](int i, int j) -> double& { return R_v(i + K(z), j + K(z)); };
   };
-  fm::family(0, Z - 1, [=](int z) {
-    fm::family(0, k(z) - 1, [=](int i) {
-      fm::family(i + 1, k(z) - 1, [=](int j) {
+  fm::family(0, Z - 1, [&](int z) {
+    fm::family(0, k(z) - 1, [&](int i) {
+      fm::family(i + 1, k(z) - 1, [&](int j) {
         R(z)(i, j) =
           + Lambda
           / pow<2>(c / (abs(E(z)(i) - E(z)(j)) / hbar))

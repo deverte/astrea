@@ -97,8 +97,8 @@ inline Eigen::MatrixXd rbb_tasitsiomi_rates(
     k(z) = elements[z]->levels().size();
   });
 
-  const auto K = [=](int z) {
-    return fm::sum<int>(0, z - 1, [=](int z_) -> int { return k(z_); });
+  const auto K = [&](int z) {
+    return fm::sum<int>(0, z - 1, [&](int z_) -> int { return k(z_); });
   };
 
   const auto m_i = elements[0]->mass() * dalton;
@@ -116,7 +116,7 @@ inline Eigen::MatrixXd rbb_tasitsiomi_rates(
 
   const auto infty = c / (spectrum->min_wavelength() * nanometer);
 
-  const auto F_lambda = [=](quantity<length> lambda) -> quantity<irradiance> {
+  const auto F_lambda = [&](quantity<length> lambda) -> quantity<irradiance> {
     return
       + spectrum->spectral_irradiance(lambda / nanometer)
       * watt * pow<-2>(meter) * pow<-1>(nanometer)
@@ -127,8 +127,8 @@ inline Eigen::MatrixXd rbb_tasitsiomi_rates(
   const auto E = [&](int z) {
     return [&](int i) -> quantity<energy>& { return E_v(i + K(z)); };
   };
-  fm::family(0, Z - 1, [=](int z) {
-    fm::family(0, k(z) - 1, [=](int i) {
+  fm::family(0, Z - 1, [&](int z) {
+    fm::family(0, k(z) - 1, [&](int i) {
       E(z)(i) = elements[z]->levels()[i].energy * electronvolt;
     });
   });
@@ -137,20 +137,20 @@ inline Eigen::MatrixXd rbb_tasitsiomi_rates(
   const auto g = [&](int z) {
     return [&](int i) -> double& { return g_v(i + K(z)); };
   };
-  fm::family(0, Z - 1, [=](int z) {
-    fm::family(0, k(z) - 1, [=](int i) {
+  fm::family(0, Z - 1, [&](int z) {
+    fm::family(0, k(z) - 1, [&](int i) {
       g(z)(i) = elements[z]->levels()[i].statistical_weight;
     });
   });
 
-  const auto nu_0 = [=](int z) {
-    return [=](int i, int j) {
+  const auto nu_0 = [&](int z) {
+    return [&](int i, int j) {
       return abs(E(z)(j) - E(z)(i)) / h;
     };
   };
 
-  const auto f = [=](int z) {
-    return [=](int i, int j) {
+  const auto f = [&](int z) {
+    return [&](int i, int j) {
       return [=](quantity<frequency> nu) -> double {
         const auto lambda = c / nu;
 
@@ -168,22 +168,22 @@ inline Eigen::MatrixXd rbb_tasitsiomi_rates(
 
   const auto delta_nu_L = 3.0 * m_i * pow<3>(c) * epsilon_0 / pow<2>(e);
 
-  const auto delta_nu_D = [=](int z) {
-    return [=](int i, int j) -> quantity<frequency> {
+  const auto delta_nu_D = [&](int z) {
+    return [&](int i, int j) -> quantity<frequency> {
       return nu_0(z)(i, j) * std::sqrt(2.0 * k_B * T / (m_i * pow<2>(c)));
     };
   };
 
-  const auto x = [=](int z) {
-    return [=](int i, int j) {
+  const auto x = [&](int z) {
+    return [&](int i, int j) {
       return [=](quantity<frequency> nu) -> double {
         return (nu - nu_0(z)(i, j)) / delta_nu_D(z)(i, j);
       };
     };
   };
 
-  const auto zeta = [=](int z) {
-    return [=](int i, int j) {
+  const auto zeta = [&](int z) {
+    return [&](int i, int j) {
       return [=](quantity<frequency> nu) -> double {
         return
           + (std::pow(x(z)(i, j)(nu), 2.0) - zeta_0)
@@ -193,14 +193,14 @@ inline Eigen::MatrixXd rbb_tasitsiomi_rates(
     };
   };
 
-  const auto gamma = [=](int z) {
-    return [=](int i, int j) {
+  const auto gamma = [&](int z) {
+    return [&](int i, int j) {
       return delta_nu_L / (2.0 * delta_nu_D(z)(i, j));
     };
   };
 
-  const auto q = [=](int z) {
-    return [=](int i, int j) {
+  const auto q = [&](int z) {
+    return [&](int i, int j) {
       return [=](quantity<frequency> nu) -> double {
         return fm::cases<double>({
           {
@@ -229,8 +229,8 @@ inline Eigen::MatrixXd rbb_tasitsiomi_rates(
     };
   };
 
-  const auto H = [=](int z) {
-    return [=](int i, int j) {
+  const auto H = [&](int z) {
+    return [&](int i, int j) {
       return [=](quantity<frequency> nu) -> double {
         return
           + std::sqrt(pi<double>())
@@ -243,8 +243,8 @@ inline Eigen::MatrixXd rbb_tasitsiomi_rates(
     };
   };
 
-  const auto alpha = [=](int z) {
-    return [=](int i, int j) {
+  const auto alpha = [&](int z) {
+    return [&](int i, int j) {
       return [=](quantity<frequency> nu) -> quantity<area> {
         return
           + 1.0
@@ -263,11 +263,11 @@ inline Eigen::MatrixXd rbb_tasitsiomi_rates(
   const auto R = [&](int z) {
     return [&](int i, int j) -> double& { return R_v(i + K(z), j + K(z)); };
   };
-  fm::family(0, Z - 1, [=](int z) {
-    fm::family(0, k(z) - 1, [=](int i) {
-      fm::family(i + 1, k(z) - 1, [=](int j) {
+  fm::family(0, Z - 1, [&](int z) {
+    fm::family(0, k(z) - 1, [&](int i) {
+      fm::family(i + 1, k(z) - 1, [&](int j) {
         R(z)(i, j) = 4.0 * pi<double>() * boost::math::quadrature::trapezoidal(
-          [=](double nu) {
+          [&](double nu) {
             const auto nu_ = nu * pow<-1>(second);
             const auto lambda = c / nu_;
             const auto F_nu = c / pow<2>(nu_) * F_lambda(lambda);
@@ -284,7 +284,7 @@ inline Eigen::MatrixXd rbb_tasitsiomi_rates(
         ) * pow<-1>(second) / R_u;
 
         R(z)(j, i) = 4.0 * pi<double>() * boost::math::quadrature::trapezoidal(
-          [=](double nu) {
+          [&](double nu) {
             const auto nu_ = nu * pow<-1>(second);
             const auto lambda = c / nu_;
             const auto F_nu = c / pow<2>(nu_) * F_lambda(lambda);

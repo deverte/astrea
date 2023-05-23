@@ -79,19 +79,19 @@ inline Eigen::MatrixXd rr_mashonkina_o1_rates(
     k(z) = elements[z]->levels().size();
   });
 
-  const auto K = [=](int z) -> int {
-    return fm::sum<int>(0, z - 1, [=](int z_) -> int { return k(z_); });
+  const auto K = [&](int z) -> int {
+    return fm::sum<int>(0, z - 1, [&](int z_) -> int { return k(z_); });
   };
 
-  const auto F_lambda = [=](quantity<length> lambda) -> quantity<irradiance> {
+  const auto F_lambda = [&](quantity<length> lambda) -> quantity<irradiance> {
     return
       + spectrum->spectral_irradiance(lambda / nanometer)
       * watt * pow<-2>(meter) * pow<-1>(nanometer)
     ;
   };
 
-  const auto alpha = [=](int z) {
-    return [=](int j) {
+  const auto alpha = [&](int z) {
+    return [&](int j) {
       return [=](quantity<frequency> frequency) -> quantity<area> {
         return rbf_mashonkina_o1.rbf_cross_section(
           elements[z]->levels()[j].term,
@@ -106,11 +106,11 @@ inline Eigen::MatrixXd rr_mashonkina_o1_rates(
   const auto R = [&](int z) {
     return [&](int i, int j) -> double& { return R_v(i + K(z), j + K(z)); };
   };
-  fm::family(0, Z - 2, [=](int z) {
-    fm::family(0, k(z) - 1, [=](int i) {
+  fm::family(0, Z - 2, [&](int z) {
+    fm::family(0, k(z) - 1, [&](int i) {
       R(z)(k(z), i) =
         4.0 * pi<double>() * boost::math::quadrature::trapezoidal(
-          [=](double nu) -> double {
+          [&](double nu) -> double {
             const auto nu_ = nu * pow<-1>(second);
             const auto lambda = c / nu_;
             const auto F_nu = c / pow<2>(nu_) * F_lambda(lambda);

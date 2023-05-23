@@ -60,7 +60,7 @@ inline Eigen::MatrixXd ci_mashonkina_o1_rates(
 
   const auto rbf_mashonkina_o1 = RBFMashonkinaO1();
 
-  const auto infty = [=]() {
+  const auto infty = [&]() {
     const auto nu = rbf_mashonkina_o1.max_frequency() * pow<-1>(second);
     const auto E = h * nu;
     return pow<static_rational<1, 2>>(2.0 * E / m_e);
@@ -68,7 +68,7 @@ inline Eigen::MatrixXd ci_mashonkina_o1_rates(
 
   const auto N_e = electron_number_density * pow<-3>(centimeter);
 
-  const auto v_0 = [=]() {
+  const auto v_0 = [&]() {
     const auto nu = rbf_mashonkina_o1.min_frequency() * pow<-1>(second);
     const auto E = h * nu;
     return pow<static_rational<1, 2>>(2.0 * E / m_e);
@@ -83,11 +83,11 @@ inline Eigen::MatrixXd ci_mashonkina_o1_rates(
     k(z) = elements[z]->levels().size();
   });
 
-  const auto K = [=](int z) -> int {
-    return fm::sum<int>(0, z - 1, [=](int z_) { return k(z_); });
+  const auto K = [&](int z) -> int {
+    return fm::sum<int>(0, z - 1, [&](int z_) { return k(z_); });
   };
 
-  const auto f = [=](quantity<velocity> v)
+  const auto f = [&](quantity<velocity> v)
     -> quantity<decltype(pow<-1>(velocity()))> {
     return
       + pow<static_rational<1, 2>>(m_e / (2.0 * pi<double>() * k_B * T_e))
@@ -95,8 +95,8 @@ inline Eigen::MatrixXd ci_mashonkina_o1_rates(
     ;
   };
 
-  const auto sigma = [=](int z) {
-    return [=](int i) {
+  const auto sigma = [&](int z) {
+    return [&](int i) {
       return [=](quantity<velocity> v) -> quantity<area> {
         const auto E = m_e * pow<2>(v) / 2.0;
         const auto nu = E / h;
@@ -114,11 +114,11 @@ inline Eigen::MatrixXd ci_mashonkina_o1_rates(
   const auto C = [&](int z) {
     return [&](int i, int j) -> double& { return C_v(i + K(z), j + K(z)); };
   };
-  fm::family(0, Z - 2, [=](int z) {
-    fm::family(0, k(z) - 1, [=](int i) {
+  fm::family(0, Z - 2, [&](int z) {
+    fm::family(0, k(z) - 1, [&](int i) {
       C(z)(i, k(z)) =
         N_e * boost::math::quadrature::trapezoidal(
-          [=](double v) -> double {
+          [&](double v) -> double {
             const auto v_ = v * meter * pow<-1>(second);
 
             return (

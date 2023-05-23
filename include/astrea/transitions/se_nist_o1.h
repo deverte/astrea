@@ -45,11 +45,11 @@ se_nist_o1_rates(const std::vector<std::shared_ptr<Element>> elements) {
     k(z) = elements[z]->levels().size();
   });
 
-  const auto K = [=](int z) {
-    return fm::sum<int>(0, z - 1, [=](int z_) -> int { return k(z_); });
+  const auto K = [&](int z) {
+    return fm::sum<int>(0, z - 1, [&](int z_) -> int { return k(z_); });
   };
 
-  const auto M = [=](int z) {
+  const auto M = [&](int z) {
     return [=](int i, int j) {
       int size = 0;
       for (const auto transition : se_nist_o1.transitions()) {
@@ -65,8 +65,8 @@ se_nist_o1_rates(const std::vector<std::shared_ptr<Element>> elements) {
     };
   };
 
-  const auto A_ = [=](int z) {
-    return [=](int j, int i) {
+  const auto A_ = [&](int z) {
+    return [&](int j, int i) {
       return [=](int m) {
         std::vector<ISENistO1Transition> transitions;
         for (const auto transition : se_nist_o1.transitions()) {
@@ -90,8 +90,8 @@ se_nist_o1_rates(const std::vector<std::shared_ptr<Element>> elements) {
     };
   };
 
-  const auto J = [=](int z) {
-    return [=](int i, int j) {
+  const auto J = [&](int z) {
+    return [&](int i, int j) {
       return [=](int m) {
         std::vector<ISENistO1Transition> transitions;
         for (const auto transition : se_nist_o1.transitions()) {
@@ -125,17 +125,17 @@ se_nist_o1_rates(const std::vector<std::shared_ptr<Element>> elements) {
     };
   };
 
-  fm::family(0, Z - 1, [=](int z) {
-    fm::family(0, k(z) - 1, [=](int i) {
-      fm::family(i + 1, k(z) - 1, [=](int j) {
+  fm::family(0, Z - 1, [&](int z) {
+    fm::family(0, k(z) - 1, [&](int i) {
+      fm::family(i + 1, k(z) - 1, [&](int j) {
         A(z)(j, i) = fm::cases<quantity<frequency>>({
           {
-            [=]() {
+            [&]() {
               return
-                + fm::sum<quantity<frequency>>(0, M(z)(j, i) - 1, [=](int m) {
+                + fm::sum<quantity<frequency>>(0, M(z)(j, i) - 1, [&](int m) {
                   return A_(z)(j, i)(m) * (2.0 * J(z)(j, i)(m) + 1.0);
                 })
-                / fm::sum<double>(0, M(z)(j, i) - 1, [=](int m) {
+                / fm::sum<double>(0, M(z)(j, i) - 1, [&](int m) {
                   return 2.0 * J(z)(j, i)(m) + 1.0;
                 })
               ;

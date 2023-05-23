@@ -54,7 +54,7 @@ inline Eigen::MatrixXd cbb_regemorter_rates(
   using boost::units::static_rational;
 
   // effective electron collision strength
-  const auto gamma = [=](int i, int j) { return 1.0; };
+  const auto gamma = [](int i, int j) { return 1.0; };
 
   const auto zeta =
     + 8.62913210858377e-6
@@ -76,16 +76,16 @@ inline Eigen::MatrixXd cbb_regemorter_rates(
     k(z) = elements[z]->levels().size();
   });
 
-  const auto K = [=](int z) -> int {
-    return fm::sum<int>(0, z - 1, [=](int z_) -> int { return k(z_); });
+  const auto K = [&](int z) -> int {
+    return fm::sum<int>(0, z - 1, [&](int z_) -> int { return k(z_); });
   };
 
   Eigen::Vector<quantity<energy>, Eigen::Dynamic> E_v(K(Z));
   const auto E = [&](int z) {
     return [&](int i) -> quantity<energy>& { return E_v(i + K(z)); };
   };
-  fm::family(0, Z - 1, [=](int z) {
-    fm::family(0, k(z) - 1, [=](int i) {
+  fm::family(0, Z - 1, [&](int z) {
+    fm::family(0, k(z) - 1, [&](int i) {
       E(z)(i) = elements[z]->levels()[i].energy * electronvolt;
     });
   });
@@ -94,8 +94,8 @@ inline Eigen::MatrixXd cbb_regemorter_rates(
   const auto g = [&](int z) {
     return [&](int i) -> double& { return g_v(i + K(z)); };
   };
-  fm::family(0, Z - 1, [=](int z) {
-    fm::family(0, k(z) - 1, [=](int i) {
+  fm::family(0, Z - 1, [&](int z) {
+    fm::family(0, k(z) - 1, [&](int i) {
       g(z)(i) = elements[z]->levels()[i].statistical_weight;
     });
   });
@@ -105,9 +105,9 @@ inline Eigen::MatrixXd cbb_regemorter_rates(
   const auto q = [&](int z) {
     return [&](int i, int j) -> double& { return q_v(i + K(z), j + K(z)); };
   };
-  fm::family(0, Z - 1, [=](int z) {
-    fm::family(0, k(z) - 1, [=](int i) {
-      fm::family(i + 1, k(z) - 1, [=](int j) {
+  fm::family(0, Z - 1, [&](int z) {
+    fm::family(0, k(z) - 1, [&](int i) {
+      fm::family(i + 1, k(z) - 1, [&](int j) {
         q(z)(i, j) =
           + zeta
           * pow<static_rational<-1, 2>>(T_e)
