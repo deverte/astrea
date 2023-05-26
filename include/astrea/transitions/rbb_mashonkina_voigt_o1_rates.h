@@ -1,5 +1,5 @@
 /**
- * \file astrea/transitions/rbb_mashonkina_voigt_o1.h
+ * \file astrea/transitions/rbb_mashonkina_voigt_o1_rates.h
  * Radiative bound-bound transitions rates using Voigt profile using
  * Mashonkina data.
  * 

@@ -1,5 +1,5 @@
 /**
- * \file astrea/transitions/pi_mashonkina_o1.h
+ * \file astrea/transitions/pi_mashonkina_o1_rates.h
  * Photoionization transition for electrically neutral oxygen using Mashonkina
  * data.
  * 

@@ -1,7 +1,6 @@
 /**
- * \file astrea/transitions/cbb_mashonkina_o1.h
- * Collisional bound-bound transitions rates for electrically neutral oxygen
- * using Mashonkina data.
+ * \file astrea/transitions/cbb_regemorter_rates.h
+ * Collisional bound-bound transitions rates using Regemorter formula.
  * 
  * \copyright GPL
  * \author Artem Shepelin (4.shepelin@gmail.com)
@@ -9,16 +8,17 @@
 #pragma once
 
 
+#include <cmath>
 #include <memory>
 #include <vector>
 
+#include <boost/units/systems/si/codata_constants.hpp>
 #include <boost/units/systems/si.hpp>
 #include <boost/units/pow.hpp>
 #include <Eigen/Dense>
 #include <fm/fm.h>
 
 #include "../data/elements/element.h"
-#include "../data/transitions/cbb_mashonkina_o1.h"
 #include "../units/units.h"
 
 
@@ -26,17 +26,19 @@ namespace astrea {
 
 
 /**
- * Collisional bound-bound transitions rates for electrically neutral oxygen
- * using Mashonkina data (from private communication).
+ * Collisional bound-bound transitions rates using Regemorter formula
+ * (doi-10.1086%2F147445).
  * 
  * \param elements Elements.
  * \param temperature Temperature in \f$K\f$.
+ * \param electron_temperature Electron temperature in \f$K\f$.
  * \param electron_number_density Electron number density in \f$cm^{-3}\f$.
  * \return Transitions rates in \f$s^{-1}\f$.
  */
-inline Eigen::MatrixXd cbb_mashonkina_o1_rates(
+inline Eigen::MatrixXd cbb_regemorter_rates(
   const std::vector<std::shared_ptr<Element>> elements,
   const double temperature,
+  const double electron_temperature,
   const double electron_number_density
 ) {
   using astrea::units::si::centimeter;
@@ -47,15 +49,25 @@ inline Eigen::MatrixXd cbb_mashonkina_o1_rates(
   using boost::units::si::frequency;
   using boost::units::si::kelvin;
   using boost::units::si::second;
-  using temperature_ = boost::units::si::temperature;
   using boost::units::pow;
   using boost::units::quantity;
+  using boost::units::static_rational;
 
-  const auto cbb_mashonkina_o1 = CBBMashonkinaO1();
+  // effective electron collision strength
+  const auto gamma = [](int i, int j) { return 1.0; };
+
+  const auto zeta =
+    + 8.62913210858377e-6
+    * pow<3>(centimeter)
+    * pow<-1>(second)
+    * pow<static_rational<1, 2>>(kelvin)
+  ;
 
   const auto N_e = electron_number_density * pow<-3>(centimeter);
 
   const auto T = temperature * kelvin;
+
+  const auto T_e = electron_temperature * kelvin;
 
   const int Z = elements.size();
 
@@ -88,19 +100,6 @@ inline Eigen::MatrixXd cbb_mashonkina_o1_rates(
     });
   });
 
-  const auto q_ = [&](int z) {
-    return [&](int i, int j) {
-      return [=](quantity<temperature_> temperature)
-        -> quantity<transition_rate_coefficient> {
-        return cbb_mashonkina_o1.collision_rate_coefficient(
-          elements[z]->levels()[i].term,
-          elements[z]->levels()[j].term,
-          (temperature / kelvin).value()
-        ) * pow<3>(centimeter) * pow<-1>(second);
-      };
-    };
-  };
-
   Eigen::MatrixXd q_v = Eigen::MatrixXd::Zero(K(Z), K(Z));
   const auto q_u = pow<3>(centimeter) * pow<-1>(second);
   const auto q = [&](int z) {
@@ -110,14 +109,16 @@ inline Eigen::MatrixXd cbb_mashonkina_o1_rates(
     fm::family(0, k(z) - 1, [&](int i) {
       fm::family(i + 1, k(z) - 1, [&](int j) {
         q(z)(i, j) =
-          + q_(z)(i, j)(T)
-          / g(z)(i)
+          + zeta
+          * pow<static_rational<-1, 2>>(T_e)
+          * gamma(i, j) / g(z)(i)
           / q_u
         ;
 
         q(z)(j, i) =
-          + q_(z)(i, j)(T) // data has only i -> j
-          / g(z)(j)
+          + zeta
+          * pow<static_rational<-1, 2>>(T_e)
+          * gamma(i, j) / g(z)(j)
           * std::exp(-(E(z)(j) - E(z)(i)) / (k_B * T))
           / q_u
         ;

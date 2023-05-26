@@ -1,5 +1,5 @@
 /**
- * \file astrea/transitions/se_nist_o1.h
+ * \file astrea/transitions/se_nist_o1_rates.h
  * Spontaneous emission transitions rates using NIST data.
  * 
  * \copyright GPL

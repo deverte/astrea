@@ -1,7 +1,7 @@
 /**
- * \file astrea/transitions/tbr_mashonkina_o1.h
- * Three-body recombination for electrically neutral oxygen using Mashonkina
- * data (with photoionization cross sections).
+ * \file astrea/transitions/tbr_mashonkina_o1_rate_coefficients.h
+ * Three-body recombination rate coefficients for electrically neutral oxygen
+ * using Mashonkina data (with photoionization cross sections).
  * 
  * \copyright GPL
  * \author Artem Shepelin (4.shepelin@gmail.com)
@@ -31,15 +31,15 @@ namespace astrea {
 
 
 /**
- * Three-body recombination for electrically neutral oxygen using Mashonkina
- * data (from private communication).
+ * Three-body recombination rate coefficients for electrically neutral oxygen
+ * using Mashonkina data (from private communication).
  * 
  * \param elements Elements.
  * \param electron_temperature Electron temperature in \f$K\f$.
  * \param electron_number_density Electron number density in \f$cm^{-3}\f$.
  * \return Transitions rates in \f$s^{-1}\f$.
  */
-inline Eigen::MatrixXd tbr_mashonkina_o1_rates(
+inline Eigen::MatrixXd tbr_mashonkina_o1_rate_coefficients(
   const std::vector<std::shared_ptr<Element>> elements,
   const double temperature,
   const double electron_temperature,
@@ -57,6 +57,7 @@ inline Eigen::MatrixXd tbr_mashonkina_o1_rates(
   using boost::units::si::meter;
   using boost::units::si::second;
   using boost::units::si::velocity;
+  using boost::units::si::volume;
   using boost::units::pow;
   using boost::units::quantity;
   using boost::units::static_rational;
@@ -148,11 +149,12 @@ inline Eigen::MatrixXd tbr_mashonkina_o1_rates(
     pow<2>(h) / (2.0 * pi<double>() * m_e * k_B * T_e)
   );
 
-  Eigen::VectorXd r(Z - 1);
+  Eigen::Vector<quantity<volume>, Eigen::Dynamic> Phi_v(Z - 1);
+  const auto Phi_u = pow<3>(centimeter);
+  const auto Phi = [&](int z) -> quantity<volume>& { return Phi_v(z); };
   fm::family(0, Z - 2, [&](int z) {
-    r(z) = 
-      + N_e
-      * fm::sum<double>(0, k(z) - 1, [&](int i) -> double {
+    Phi(z) =
+      + fm::sum<double>(0, k(z) - 1, [&](int i) -> double {
         return g(z)(i) * std::exp(-E(z)(i) / (k_B * T));
       })
       / fm::sum<double>(0, k(z + 1) - 1, [&](int i) -> double {
@@ -166,9 +168,13 @@ inline Eigen::MatrixXd tbr_mashonkina_o1_rates(
   Eigen::VectorXd N(Z);
   fm::family(0, Z - 1, [&](int z) {
     N(z) =
-      + fm::prod<double>(z, Z - 2, [&](int i) -> double { return r(i); })
+      + fm::prod<double>(z, Z - 2, [&](int i) -> double {
+        return N_e * Phi(i);
+      })
       / fm::sum<double>(0, Z - 1, [&](int k) -> double {
-        return fm::prod<double>(k, Z - 2, [&](int i) { return r(i); });
+        return fm::prod<double>(k, Z - 2, [&](int i) -> double {
+          return N_e * Phi(i);
+        });
       })
     ;
   });
@@ -200,7 +206,23 @@ inline Eigen::MatrixXd tbr_mashonkina_o1_rates(
     });
   });
 
-  return C_v;
+  Eigen::MatrixXd alpha_TBR_v = Eigen::MatrixXd::Zero(K(Z), K(Z));
+  const auto alpha_TBR_u = pow<3>(centimeter) * pow<-1>(second);
+  const auto alpha_TBR = [&](int z) {
+    return [&](int i, int j) -> double& {
+      return alpha_TBR_v(i + K(z), j + K(z));
+    };
+  };
+  fm::family(0, Z - 2, [&](int z) {
+    fm::family(0, k(z) - 1, [&](int i) {
+      alpha_TBR(z)(k(z), i) =
+        + 1.0 / N_e * (N(z) / N(z + 1)) * C(z)(k(z), i) * C_u
+        / alpha_TBR_u
+      ;
+    });
+  });
+
+  return alpha_TBR_v;
 }
 
 

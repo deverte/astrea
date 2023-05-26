@@ -1,5 +1,5 @@
 /**
- * \file astrea/transitions/rbb_tasitsiomi.h
+ * \file astrea/transitions/rbb_tasitsiomi_rates.h
  * Radiative bound-bound transitions rates using Tasitsiomi formula.
  * 
  * \copyright GPL
@@ -22,7 +22,7 @@
 #include <Eigen/Dense>
 #include <fm/fm.h>
 
-#include "./se_nist_o1.h"
+#include "./se_nist_o1_rates.h"
 #include "../data/elements/element.h"
 #include "../data/spectra/spectrum.h"
 #include "../units/units.h"

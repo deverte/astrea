@@ -1,6 +1,6 @@
 /**
- * \file astrea/transitions/rr_mashonkina_o1.h
- * Radiative recombination transitions rates using Mashonkina data.
+ * \file astrea/transitions/rr_mashonkina_o1_rate_coefficients.h
+ * Radiative recombination transitions rate coefficients using Mashonkina data.
  * 
  * \copyright GPL
  * \author Artem Shepelin (4.shepelin@gmail.com)
@@ -30,37 +30,44 @@ namespace astrea {
 
 
 /**
- * Radiative recombination recombination transitions rates using Mashonkina data
- * (from private communication).
+ * Radiative recombination recombination transitions rate coefficients using
+ * Mashonkina data (from private communication).
  * 
  * \param elements Elements.
  * \param spectrum Spectrum.
  * \param temperature Temperature in \f$K\f$.
  * \param optical_depth Optical depth in \f$1\f$.
- * \return Transitions rates in \f$s^{-1}\f$.
+ * \return Rate coefficients in \f$cm^3 \times s^{-1}\f$.
  */
-inline Eigen::MatrixXd rr_mashonkina_o1_rates(
+inline Eigen::MatrixXd rr_mashonkina_o1_rate_coefficients(
   const std::vector<std::shared_ptr<Element>> elements,
   const std::shared_ptr<Spectrum> spectrum,
   const double temperature,
+  const double electron_temperature,
+  const double electron_number_density,
   const double optical_depth
 ) {
   using astrea::units::si::centimeter;
+  using astrea::units::si::electronvolt;
   using astrea::units::si::irradiance;
   using astrea::units::si::nanometer;
   using boost::math::constants::pi;
   using boost::units::si::constants::codata::c;
   using boost::units::si::constants::codata::h;
   using boost::units::si::constants::codata::k_B;
+  using boost::units::si::constants::codata::m_e;
   using boost::units::si::area;
+  using boost::units::si::energy;
   using boost::units::si::frequency;
   using boost::units::si::kelvin;
   using boost::units::si::length;
   using boost::units::si::meter;
   using boost::units::si::second;
+  using boost::units::si::volume;
   using boost::units::si::watt;
   using boost::units::pow;
   using boost::units::quantity;
+  using boost::units::static_rational;
 
   const auto rbf_mashonkina_o1 = RBFMashonkinaO1();
 
@@ -69,6 +76,10 @@ inline Eigen::MatrixXd rr_mashonkina_o1_rates(
   const auto nu_0 = rbf_mashonkina_o1.min_frequency() * pow<-1>(second);
 
   const auto T = temperature * kelvin;
+
+  const auto T_e = electron_temperature * kelvin;
+
+  const auto N_e = electron_number_density * pow<-3>(centimeter);
 
   const auto& tau = optical_depth;
 
@@ -82,6 +93,31 @@ inline Eigen::MatrixXd rr_mashonkina_o1_rates(
   const auto K = [&](int z) -> int {
     return fm::sum<int>(0, z - 1, [&](int z_) -> int { return k(z_); });
   };
+
+  Eigen::Vector<quantity<energy>, Eigen::Dynamic> E_v(K(Z));
+  const auto E = [&](int z) {
+    return [&](int i) -> quantity<energy>& { return E_v(i + K(z)); };
+  };
+  fm::family(0, Z - 1, [&](int z) {
+    fm::family(0, k(z) - 1, [&](int i) {
+      E(z)(i) = elements[z]->levels()[i].energy * electronvolt;
+    });
+  });
+
+  Eigen::VectorXd g_v(K(Z));
+  const auto g = [&](int z) {
+    return [&](int i) -> double& { return g_v(i + K(z)); };
+  };
+  fm::family(0, Z - 1, [&](int z) {
+    fm::family(0, k(z) - 1, [&](int i) {
+      g(z)(i) = elements[z]->levels()[i].statistical_weight;
+    });
+  });
+
+  Eigen::Vector<quantity<energy>, Eigen::Dynamic> I(Z);
+  fm::family(0, Z - 1, [&](int z) {
+    I(z) = elements[z]->levels()[0].ionization_energy * electronvolt;
+  });
 
   const auto F_lambda = [&](quantity<length> lambda) -> quantity<irradiance> {
     return
@@ -130,7 +166,57 @@ inline Eigen::MatrixXd rr_mashonkina_o1_rates(
     });
   });
 
-  return R_v;
+  const auto tilde_lambda = pow<static_rational<1, 2>>(
+    pow<2>(h) / (2.0 * pi<double>() * m_e * k_B * T_e)
+  );
+
+  Eigen::Vector<quantity<volume>, Eigen::Dynamic> Phi_v(Z - 1);
+  const auto Phi_u = pow<3>(centimeter);
+  const auto Phi = [&](int z) -> quantity<volume>& { return Phi_v(z); };
+  fm::family(0, Z - 2, [&](int z) {
+    Phi(z) =
+      + fm::sum<double>(0, k(z) - 1, [&](int i) -> double {
+        return g(z)(i) * std::exp(-E(z)(i) / (k_B * T));
+      })
+      / fm::sum<double>(0, k(z + 1) - 1, [&](int i) -> double {
+        return g(z + 1)(i) * std::exp(-E(z + 1)(i) / (k_B * T));
+      })
+      * pow<3>(tilde_lambda) / 2.0
+      * std::exp(I(z) / (k_B * T_e))
+    ;
+  });
+
+  Eigen::VectorXd N(Z);
+  fm::family(0, Z - 1, [&](int z) {
+    N(z) =
+      + fm::prod<double>(z, Z - 2, [&](int i) -> double {
+        return N_e * Phi(i);
+      })
+      / fm::sum<double>(0, Z - 1, [&](int k) -> double {
+        return fm::prod<double>(k, Z - 2, [&](int i) -> double {
+          return N_e * Phi(i);
+        });
+      })
+    ;
+  });
+
+  Eigen::MatrixXd alpha_RR_v = Eigen::MatrixXd::Zero(K(Z), K(Z));
+  const auto alpha_RR_u = pow<3>(centimeter) * pow<-1>(second);
+  const auto alpha_RR = [&](int z) {
+    return [&](int i, int j) -> double& {
+      return alpha_RR_v(i + K(z), j + K(z));
+    };
+  };
+  fm::family(0, Z - 2, [&](int z) {
+    fm::family(0, k(z) - 1, [&](int i) {
+      alpha_RR(z)(k(z), i) =
+        + 1.0 / N_e * (N(z) / N(z + 1)) * R(z)(k(z), i) * R_u
+        / alpha_RR_u
+      ;
+    });
+  });
+
+  return alpha_RR_v;
 }
 
 

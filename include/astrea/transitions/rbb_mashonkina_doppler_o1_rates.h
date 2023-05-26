@@ -1,5 +1,5 @@
 /**
- * \file astrea/transitions/rbb_mashonkina_doppler_o1.h
+ * \file astrea/transitions/rbb_mashonkina_doppler_o1_rates.h
  * Radiative bound-bound transitions rates using Doppler profile using
  * Mashonkina data.
  * 

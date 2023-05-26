@@ -140,6 +140,7 @@ inline Eigen::VectorXd lte_boltzmann_saha_population(
   using boost::units::si::constants::codata::m_e;
   using boost::units::si::energy;
   using boost::units::si::kelvin;
+  using boost::units::si::volume;
   using boost::units::pow;
   using boost::units::quantity;
   using boost::units::static_rational;
@@ -191,11 +192,12 @@ inline Eigen::VectorXd lte_boltzmann_saha_population(
   );
 
   // Saha Equation
-  Eigen::VectorXd r(Z - 1);
+  Eigen::Vector<quantity<volume>, Eigen::Dynamic> Phi_v(Z - 1);
+  const auto Phi_u = pow<3>(centimeter);
+  const auto Phi = [&](int z) -> quantity<volume>& { return Phi_v(z); };
   fm::family(0, Z - 2, [&](int z) {
-    r(z) = 
-      + N_e
-      * fm::sum<double>(0, k(z) - 1, [&](int i) -> double {
+    Phi(z) =
+      + fm::sum<double>(0, k(z) - 1, [&](int i) -> double {
         return g(z)(i) * std::exp(-E(z)(i) / (k_B * T));
       })
       / fm::sum<double>(0, k(z + 1) - 1, [&](int i) -> double {
@@ -209,9 +211,13 @@ inline Eigen::VectorXd lte_boltzmann_saha_population(
   Eigen::VectorXd N(Z);
   fm::family(0, Z - 1, [&](int z) {
     N(z) =
-      + fm::prod<double>(z, Z - 2, [&](int i) -> double { return r(i); })
+      + fm::prod<double>(z, Z - 2, [&](int i) -> double {
+        return N_e * Phi(i);
+      })
       / fm::sum<double>(0, Z - 1, [&](int k) -> double {
-        return fm::prod<double>(k, Z - 2, [&](int i) { return r(i);});
+        return fm::prod<double>(k, Z - 2, [&](int i) -> double {
+          return N_e * Phi(i);
+        });
       })
     ;
   });
