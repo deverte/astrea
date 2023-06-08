@@ -41,11 +41,9 @@ namespace astrea {
  */
 inline Eigen::MatrixXd rr_mashonkina_o1_rate_coefficients(
   const std::vector<std::shared_ptr<Element>> elements,
-  const std::shared_ptr<Spectrum> spectrum,
   const double temperature,
   const double electron_temperature,
-  const double electron_number_density,
-  const double optical_depth
+  const double electron_number_density
 ) {
   using astrea::units::si::centimeter;
   using astrea::units::si::electronvolt;
@@ -81,8 +79,6 @@ inline Eigen::MatrixXd rr_mashonkina_o1_rate_coefficients(
 
   const auto N_e = electron_number_density * pow<-3>(centimeter);
 
-  const auto& tau = optical_depth;
-
   const int Z = elements.size();
 
   Eigen::VectorXi k(Z);
@@ -96,6 +92,7 @@ inline Eigen::MatrixXd rr_mashonkina_o1_rate_coefficients(
 
   Eigen::Vector<quantity<energy>, Eigen::Dynamic> E_v(K(Z));
   const auto E = [&](int z) {
+    // Warning: unsafe indices (E(z + 1)(i) != E(z)(k(z) + i))
     return [&](int i) -> quantity<energy>& { return E_v(i + K(z)); };
   };
   fm::family(0, Z - 1, [&](int z) {
@@ -106,6 +103,7 @@ inline Eigen::MatrixXd rr_mashonkina_o1_rate_coefficients(
 
   Eigen::VectorXd g_v(K(Z));
   const auto g = [&](int z) {
+    // Warning: unsafe indices (g(z + 1)(i) != g(z)(k(z) + i))
     return [&](int i) -> double& { return g_v(i + K(z)); };
   };
   fm::family(0, Z - 1, [&](int z) {
@@ -114,21 +112,22 @@ inline Eigen::MatrixXd rr_mashonkina_o1_rate_coefficients(
     });
   });
 
-  Eigen::Vector<quantity<energy>, Eigen::Dynamic> I(Z);
+  Eigen::Vector<quantity<energy>, Eigen::Dynamic> I_v(Z);
+  const auto I = [&](int z) {
+    // Warning: unsafe indices (I(z + 1)(i) != I(z)(k(z) + i))
+    return [&](int i) -> quantity<energy>& { return I_v(i + K(z)); };
+  };
   fm::family(0, Z - 1, [&](int z) {
-    I(z) = elements[z]->levels()[0].ionization_energy * electronvolt;
+    fm::family(0, k(z) - 1, [&](int i) {
+      I(i)(z) = elements[z]->levels()[i].ionization_energy * electronvolt;
+    });
   });
 
-  const auto F_lambda = [&](quantity<length> lambda) -> quantity<irradiance> {
-    return
-      + spectrum->spectral_irradiance(lambda / nanometer)
-      * watt * pow<-2>(meter) * pow<-1>(nanometer)
-    ;
-  };
-
   const auto alpha = [&](int z) {
+    // Warning: unsafe indices (alpha(z + 1)(i) != alpha(z)(k(z) + i))
     return [&](int j) {
-      return [=](quantity<frequency> frequency) -> quantity<area> {
+      return [=](quantity<frequency> frequency) ->
+        quantity<area> {
         return rbf_mashonkina_o1.rbf_cross_section(
           elements[z]->levels()[j].term,
           frequency / pow<-1>(second)
@@ -148,15 +147,12 @@ inline Eigen::MatrixXd rr_mashonkina_o1_rate_coefficients(
         4.0 * pi<double>() * boost::math::quadrature::trapezoidal(
           [&](double nu) -> double {
             const auto nu_ = nu * pow<-1>(second);
-            const auto lambda = c / nu_;
-            const auto F_nu = c / pow<2>(nu_) * F_lambda(lambda);
 
             return (
               + alpha(z)(i)(nu_)
               / (h * nu_)
-              * ((2.0 * h * pow<3>(nu_) / pow<2>(c)) + F_nu)
+              * (2.0 * h * pow<3>(nu_) / pow<2>(c))
               * std::exp(-(h * nu_) / (k_B * T))
-              * std::exp(-tau)
             ).value();
           },
           (nu_0 / pow<-1>(second)).value(),
@@ -170,34 +166,21 @@ inline Eigen::MatrixXd rr_mashonkina_o1_rate_coefficients(
     pow<2>(h) / (2.0 * pi<double>() * m_e * k_B * T_e)
   );
 
-  Eigen::Vector<quantity<volume>, Eigen::Dynamic> Phi_v(Z - 1);
+  Eigen::Vector<quantity<volume>, Eigen::Dynamic> Phi_v(K(Z));
   const auto Phi_u = pow<3>(centimeter);
-  const auto Phi = [&](int z) -> quantity<volume>& { return Phi_v(z); };
+  const auto Phi = [&](int z) {
+    return [&](int i) -> quantity<volume>& {
+      return Phi_v(i + K(z));
+    };
+  };
   fm::family(0, Z - 2, [&](int z) {
-    Phi(z) =
-      + fm::sum<double>(0, k(z) - 1, [&](int i) -> double {
-        return g(z)(i) * std::exp(-E(z)(i) / (k_B * T));
-      })
-      / fm::sum<double>(0, k(z + 1) - 1, [&](int i) -> double {
-        return g(z + 1)(i) * std::exp(-E(z + 1)(i) / (k_B * T));
-      })
-      * pow<3>(tilde_lambda) / 2.0
-      * std::exp(I(z) / (k_B * T_e))
-    ;
-  });
-
-  Eigen::VectorXd N(Z);
-  fm::family(0, Z - 1, [&](int z) {
-    N(z) =
-      + fm::prod<double>(z, Z - 2, [&](int i) -> double {
-        return N_e * Phi(i);
-      })
-      / fm::sum<double>(0, Z - 1, [&](int k) -> double {
-        return fm::prod<double>(k, Z - 2, [&](int i) -> double {
-          return N_e * Phi(i);
-        });
-      })
-    ;
+    fm::family(0, k(z) - 1, [&](int i) {
+      Phi(z)(i) =
+        + pow<3>(tilde_lambda) / 2.0
+        * g(z)(i) / g(z + 1)(0) // g(z + 1)(0) != g(z)(k(z)), but must be
+        * std::exp((I(z)(0) - E(z)(i)) / (k_B * T))
+      ;
+    });
   });
 
   Eigen::MatrixXd alpha_RR_v = Eigen::MatrixXd::Zero(K(Z), K(Z));
@@ -210,7 +193,7 @@ inline Eigen::MatrixXd rr_mashonkina_o1_rate_coefficients(
   fm::family(0, Z - 2, [&](int z) {
     fm::family(0, k(z) - 1, [&](int i) {
       alpha_RR(z)(k(z), i) =
-        + 1.0 / N_e * (N(z) / N(z + 1)) * R(z)(k(z), i) * R_u
+        + Phi(z)(i) * (R(z)(k(z), i) * R_u)
         / alpha_RR_u
       ;
     });

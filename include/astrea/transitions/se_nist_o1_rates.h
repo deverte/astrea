@@ -50,7 +50,7 @@ se_nist_o1_rates(const std::vector<std::shared_ptr<Element>> elements) {
   };
 
   const auto M = [&](int z) {
-    return [=](int i, int j) {
+    return [&, z, se_nist_o1](int i, int j) {
       int size = 0;
       for (const auto transition : se_nist_o1.transitions()) {
         if (
@@ -66,8 +66,8 @@ se_nist_o1_rates(const std::vector<std::shared_ptr<Element>> elements) {
   };
 
   const auto A_ = [&](int z) {
-    return [&](int j, int i) {
-      return [=](int m) {
+    return [&, z](int j, int i) {
+      return [&, z, j, i, se_nist_o1](int m) {
         std::vector<ISENistO1Transition> transitions;
         for (const auto transition : se_nist_o1.transitions()) {
           if (
@@ -91,8 +91,8 @@ se_nist_o1_rates(const std::vector<std::shared_ptr<Element>> elements) {
   };
 
   const auto J = [&](int z) {
-    return [&](int i, int j) {
-      return [=](int m) {
+    return [&, z](int i, int j) {
+      return [&, z, i, j, se_nist_o1](int m) {
         std::vector<ISENistO1Transition> transitions;
         for (const auto transition : se_nist_o1.transitions()) {
           if (
@@ -120,17 +120,17 @@ se_nist_o1_rates(const std::vector<std::shared_ptr<Element>> elements) {
   Eigen::MatrixXd A_v = Eigen::MatrixXd::Zero(K(Z), K(Z));
   const auto A_u = pow<-1>(second);
   const auto A = [&](int z) {
-    return [&](int j, int i) -> double& {
+    return [&, z](int j, int i) -> double& {
       return A_v(j + K(z), i + K(z));
     };
   };
 
   fm::family(0, Z - 1, [&](int z) {
-    fm::family(0, k(z) - 1, [&](int i) {
-      fm::family(i + 1, k(z) - 1, [&](int j) {
+    fm::family(0, k(z) - 1, [&, z](int i) {
+      fm::family(i + 1, k(z) - 1, [&, z, i](int j) {
         A(z)(j, i) = fm::cases<quantity<frequency>>({
           {
-            [&]() {
+            [&, z, i, j]() {
               return
                 + fm::sum<quantity<frequency>>(0, M(z)(j, i) - 1, [&](int m) {
                   return A_(z)(j, i)(m) * (2.0 * J(z)(j, i)(m) + 1.0);
@@ -142,7 +142,7 @@ se_nist_o1_rates(const std::vector<std::shared_ptr<Element>> elements) {
             },
             M(z)(j, i) - 1 > 0,
           },
-          { []() { return 0.0 * pow<-1>(second); }, true },
+          { [&]() { return 0.0 * pow<-1>(second); }, true },
         }) / A_u;
       });
     });

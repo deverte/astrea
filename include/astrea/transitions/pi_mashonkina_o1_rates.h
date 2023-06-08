@@ -86,8 +86,9 @@ inline Eigen::MatrixXd pi_mashonkina_o1_rates(
   };
 
   const auto alpha = [&](int z) {
-    return [&](int i) {
-      return [=](quantity<frequency> frequency) -> quantity<area> {
+    return [&, z](int i) {
+      return [&, z, i, rbf_mashonkina_o1](quantity<frequency> frequency) ->
+        quantity<area> {
         return rbf_mashonkina_o1.rbf_cross_section(
           elements[z]->levels()[i].term,
           frequency / pow<-1>(second)
@@ -99,13 +100,13 @@ inline Eigen::MatrixXd pi_mashonkina_o1_rates(
   Eigen::MatrixXd R_v = Eigen::MatrixXd::Zero(K(Z), K(Z));
   const auto R_u = pow<-1>(second);
   const auto R = [&](int z) {
-    return [&](int i, int j) -> double& { return R_v(i + K(z), j + K(z)); };
+    return [&, z](int i, int j) -> double& { return R_v(i + K(z), j + K(z)); };
   };
   fm::family(0, Z - 2, [&](int z) {
     fm::family(0, k(z) - 1, [&](int i) {
       R(z)(i, k(z)) =
         4.0 * pi<double>() * boost::math::quadrature::trapezoidal(
-          [&](double nu) -> double {
+          [&, z, i](double nu) -> double {
             const auto nu_ = nu * pow<-1>(second);
             const auto lambda = c / nu_;
             const auto F_nu = c / pow<2>(nu_) * F_lambda(lambda);

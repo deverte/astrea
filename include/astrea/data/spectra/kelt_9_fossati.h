@@ -100,14 +100,14 @@ inline Kelt9Fossati::Kelt9Fossati() {
         resource_.wavelengths.begin(),
         resource_.wavelengths.end()
       )
-    * astrea::units::si::nanometer
+    * astrea::units::si::angstrom
   ;
   min_wavelength_ =
     + *std::min_element(
         resource_.wavelengths.begin(),
         resource_.wavelengths.end()
       )
-    * astrea::units::si::nanometer
+    * astrea::units::si::angstrom
   ;
 }
 
@@ -150,7 +150,7 @@ inline double Kelt9Fossati::spectral_irradiance(const double wavelength) const {
   const auto nu = c / lambda;
 
   const auto E_e_lambda =
-    + (h * nu) * interpolant_((lambda / nanometer).value())
+    + (h * nu) * interpolant_((lambda / angstrom).value())
     * pow<-1>(second) * pow<-2>(centimeter) * pow<-1>(angstrom)
     * pow<2>(astronomical_unit)
   ;

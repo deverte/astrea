@@ -96,8 +96,9 @@ inline Eigen::MatrixXd ci_mashonkina_o1_rates(
   };
 
   const auto sigma = [&](int z) {
-    return [&](int i) {
-      return [=](quantity<velocity> v) -> quantity<area> {
+    return [&, z](int i) {
+      return [&, z, i, rbf_mashonkina_o1](quantity<velocity> v) ->
+        quantity<area> {
         const auto E = m_e * pow<2>(v) / 2.0;
         const auto nu = E / h;
 
@@ -112,13 +113,13 @@ inline Eigen::MatrixXd ci_mashonkina_o1_rates(
   Eigen::MatrixXd C_v = Eigen::MatrixXd::Zero(K(Z), K(Z));
   const auto C_u = pow<-1>(second);
   const auto C = [&](int z) {
-    return [&](int i, int j) -> double& { return C_v(i + K(z), j + K(z)); };
+    return [&, z](int i, int j) -> double& { return C_v(i + K(z), j + K(z)); };
   };
   fm::family(0, Z - 2, [&](int z) {
-    fm::family(0, k(z) - 1, [&](int i) {
+    fm::family(0, k(z) - 1, [&, z](int i) {
       C(z)(i, k(z)) =
         N_e * boost::math::quadrature::trapezoidal(
-          [&](double v) -> double {
+          [&, z, i](double v) -> double {
             const auto v_ = v * meter * pow<-1>(second);
 
             return (

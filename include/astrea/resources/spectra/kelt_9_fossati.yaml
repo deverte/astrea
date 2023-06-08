@@ -3,7 +3,7 @@
 #
 # distance in au
 # spectral_irradiance in photons * s^{-1} * cm^{-2} * A^{-1} * au^2 at 1 au
-# wavelengths in nm
+# wavelengths in angstrom
 #endif
 {
   distance: 0.03,

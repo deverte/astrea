@@ -95,30 +95,30 @@ inline Eigen::MatrixXd tbr_mashonkina_o1_rate_coefficients(
 
   Eigen::Vector<quantity<energy>, Eigen::Dynamic> E_v(K(Z));
   const auto E = [&](int z) {
-    return [&](int i) -> quantity<energy>& { return E_v(i + K(z)); };
+    return [&, z](int i) -> quantity<energy>& { return E_v(i + K(z)); };
   };
   fm::family(0, Z - 1, [&](int z) {
-    fm::family(0, k(z) - 1, [&](int i) {
+    fm::family(0, k(z) - 1, [&, z](int i) {
       E(z)(i) = elements[z]->levels()[i].energy * electronvolt;
     });
   });
 
   Eigen::VectorXd g_v(K(Z));
   const auto g = [&](int z) {
-    return [&](int i) -> double& { return g_v(i + K(z)); };
+    return [&, z](int i) -> double& { return g_v(i + K(z)); };
   };
   fm::family(0, Z - 1, [&](int z) {
-    fm::family(0, k(z) - 1, [&](int i) {
+    fm::family(0, k(z) - 1, [&, z](int i) {
       g(z)(i) = elements[z]->levels()[i].statistical_weight;
     });
   });
 
   Eigen::Vector<quantity<energy>, Eigen::Dynamic> I_v(K(Z));
   const auto I = [&](int z) {
-    return [&](int i) -> quantity<energy>& { return I_v(i + K(z)); };
+    return [&, z](int i) -> quantity<energy>& { return I_v(i + K(z)); };
   };
   fm::family(0, Z - 1, [&](int z) {
-    fm::family(0, k(z) - 1, [&](int i) {
+    fm::family(0, k(z) - 1, [&, z](int i) {
       I(z)(i) = elements[z]->levels()[i].ionization_energy * electronvolt;
     });
   });
@@ -132,8 +132,9 @@ inline Eigen::MatrixXd tbr_mashonkina_o1_rate_coefficients(
   };
 
   const auto sigma = [&](int z) {
-    return [&](int i) {
-      return [=](quantity<velocity> v) -> quantity<area> {
+    return [&, z](int i) {
+      return [&, z, i, rbf_mashonkina_o1](quantity<velocity> v)
+        -> quantity<area> {
         const auto E = m_e * pow<2>(v) / 2.0;
         const auto nu = E / h;
 
@@ -154,10 +155,10 @@ inline Eigen::MatrixXd tbr_mashonkina_o1_rate_coefficients(
   const auto Phi = [&](int z) -> quantity<volume>& { return Phi_v(z); };
   fm::family(0, Z - 2, [&](int z) {
     Phi(z) =
-      + fm::sum<double>(0, k(z) - 1, [&](int i) -> double {
+      + fm::sum<double>(0, k(z) - 1, [&, z](int i) -> double {
         return g(z)(i) * std::exp(-E(z)(i) / (k_B * T));
       })
-      / fm::sum<double>(0, k(z + 1) - 1, [&](int i) -> double {
+      / fm::sum<double>(0, k(z + 1) - 1, [&, z](int i) -> double {
         return g(z + 1)(i) * std::exp(-E(z + 1)(i) / (k_B * T));
       })
       * pow<3>(tilde_lambda) / 2.0
@@ -182,13 +183,13 @@ inline Eigen::MatrixXd tbr_mashonkina_o1_rate_coefficients(
   Eigen::MatrixXd C_v = Eigen::MatrixXd::Zero(K(Z), K(Z));
   const auto C_u = pow<-1>(second);
   const auto C = [&](int z) {
-    return [&](int i, int j) -> double& { return C_v(i + K(z), j + K(z)); };
+    return [&, z](int i, int j) -> double& { return C_v(i + K(z), j + K(z)); };
   };
   fm::family(0, Z - 2, [&](int z) {
-    fm::family(0, k(z) - 1, [&](int i) {
+    fm::family(0, k(z) - 1, [&, z](int i) {
       C(z)(k(z), i) =
         N_e * boost::math::quadrature::trapezoidal(
-          [&](double v) -> double {
+          [&, z, i](double v) -> double {
             const auto v_ = v * meter * pow<-1>(second);
 
             return (
@@ -209,12 +210,12 @@ inline Eigen::MatrixXd tbr_mashonkina_o1_rate_coefficients(
   Eigen::MatrixXd alpha_TBR_v = Eigen::MatrixXd::Zero(K(Z), K(Z));
   const auto alpha_TBR_u = pow<3>(centimeter) * pow<-1>(second);
   const auto alpha_TBR = [&](int z) {
-    return [&](int i, int j) -> double& {
+    return [&, z](int i, int j) -> double& {
       return alpha_TBR_v(i + K(z), j + K(z));
     };
   };
   fm::family(0, Z - 2, [&](int z) {
-    fm::family(0, k(z) - 1, [&](int i) {
+    fm::family(0, k(z) - 1, [&, z](int i) {
       alpha_TBR(z)(k(z), i) =
         + 1.0 / N_e * (N(z) / N(z + 1)) * C(z)(k(z), i) * C_u
         / alpha_TBR_u

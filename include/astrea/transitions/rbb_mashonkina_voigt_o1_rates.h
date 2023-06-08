@@ -65,7 +65,7 @@ inline Eigen::MatrixXd rbb_mashonkina_voigt_o1_rates(
 
   Eigen::Vector<quantity<energy>, Eigen::Dynamic> E_v(K(Z));
   const auto E = [&](int z) {
-    return [&](int i) -> quantity<energy>& { return E_v(i + K(z)); };
+    return [&, z](int i) -> quantity<energy>& { return E_v(i + K(z)); };
   };
   fm::family(0, Z - 1, [&](int z) {
     fm::family(0, k(z) - 1, [&](int i) {
@@ -75,16 +75,16 @@ inline Eigen::MatrixXd rbb_mashonkina_voigt_o1_rates(
 
   Eigen::VectorXd g_v(K(Z));
   const auto g = [&](int z) {
-    return [&](int i) -> double& { return g_v(i + K(z)); };
+    return [&, z](int i) -> double& { return g_v(i + K(z)); };
   };
   fm::family(0, Z - 1, [&](int z) {
-    fm::family(0, k(z) - 1, [&](int i) {
+    fm::family(0, k(z) - 1, [&, z](int i) {
       g(z)(i) = elements[z]->levels()[i].statistical_weight;
     });
   });
 
   const auto f = [&](int z) {
-    return [&](int i, int j) -> double {
+    return [&, z](int i, int j) -> double {
       for (const auto transition : rbb_mashonkina_voigt_o1.transitions()) {
         if (
           transition.initial == elements[z]->levels()[i].term &&
@@ -100,11 +100,11 @@ inline Eigen::MatrixXd rbb_mashonkina_voigt_o1_rates(
   Eigen::MatrixXd R_v = Eigen::MatrixXd::Zero(K(Z), K(Z));
   const auto R_u = pow<-1>(second);
   const auto R = [&](int z) {
-    return [&](int i, int j) -> double& { return R_v(i + K(z), j + K(z)); };
+    return [&, z](int i, int j) -> double& { return R_v(i + K(z), j + K(z)); };
   };
   fm::family(0, Z - 1, [&](int z) {
-    fm::family(0, k(z) - 1, [&](int i) {
-      fm::family(i + 1, k(z) - 1, [&](int j) {
+    fm::family(0, k(z) - 1, [&, z](int i) {
+      fm::family(i + 1, k(z) - 1, [&, z, i](int j) {
         R(z)(i, j) =
           + Lambda
           / pow<2>(c / (abs(E(z)(i) - E(z)(j)) / hbar))

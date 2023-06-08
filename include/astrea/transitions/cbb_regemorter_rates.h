@@ -82,20 +82,20 @@ inline Eigen::MatrixXd cbb_regemorter_rates(
 
   Eigen::Vector<quantity<energy>, Eigen::Dynamic> E_v(K(Z));
   const auto E = [&](int z) {
-    return [&](int i) -> quantity<energy>& { return E_v(i + K(z)); };
+    return [&, z](int i) -> quantity<energy>& { return E_v(i + K(z)); };
   };
   fm::family(0, Z - 1, [&](int z) {
-    fm::family(0, k(z) - 1, [&](int i) {
+    fm::family(0, k(z) - 1, [&, z](int i) {
       E(z)(i) = elements[z]->levels()[i].energy * electronvolt;
     });
   });
 
   Eigen::VectorXd g_v(K(Z));
   const auto g = [&](int z) {
-    return [&](int i) -> double& { return g_v(i + K(z)); };
+    return [&, z](int i) -> double& { return g_v(i + K(z)); };
   };
   fm::family(0, Z - 1, [&](int z) {
-    fm::family(0, k(z) - 1, [&](int i) {
+    fm::family(0, k(z) - 1, [&, z](int i) {
       g(z)(i) = elements[z]->levels()[i].statistical_weight;
     });
   });
@@ -103,11 +103,11 @@ inline Eigen::MatrixXd cbb_regemorter_rates(
   Eigen::MatrixXd q_v = Eigen::MatrixXd::Zero(K(Z), K(Z));
   const auto q_u = pow<3>(centimeter) * pow<-1>(second);
   const auto q = [&](int z) {
-    return [&](int i, int j) -> double& { return q_v(i + K(z), j + K(z)); };
+    return [&, z](int i, int j) -> double& { return q_v(i + K(z), j + K(z)); };
   };
   fm::family(0, Z - 1, [&](int z) {
-    fm::family(0, k(z) - 1, [&](int i) {
-      fm::family(i + 1, k(z) - 1, [&](int j) {
+    fm::family(0, k(z) - 1, [&, z](int i) {
+      fm::family(i + 1, k(z) - 1, [&, z, i](int j) {
         q(z)(i, j) =
           + zeta
           * pow<static_rational<-1, 2>>(T_e)
