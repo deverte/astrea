@@ -149,20 +149,9 @@ inline Eigen::MatrixXd rbb_tasitsiomi_rates(
     };
   };
 
-  const auto f = [&](int z) {
+  const auto lambda_0 = [&](int z) {
     return [&, z](int i, int j) {
-      return [&, z, i, j](quantity<frequency> nu) -> double {
-        const auto lambda = c / nu;
-
-        return
-          + (
-            + A(z)(i, j) * pow<-1>(second)
-            + A(z)(j, i) * pow<-1>(second)
-          )
-          * g(z)(j) / g(z)(i)
-          * pow<2>(lambda) / Lambda
-        ;
-      };
+      return c / nu_0(z)(i, j);
     };
   };
 
@@ -229,35 +218,6 @@ inline Eigen::MatrixXd rbb_tasitsiomi_rates(
     };
   };
 
-  const auto H = [&](int z) {
-    return [&, z](int i, int j) {
-      return [&, z, i, j](quantity<frequency> nu) -> double {
-        return
-          + std::sqrt(pi<double>())
-          * (
-            + q(z)(i, j)(nu)
-            + std::exp(-std::pow(x(z)(i, j)(nu), 2.0)) / epsilon
-          )
-        ;
-      };
-    };
-  };
-
-  const auto alpha = [&](int z) {
-    return [&, z](int i, int j) {
-      return [&, z, i, j](quantity<frequency> nu) -> quantity<area> {
-        return
-          + 1.0
-          / (4.0 * pi<double>() * epsilon_0)
-          * f(z)(i, j)(nu)
-          * std::sqrt(pi<double>()) * pow<2>(e)
-          / (m_e * c * delta_nu_D(z)(i, j))
-          * H(z)(i, j)(nu)
-        ;
-      };
-    };
-  };
-
   Eigen::MatrixXd R_v = Eigen::MatrixXd::Zero(K(Z), K(Z));
   const auto R_u = pow<-1>(second);
   const auto R = [&](int z) {
@@ -266,40 +226,24 @@ inline Eigen::MatrixXd rbb_tasitsiomi_rates(
   fm::family(0, Z - 1, [&](int z) {
     fm::family(0, k(z) - 1, [&, z](int i) {
       fm::family(i + 1, k(z) - 1, [&, z, i](int j) {
-        R(z)(i, j) = 4.0 * pi<double>() * boost::math::quadrature::trapezoidal(
-          [&, z, i, j](double nu) {
-            const auto nu_ = nu * pow<-1>(second);
-            const auto lambda = c / nu_;
-            const auto F_nu = c / pow<2>(nu_) * F_lambda(lambda);
+        R(z)(i, j) =
+          + 1.0 / (4.0 * h * pow<2>(c))
+          * pow<5>(lambda_0(z)(i, j))
+          * F_lambda(lambda_0(z)(i, j))
+          * A(z)(j, i)
+          * g(z)(j) / g(z)(i)
+        ;
 
-            return (
-              + alpha(z)(i, j)(nu_)
-              / (h * nu_)
-              * F_nu
-              * std::exp(-tau)
-            ).value();
-          },
-          (nu_0(z)(i, j) / pow<-1>(second)).value(),
-          (infty / pow<-1>(second)).value()
-        ) * pow<-1>(second) / R_u;
-
-        R(z)(j, i) = 4.0 * pi<double>() * boost::math::quadrature::trapezoidal(
-          [&, z, i, j](double nu) {
-            const auto nu_ = nu * pow<-1>(second);
-            const auto lambda = c / nu_;
-            const auto F_nu = c / pow<2>(nu_) * F_lambda(lambda);
-
-            return (
-              + alpha(z)(j, i)(nu_)
-              / (h * nu_)
-              * ((2.0 * h * pow<3>(nu_) / pow<2>(c)) + F_nu)
-              * std::exp(-(h * nu_) / (k_B * T))
-              * std::exp(-tau)
-            ).value();
-          },
-          (nu_0(z)(j, i) / pow<-1>(second)).value(),
-          (infty / pow<-1>(second)).value()
-        ) * pow<-1>(second) / R_u;
+        R(z)(j, i) =
+          + (
+            + 1.0 / (4.0 * h * pow<2>(c))
+            * pow<5>(lambda_0(z)(i, j))
+            * F_lambda(lambda_0(z)(j, i))
+            + 1.0 / 2.0
+          )
+          * A(z)(j, i)
+          * g(z)(i) / g(z)(j)
+        ;
       });
     });
   });

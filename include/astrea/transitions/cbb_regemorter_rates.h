@@ -112,6 +112,7 @@ inline Eigen::MatrixXd cbb_regemorter_rates(
           + zeta
           * pow<static_rational<-1, 2>>(T_e)
           * gamma(i, j) / g(z)(i)
+          * std::exp(-(E(z)(j) - E(z)(i)) / (k_B * T))
           / q_u
         ;
 
@@ -119,7 +120,6 @@ inline Eigen::MatrixXd cbb_regemorter_rates(
           + zeta
           * pow<static_rational<-1, 2>>(T_e)
           * gamma(i, j) / g(z)(j)
-          * std::exp(-(E(z)(j) - E(z)(i)) / (k_B * T))
           / q_u
         ;
       });
