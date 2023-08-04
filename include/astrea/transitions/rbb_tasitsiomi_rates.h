@@ -49,21 +49,16 @@ inline Eigen::MatrixXd rbb_tasitsiomi_rates(
   const double temperature,
   const Eigen::MatrixXd spontaneous_emission_rates
 ) {
-  using astrea::units::si::angstrom;
   using astrea::units::si::dalton;
   using astrea::units::si::electronvolt;
   using astrea::units::si::nanometer;
   using astrea::units::si::irradiance;
   using boost::math::constants::pi;
+  using boost::units::si::constants::codata::alpha;
   using boost::units::si::constants::codata::c;
-  using boost::units::si::constants::codata::e;
-  using boost::units::si::constants::codata::epsilon_0;
   using boost::units::si::constants::codata::h;
   using boost::units::si::constants::codata::k_B;
-  using boost::units::si::constants::codata::m_e;
-  using boost::units::si::area;
   using boost::units::si::energy;
-  using boost::units::si::frequency;
   using boost::units::si::kelvin;
   using boost::units::si::length;
   using boost::units::si::meter;
@@ -71,24 +66,7 @@ inline Eigen::MatrixXd rbb_tasitsiomi_rates(
   using boost::units::si::watt;
   using boost::units::pow;
   using boost::units::quantity;
-
-  const auto Lambda = 6.6702e15 * pow<2>(angstrom) * pow<-1>(second);
-
-  const auto chi = 21.0;
-
-  const auto epsilon = 1.77245385;
-
-  const auto kappa_0 = 0.1117;
-
-  const auto kappa_1 = 4.421;
-
-  const auto kappa_2 = -9.207;
-
-  const auto kappa_3 = 5.674;
-
-  const auto zeta_0 = 0.855;
-
-  const auto zeta_1 = 3.42;
+  using boost::units::static_rational;
 
   const int Z = elements.size();
 
@@ -114,7 +92,7 @@ inline Eigen::MatrixXd rbb_tasitsiomi_rates(
 
   const auto& tau = optical_depth;
 
-  const auto infty = c / (spectrum->min_wavelength() * nanometer);
+  const auto zero_lambda = spectrum->min_wavelength() * nanometer;
 
   const auto F_lambda = [&](quantity<length> lambda) -> quantity<irradiance> {
     return
@@ -143,78 +121,9 @@ inline Eigen::MatrixXd rbb_tasitsiomi_rates(
     });
   });
 
-  const auto nu_0 = [&](int z) {
-    return [&, z](int i, int j) {
-      return abs(E(z)(j) - E(z)(i)) / h;
-    };
-  };
-
   const auto lambda_0 = [&](int z) {
     return [&, z](int i, int j) {
-      return c / nu_0(z)(i, j);
-    };
-  };
-
-  const auto delta_nu_L = 3.0 * m_i * pow<3>(c) * epsilon_0 / pow<2>(e);
-
-  const auto delta_nu_D = [&](int z) {
-    return [&, z](int i, int j) -> quantity<frequency> {
-      return nu_0(z)(i, j) * std::sqrt(2.0 * k_B * T / (m_i * pow<2>(c)));
-    };
-  };
-
-  const auto x = [&](int z) {
-    return [&, z](int i, int j) {
-      return [&, z, i, j](quantity<frequency> nu) -> double {
-        return (nu - nu_0(z)(i, j)) / delta_nu_D(z)(i, j);
-      };
-    };
-  };
-
-  const auto zeta = [&](int z) {
-    return [&, z](int i, int j) {
-      return [&, z, i, j](quantity<frequency> nu) -> double {
-        return
-          + (std::pow(x(z)(i, j)(nu), 2.0) - zeta_0)
-          / (std::pow(x(z)(i, j)(nu), 2.0) + zeta_1)
-        ;
-      };
-    };
-  };
-
-  const auto gamma = [&](int z) {
-    return [&, z](int i, int j) {
-      return delta_nu_L / (2.0 * delta_nu_D(z)(i, j));
-    };
-  };
-
-  const auto q = [&](int z) {
-    return [&, z](int i, int j) {
-      return [&, z, i, j](quantity<frequency> nu) -> double {
-        return fm::cases<double>({
-          {
-            [&, z, i, j, nu]() -> double {
-              return
-                + zeta(z)(i, j)(nu)
-                * (1.0 + chi / std::pow(x(z)(i, j)(nu), 2.0))
-                * gamma(z)(i, j)
-                / (pi<double>() * (std::pow(x(z)(i, j)(nu), 2.0) + 1))
-                * (
-                  + kappa_0
-                  + zeta(z)(i, j)(nu)
-                  * (
-                    + kappa_1
-                    + zeta(z)(i, j)(nu)
-                    * (kappa_2 + kappa_3 * zeta(z)(i, j)(nu))
-                  )
-                )
-              ;
-            },
-            zeta(z)(i, j)(nu) > 0.0
-          },
-          {[]() -> double { return 0.0; }, zeta(z)(i, j)(nu) <= 0.0}
-        });
-      };
+      return h * c / abs(E(z)(j) - E(z)(i));
     };
   };
 
@@ -227,22 +136,161 @@ inline Eigen::MatrixXd rbb_tasitsiomi_rates(
     fm::family(0, k(z) - 1, [&, z](int i) {
       fm::family(i + 1, k(z) - 1, [&, z, i](int j) {
         R(z)(i, j) =
-          + 1.0 / (4.0 * h * pow<2>(c))
-          * pow<5>(lambda_0(z)(i, j))
-          * F_lambda(lambda_0(z)(i, j))
+          // Resonant Broadening
+          + 1.0
+          / (
+            + 8.0
+            * pow<static_rational<1, 2>>(2)
+            * pow<static_rational<3, 2>>(pi<double>())
+            * h * c * pow<static_rational<1, 2>>(k_B)
+          )
+          * pow<static_rational<-1, 2>>(T)
+          * pow<static_rational<1, 2>>(m_i)
+          * pow<3>(lambda_0(z)(i, j))
           * A(z)(j, i)
           * g(z)(j) / g(z)(i)
+          * boost::math::quadrature::trapezoidal(
+            [&](double lambda) {
+              auto lambda_ = lambda * nanometer;
+              return
+                + lambda_
+                * F_lambda(lambda_)
+                * std::exp(
+                  - pow<2>(c) / (2.0 * k_B) * pow<-1>(T) * m_i
+                  * pow<2>(lambda_0(z)(i, j) - lambda_) / pow<2>(lambda_)
+                )
+                / (watt * pow<-2>(meter))
+              ;
+            },
+            (zero_lambda / nanometer).value(),
+            (lambda_0(z)(i, j) / nanometer).value()
+          )
+          * watt * pow<-2>(meter) * nanometer
+          // Natural Broadening
+          + 3.0
+          / (32.0 * pow<2>(pi<double>()) * pow<2>(h) * c * alpha)
+          * m_i
+          * pow<4>(lambda_0(z)(j, i))
+          * A(z)(j, i)
+          * g(z)(j) / g(z)(i)
+          * boost::math::quadrature::trapezoidal(
+            [&](double lambda) {
+              auto lambda_ = lambda * nanometer;
+              return
+                + F_lambda(lambda_)
+                * pow<3>(lambda_)
+                / pow<2>(lambda_0(z)(i, j) - lambda_)
+                / (watt * pow<-2>(meter))
+              ;
+            },
+            (zero_lambda / nanometer).value(),
+            // 0.1 because lambda << lambda_0
+            ((zero_lambda + lambda_0(z)(i, j)) * 0.1 / nanometer).value()
+          )
+          * watt * pow<-2>(meter) * nanometer
         ;
 
         R(z)(j, i) =
-          + (
-            + 1.0 / (4.0 * h * pow<2>(c))
-            * pow<5>(lambda_0(z)(i, j))
-            * F_lambda(lambda_0(z)(j, i))
-            + 1.0 / 2.0
+          // Resonant broadening
+          + 1.0
+          / (
+            + 8.0
+            * pow<static_rational<1, 2>>(2)
+            * pow<static_rational<3, 2>>(pi<double>())
+            * h * c * pow<static_rational<1, 2>>(k_B)
           )
+          * pow<static_rational<-1, 2>>(T)
+          * pow<static_rational<1, 2>>(m_i)
+          * pow<3>(lambda_0(z)(i, j))
           * A(z)(j, i)
-          * g(z)(i) / g(z)(j)
+          * g(z)(j) / g(z)(i)
+          * boost::math::quadrature::trapezoidal(
+            [&](double lambda) {
+              auto lambda_ = lambda * nanometer;
+              return
+                + lambda_
+                * F_lambda(lambda_)
+                * std::exp(
+                  - pow<2>(c) / (2.0 * k_B) * pow<-1>(T) * m_i
+                  * pow<2>(lambda_0(z)(j, i) - lambda_) / pow<2>(lambda_)
+                )
+                / (watt * pow<-2>(meter))
+              ;
+            },
+            (zero_lambda / nanometer).value(),
+            (lambda_0(z)(j, i) / nanometer).value()
+          )
+          * watt * pow<-2>(meter) * nanometer
+          + c
+          / (
+            + 4.0
+            * pow<static_rational<1, 2>>(2)
+            * pow<static_rational<3, 2>>(pi<double>())
+            * pow<static_rational<1, 2>>(k_B)
+          )
+          * pow<static_rational<-1, 2>>(T)
+          * pow<static_rational<1, 2>>(m_i)
+          * pow<3>(lambda_0(z)(j, i))
+          * A(z)(j, i)
+          * g(z)(j) / g(z)(i)
+          * boost::math::quadrature::trapezoidal(
+            [&](double lambda) {
+              auto lambda_ = lambda * nanometer;
+              return
+                + 1.0 / pow<4>(lambda_)
+                * std::exp(
+                  - pow<2>(c) / (2.0 * k_B) * pow<-1>(T) * m_i
+                  * pow<2>(lambda_0(z)(j, i) - lambda_) / pow<2>(lambda_)
+                )
+                / pow<-4>(nanometer)
+              ;
+            },
+            (zero_lambda / nanometer).value(),
+            (lambda_0(z)(j, i) / nanometer).value()
+          )
+          * pow<-3>(nanometer)
+          // Natural broadening
+          // + 3.0
+          // / (32.0 * pow<2>(pi<double>()) * pow<2>(h) * c * alpha)
+          // * m_i
+          // * pow<4>(lambda_0(z)(j, i))
+          // * A(z)(j, i)
+          // * g(z)(j) / g(z)(i)
+          // * boost::math::quadrature::trapezoidal(
+          //   [&](double lambda) {
+          //     auto lambda_ = lambda * nanometer;
+          //     return
+          //       + F_lambda(lambda_0(z)(j, i))
+          //       * pow<3>(lambda_)
+          //       / pow<2>(lambda_0(z)(j, i) - lambda_)
+          //       / (watt * pow<-2>(meter))
+          //     ;
+          //   },
+          //   (zero_lambda / nanometer).value(),
+          //   // 0.1 because lambda << lambda_0
+          //   ((zero_lambda + lambda_0(z)(j, i)) * 0.1 / nanometer).value()
+          // )
+          // * watt * pow<-2>(meter) * nanometer
+          // + 3.0 * c
+          // / (16.0 * pow<2>(pi<double>()) * h * alpha)
+          // * m_i
+          // * pow<4>(lambda_0(z)(j, i))
+          // * A(z)(j, i)
+          // * g(z)(j) / g(z)(i)
+          // * boost::math::quadrature::trapezoidal(
+          //   [&](double lambda) {
+          //     auto lambda_ = lambda * nanometer;
+          //     return
+          //       + 1.0
+          //       / (pow<2>(lambda_) * pow<2>(lambda_0(z)(j, i) - lambda_))
+          //       / (pow<-4>(nanometer))
+          //     ;
+          //   },
+          //   (zero_lambda / nanometer).value(),
+          //   // 0.1 because lambda << lambda_0
+          //   ((zero_lambda + lambda_0(z)(j, i)) * 0.1 / nanometer).value()
+          // )
+          // * (pow<-3>(nanometer))
         ;
       });
     });
