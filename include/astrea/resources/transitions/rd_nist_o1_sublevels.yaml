@@ -1,7 +1,7 @@
 #if 0
 # Spontaneous emission transitions data by NIST.
 #
-# transitions.rate in s^{-1}
+# transitions.rate in s-1
 # transitions.initial_total_angular_momentum_quantum_number in 1
 # transitions.final_total_angular_momentum_quantum_number in 1
 #endif

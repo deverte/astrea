@@ -30,19 +30,19 @@ struct RBBMashonkinaVoigtO1Transition {
    */
   const std::string final;
   /**
-   * Oscillator strength in \f$1\f$.
+   * Oscillator strength in 1.
    */
   const double oscillator_strength;
   /**
-   * Van-der-Waals constant in \f$1\f$.
+   * Van-der-Waals constant in 1.
    */
   const double van_der_waals_constant;
   /**
-   * Quadratic Stark constant in \f$1\f$.
+   * Quadratic Stark constant in 1.
    */
   const double quadratic_stark_constant;
   /**
-   * Radiative dumping constant in \f$1\f$.
+   * Radiative dumping constant in 1.
    */
   const double radiative_damping_constant;
 };

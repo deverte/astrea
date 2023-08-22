@@ -1,5 +1,5 @@
 /**
- * \file astrea/physics/constants.h
+ * \file astrea/units/units.h
  * Physical (and some mathematical) constants.
  * 
  * \copyright GPL

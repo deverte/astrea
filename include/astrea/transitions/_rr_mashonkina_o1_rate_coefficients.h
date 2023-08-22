@@ -30,8 +30,7 @@ namespace astrea {
 
 
 /**
- * Radiative recombination recombination transitions rate coefficients using
- * Mashonkina data (from private communication).
+ * Radiative recombination transitions rate coefficients using Mashonkina data.
  * 
  * \param elements Elements.
  * \param spectrum Spectrum.
@@ -137,7 +136,6 @@ inline Eigen::MatrixXd rr_mashonkina_o1_rate_coefficients(
   };
 
   Eigen::MatrixXd R_v = Eigen::MatrixXd::Zero(K(Z), K(Z));
-  const auto R_u = pow<-1>(second);
   const auto R = [&](int z) {
     return [&](int i, int j) -> double& { return R_v(i + K(z), j + K(z)); };
   };
@@ -167,7 +165,6 @@ inline Eigen::MatrixXd rr_mashonkina_o1_rate_coefficients(
   );
 
   Eigen::Vector<quantity<volume>, Eigen::Dynamic> Phi_v(K(Z));
-  const auto Phi_u = pow<3>(centimeter);
   const auto Phi = [&](int z) {
     return [&](int i) -> quantity<volume>& {
       return Phi_v(i + K(z));
@@ -184,7 +181,6 @@ inline Eigen::MatrixXd rr_mashonkina_o1_rate_coefficients(
   });
 
   Eigen::MatrixXd alpha_RR_v = Eigen::MatrixXd::Zero(K(Z), K(Z));
-  const auto alpha_RR_u = pow<3>(centimeter) * pow<-1>(second);
   const auto alpha_RR = [&](int z) {
     return [&](int i, int j) -> double& {
       return alpha_RR_v(i + K(z), j + K(z));
@@ -192,10 +188,7 @@ inline Eigen::MatrixXd rr_mashonkina_o1_rate_coefficients(
   };
   fm::family(0, Z - 2, [&](int z) {
     fm::family(0, k(z) - 1, [&](int i) {
-      alpha_RR(z)(k(z), i) =
-        + Phi(z)(i) * (R(z)(k(z), i) * R_u)
-        / alpha_RR_u
-      ;
+      alpha_RR(z)(k(z), i) = Phi(z)(i) * R(z)(k(z), i);
     });
   });
 

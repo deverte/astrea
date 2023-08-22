@@ -2,8 +2,8 @@
 # Radiative bound-free ion transitions data for electrically neutral oxygen by
 # Mashonkina (private communication).
 #
-# frequencies in s^{-1}
-# rbf_cross_sections in cm^2
+# frequencies in s-1
+# rbf_cross_sections in cm2
 #endif
 {
   transitions: {

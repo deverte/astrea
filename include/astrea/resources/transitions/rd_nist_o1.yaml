@@ -1,0 +1,554 @@
+#if 0
+# Spontaneous emission full transitions data by NIST.
+#
+# transitions.rate in s-1
+#endif
+{
+  transitions: {
+    {
+      initial: "12P1D4",
+      final: "12P3P4",
+      rate: 0.00149507,
+    },
+    {
+      initial: "12P1S4",
+      final: "12P3P4",
+      rate: 0.037821,
+    },
+    {
+      initial: "13S5S",
+      final: "12P3P4",
+      rate: 2780.0,
+    },
+    {
+      initial: "13S3S",
+      final: "12P3P4",
+      rate: 203866666.66666666,
+    },
+    {
+      initial: "13P5P",
+      final: "13S5S",
+      rate: 36900000.0,
+    },
+    {
+      initial: "13P5P",
+      final: "13S3S",
+      rate: 299.5,
+    },
+    {
+      initial: "13P3P",
+      final: "13S5S",
+      rate: 979.0,
+    },
+    {
+      initial: "13P3P",
+      final: "13S3S",
+      rate: 32200000.0,
+    },
+    {
+      initial: "14S5S",
+      final: "13P5P",
+      rate: 8913333.333333334,
+    },
+    {
+      initial: "14S3S",
+      final: "12P3P4",
+      rate: 56500000.0,
+    },
+    {
+      initial: "14S3S",
+      final: "13P3P",
+      rate: 7140000.0,
+    },
+    {
+      initial: "13D5D",
+      final: "13P5P",
+      rate: 24732222.222222224,
+    },
+    {
+      initial: "13D5D",
+      final: "13P3P",
+      rate: 826.4,
+    },
+    {
+      initial: "13D3D",
+      final: "12P3P4",
+      rate: 32171923.076923076,
+    },
+    {
+      initial: "13D3D",
+      final: "13P3P",
+      rate: 6339705.333333333,
+    },
+    {
+      initial: "14P5P",
+      final: "13S5S",
+      rate: 489200.0,
+    },
+    {
+      initial: "14P5P",
+      final: "14S5S",
+      rate: 4294666.666666667,
+    },
+    {
+      initial: "14P5P",
+      final: "14S3S",
+      rate: 56.45,
+    },
+    {
+      initial: "14P5P",
+      final: "13D5D",
+      rate: 165688.88888888888,
+    },
+    {
+      initial: "14P3P",
+      final: "13S3S",
+      rate: 758333.3333333334,
+    },
+    {
+      initial: "14P3P",
+      final: "14S3S",
+      rate: 4100000.0,
+    },
+    {
+      initial: "14P3P",
+      final: "13D3D",
+      rate: 403195.45454545453,
+    },
+    {
+      initial: "13S3DP",
+      final: "12P3P4",
+      rate: 130346538.46153846,
+    },
+    {
+      initial: "13S3DP",
+      final: "12P1D4",
+      rate: 13801.333333333334,
+    },
+    {
+      initial: "13S3DP",
+      final: "13P3P",
+      rate: 32388.46153846154,
+    },
+    {
+      initial: "15S5S",
+      final: "13P5P",
+      rate: 2750000.0,
+    },
+    {
+      initial: "15S5S",
+      final: "14P5P",
+      rate: 1836666.6666666667,
+    },
+    {
+      initial: "15S3S",
+      final: "12P3P4",
+      rate: 23086666.666666668,
+    },
+    {
+      initial: "15S3S",
+      final: "13P3P",
+      rate: 2238333.3333333335,
+    },
+    {
+      initial: "15S3S",
+      final: "14P3P",
+      rate: 1608333.3333333333,
+    },
+    {
+      initial: "14D5D",
+      final: "13P5P",
+      rate: 4234777.777777778,
+    },
+    {
+      initial: "14D5D",
+      final: "14P5P",
+      rate: 3581222.222222222,
+    },
+    {
+      initial: "14D5D",
+      final: "14P3P",
+      rate: 279.58000000000004,
+    },
+    {
+      initial: "14D3D",
+      final: "12P3P4",
+      rate: 18632884.615384616,
+    },
+    {
+      initial: "14D3D",
+      final: "13P3P",
+      rate: 840383.3333333334,
+    },
+    {
+      initial: "14D3D",
+      final: "14P5P",
+      rate: 532.5416666666666,
+    },
+    {
+      initial: "14D3D",
+      final: "14P3P",
+      rate: 1166782.0895522388,
+    },
+    {
+      initial: "14F5F",
+      final: "13D5D",
+      rate: 6986986.486486486,
+    },
+    {
+      initial: "14F5F",
+      final: "14D5D",
+      rate: 113.41905405405406,
+    },
+    {
+      initial: "14F3F",
+      final: "13D3D",
+      rate: 8139578.947368421,
+    },
+    {
+      initial: "14F3F",
+      final: "13S3DP",
+      rate: 8633.381578947368,
+    },
+    {
+      initial: "14F3F",
+      final: "14D3D",
+      rate: 25.86026315789474,
+    },
+    {
+      initial: "15P5P",
+      final: "14S5S",
+      rate: 235000.0,
+    },
+    {
+      initial: "15P5P",
+      final: "13D5D",
+      rate: 13461.555555555555,
+    },
+    {
+      initial: "15P5P",
+      final: "14D5D",
+      rate: 67262.0,
+    },
+    {
+      initial: "15P3P",
+      final: "13S3S",
+      rate: 93000.0,
+    },
+    {
+      initial: "15P3P",
+      final: "14S3S",
+      rate: 286000.0,
+    },
+    {
+      initial: "15P3P",
+      final: "13D3D",
+      rate: 74875.0,
+    },
+    {
+      initial: "15P3P",
+      final: "13S3DP",
+      rate: 13648.235294117647,
+    },
+    {
+      initial: "15P3P",
+      final: "14D3D",
+      rate: 191688.23529411765,
+    },
+    {
+      initial: "16S5S",
+      final: "13P5P",
+      rate: 1288000.0,
+    },
+    {
+      initial: "16S5S",
+      final: "14P5P",
+      rate: 664333.3333333334,
+    },
+    {
+      initial: "16S3S",
+      final: "12P3P4",
+      rate: 11616666.666666666,
+    },
+    {
+      initial: "16S3S",
+      final: "13P3P",
+      rate: 1050000.0,
+    },
+    {
+      initial: "16S3S",
+      final: "14P3P",
+      rate: 568000.0,
+    },
+    {
+      initial: "15D5D",
+      final: "13P5P",
+      rate: 1505444.4444444445,
+    },
+    {
+      initial: "15D5D",
+      final: "14P5P",
+      rate: 1073266.6666666667,
+    },
+    {
+      initial: "15D5D",
+      final: "14F5F",
+      rate: 22998.557142857142,
+    },
+    {
+      initial: "15D3D",
+      final: "12P3P4",
+      rate: 16170769.23076923,
+    },
+    {
+      initial: "15D3D",
+      final: "13P3P",
+      rate: 523023.07692307694,
+    },
+    {
+      initial: "15D3D",
+      final: "14P3P",
+      rate: 680861.5384615385,
+    },
+    {
+      initial: "15F5F",
+      final: "13D5D",
+      rate: 2348139.189189189,
+    },
+    {
+      initial: "15F5F",
+      final: "14D5D",
+      rate: 1268487.8378378379,
+    },
+    {
+      initial: "15F3F",
+      final: "13D3D",
+      rate: 2663552.6315789474,
+    },
+    {
+      initial: "15F3F",
+      final: "13S3DP",
+      rate: 24017.105263157893,
+    },
+    {
+      initial: "15F3F",
+      final: "14D3D",
+      rate: 1504631.5789473683,
+    },
+    {
+      initial: "16P5P",
+      final: "14S5S",
+      rate: 45400.0,
+    },
+    {
+      initial: "16P5P",
+      final: "13D5D",
+      rate: 6953.888888888889,
+    },
+    {
+      initial: "16P5P",
+      final: "14D5D",
+      rate: 4502.266666666666,
+    },
+    {
+      initial: "16P3P",
+      final: "13D3D",
+      rate: 34843.63636363636,
+    },
+    {
+      initial: "16P3P",
+      final: "14D3D",
+      rate: 35735.294117647056,
+    },
+    {
+      initial: "17S5S",
+      final: "13P5P",
+      rate: 713000.0,
+    },
+    {
+      initial: "17S5S",
+      final: "14P5P",
+      rate: 346000.0,
+    },
+    {
+      initial: "17S3S",
+      final: "12P3P4",
+      rate: 6646666.666666667,
+    },
+    {
+      initial: "17S3S",
+      final: "13P3P",
+      rate: 582666.6666666666,
+    },
+    {
+      initial: "17S3S",
+      final: "14P3P",
+      rate: 295866.6666666667,
+    },
+    {
+      initial: "16D5D",
+      final: "13P5P",
+      rate: 704144.4444444445,
+    },
+    {
+      initial: "16D5D",
+      final: "14P5P",
+      rate: 480633.3333333333,
+    },
+    {
+      initial: "16D5D",
+      final: "14F5F",
+      rate: 10033.714285714286,
+    },
+    {
+      initial: "16D3D",
+      final: "12P3P4",
+      rate: 9555884.615384616,
+    },
+    {
+      initial: "16D3D",
+      final: "13P3P",
+      rate: 206628.84615384616,
+    },
+    {
+      initial: "16D3D",
+      final: "14P3P",
+      rate: 268257.6923076923,
+    },
+    {
+      initial: "16F5F",
+      final: "13D5D",
+      rate: 1122700.0,
+    },
+    {
+      initial: "16F5F",
+      final: "14D5D",
+      rate: 646902.7027027027,
+    },
+    {
+      initial: "16F3F",
+      final: "13D3D",
+      rate: 1258236.8421052631,
+    },
+    {
+      initial: "16F3F",
+      final: "13S3DP",
+      rate: 13853.28947368421,
+    },
+    {
+      initial: "16F3F",
+      final: "14D3D",
+      rate: 739669.7368421053,
+    },
+    {
+      initial: "18S5S",
+      final: "13P5P",
+      rate: 436666.6666666667,
+    },
+    {
+      initial: "18S5S",
+      final: "14P5P",
+      rate: 206333.33333333334,
+    },
+    {
+      initial: "18S3S",
+      final: "12P3P4",
+      rate: 4130000.0,
+    },
+    {
+      initial: "18S3S",
+      final: "13P3P",
+      rate: 357666.6666666667,
+    },
+    {
+      initial: "18S3S",
+      final: "14P3P",
+      rate: 176966.66666666666,
+    },
+    {
+      initial: "17D5D",
+      final: "13P5P",
+      rate: 388844.44444444444,
+    },
+    {
+      initial: "17D5D",
+      final: "14P5P",
+      rate: 261211.11111111112,
+    },
+    {
+      initial: "17D5D",
+      final: "14F5F",
+      rate: 5357.8,
+    },
+    {
+      initial: "17D3D",
+      final: "12P3P4",
+      rate: 6116846.153846154,
+    },
+    {
+      initial: "17D3D",
+      final: "13P3P",
+      rate: 101548.84615384616,
+    },
+    {
+      initial: "17D3D",
+      final: "14P3P",
+      rate: 135096.15384615384,
+    },
+    {
+      initial: "17F5F",
+      final: "13D5D",
+      rate: 634897.2972972973,
+    },
+    {
+      initial: "17F5F",
+      final: "14D5D",
+      rate: 372622.97297297296,
+    },
+    {
+      initial: "17F3F",
+      final: "13D3D",
+      rate: 708661.8421052631,
+    },
+    {
+      initial: "17F3F",
+      final: "13S3DP",
+      rate: 8535.552631578947,
+    },
+    {
+      initial: "17F3F",
+      final: "14D3D",
+      rate: 419989.4736842105,
+    },
+    {
+      initial: "18D5D",
+      final: "13P5P",
+      rate: 239033.33333333334,
+    },
+    {
+      initial: "18D5D",
+      final: "14P5P",
+      rate: 159246.66666666666,
+    },
+    {
+      initial: "18D5D",
+      final: "14F5F",
+      rate: 3223.0342857142855,
+    },
+    {
+      initial: "18D3D",
+      final: "12P3P4",
+      rate: 4158192.3076923075,
+    },
+    {
+      initial: "18D3D",
+      final: "13P3P",
+      rate: 57554.230769230766,
+    },
+    {
+      initial: "18D3D",
+      final: "14P3P",
+      rate: 78404.23076923077,
+    },
+  },
+}

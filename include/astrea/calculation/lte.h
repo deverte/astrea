@@ -33,11 +33,11 @@ namespace astrea {
  * population is set manually.
  * 
  * \param elements Elements.
- * \param elements_population Elements population in \f$1\f$.
- * \param temperature Temperature in \f$K\f$.
+ * \param elements_population Elements population in 1.
+ * \param temperature Temperature in K.
  * \exception length_error \p elements and \p elements_population must have the
  * same size.
- * \return Electrons population in \f$1\f$.
+ * \return Electrons population in 1.
  */
 inline Eigen::VectorXd lte_boltzmann_population(
   const std::vector<std::shared_ptr<Element>> elements,
@@ -121,10 +121,10 @@ inline Eigen::VectorXd lte_boltzmann_population(
  * and Saha ionization equation.
  * 
  * \param elements Elements.
- * \param temperature Temperature in \f$K\f$.
- * \param electron_temperature Electron temperature in \f$K\f$.
- * \param electron_number_density Electron number density in \f$cm^{-3}\f$.
- * \return Electrons population in \f$1\f$.
+ * \param temperature Temperature in K.
+ * \param electron_temperature Electron temperature in K.
+ * \param electron_number_density Electron number density in cm-3.
+ * \return Electrons population in 1.
  */
 inline Eigen::VectorXd lte_boltzmann_saha_population(
   const std::vector<std::shared_ptr<Element>> elements,

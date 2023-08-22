@@ -89,7 +89,9 @@
         "slist": "cpp",
         "latch": "cpp",
         "syncstream": "cpp",
-        "scoped_allocator": "cpp"
+        "scoped_allocator": "cpp",
+        "format": "cpp",
+        "stdfloat": "cpp"
     },
     "mesonbuild.configureOnOpen": false,
     "svg.preview.background": "white"

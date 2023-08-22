@@ -40,36 +40,36 @@ class SunGueymard : public Spectrum {
   /**
    * Distance to radiation source.
    * 
-   * \return Distance in \f$au\f$.
+   * \return Distance in au.
    */
   double distance() const override;
 
   /**
    * Distance to radiation source.
    * 
-   * \param distance Distance in \f$au\f$.
+   * \param distance Distance in au.
    */
   void distance(const double value) override;
 
   /**
    * Maximal wavelength of the spectrum.
    * 
-   * \return Wavelength in \f$nm\f$.
+   * \return Wavelength in nm.
    */
   double max_wavelength() const override;
 
   /**
    * Minimal wavelength of the spectrum.
    * 
-   * \return Wavelength in \f$nm\f$.
+   * \return Wavelength in nm.
    */
   double min_wavelength() const override;
 
   /**
    * Spectral irradiance.
    * 
-   * \param wavelength Wavelength in \f$nm\f$.
-   * \return Spectral irradiance in \f$W \cdot m^{-2} \cdot nm^{-1}\f$.
+   * \param wavelength Wavelength in nm.
+   * \return Spectral irradiance in W m-2 nm-1.
    */
   double spectral_irradiance(const double wavelength) const override;
 

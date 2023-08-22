@@ -52,11 +52,11 @@ struct IRBFMashonkinaO1 {
    */
   const std::vector<IRBFMashonkinaO1Transition> transitions;
   /**
-   * Frequencies in \f$s^{-1}\f$.
+   * Frequencies in s-1.
    */
   const std::vector<double> frequencies;
   /**
-   * Radiative bound-free cross sections in \f$cm^2\f$.
+   * Radiative bound-free cross sections in cm2.
    */
   const std::vector<double> rbf_cross_sections;
 };
@@ -79,14 +79,14 @@ class RBFMashonkinaO1 {
   /**
    * Maximum frequency.
    * 
-   * \return Frequency in \f$s^{-1}\f$.
+   * \return Frequency in s-1.
    */
   double max_frequency() const;
 
   /**
    * Minumum frequency.
    * 
-   * \return Frequency in \f$s^{-1}\f$.
+   * \return Frequency in s-1.
    */
   double min_frequency() const;
 
@@ -94,8 +94,8 @@ class RBFMashonkinaO1 {
    * Radiative bound-free cross-section.
    * 
    * \param initial Initial term.
-   * \param frequency Frequency in \f$s^{-1}\f$.
-   * \return Radiative bound-free cross-section in \f$cm^2\f$.
+   * \param frequency Frequency in s-1.
+   * \return Radiative bound-free cross-section in cm2.
    */
   double
   rbf_cross_section(const std::string initial, const double frequency) const;
@@ -106,8 +106,8 @@ class RBFMashonkinaO1 {
   ;
 
   /**
-   * Radiative bound-free cross section functions of frequency in \f$s^{-1}\f$,
-   * returns result in \f$cm^2\f$.
+   * Radiative bound-free cross section functions of frequency in s-1,
+   * returns result in cm2.
    */
   std::vector<ni::LinearInterpolant> rbf_cross_sections_;
 };

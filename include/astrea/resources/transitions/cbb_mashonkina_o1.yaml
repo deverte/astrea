@@ -2,7 +2,7 @@
 # Collisional bound-bound transitions data for electrically neutral oxygen by
 # Mashonkina (private communication).
 #
-# transitions.collision_rate_coefficients in cm^3 * s^{-1}
+# transitions.collision_rate_coefficients in cm3 s-1
 # transitions.temperatures in K
 #endif
 {

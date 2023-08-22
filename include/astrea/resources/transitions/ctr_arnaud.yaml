@@ -7,7 +7,7 @@
 # fit.atomic_number in 1
 # fit.ionization_stage in 1
 # fit.temperatures_range in K
-# fit.a in 1.0e-9 * cm^3 * s^{-1}
+# fit.a in 1.0e-9 cm3 s-1
 # fit.b in 1
 # fit.c in 1
 # fit.d in 1

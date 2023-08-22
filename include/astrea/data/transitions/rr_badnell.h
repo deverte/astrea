@@ -21,35 +21,35 @@ namespace astrea {
  */
 struct IRRBadnellFit {
   /**
-   * Nuclear charge in \f$1\f$.
+   * Nuclear charge in 1.
    */
   const double Z;
   /**
-   * Number of ion electrons before recombination in \f$1\f$.
+   * Number of ion electrons before recombination in 1.
    */
   const double N;
   /**
-   * Total RR rate coefficient "A" in \f$cm^3 \cdot s^{-1}\f$.
+   * Total RR rate coefficient "A" in cm3 s-1.
    */
   const double A;
   /**
-   * Total RR rate coefficient "B" in \f$1\f$.
+   * Total RR rate coefficient "B" in 1.
    */
   const double B;
   /**
-   * Total RR rate coefficient "T_0_" in \f$K\f$.
+   * Total RR rate coefficient "T_0_" in K.
    */
   const double T0;
   /**
-   * Total RR rate coefficient "T_1_" in \f$K\f$.
+   * Total RR rate coefficient "T_1_" in K.
    */
   const double T1;
   /**
-   * Total RR rate coefficient "C" in \f$1\f$.
+   * Total RR rate coefficient "C" in 1.
    */
   const double C = 0.0;
   /**
-   * Total RR rate coefficient "T_2_" in \f$K\f$.
+   * Total RR rate coefficient "T_2_" in K.
    */
   const double T2 = 0.0;
 };

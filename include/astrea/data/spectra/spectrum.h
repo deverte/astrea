@@ -19,15 +19,15 @@ namespace astrea {
  */
 struct ISpectrum {
   /**
-   * Distance in \f$au\f$.
+   * Distance in au.
    */
   double distance;
   /**
-   * Spectral irradiance in \f$W \cdot m^{-2} \cdot nm^{-1}\f$.
+   * Spectral irradiance in W m-2 nm-1.
    */
   std::vector<double> spectral_irradiance;
   /**
-   * Wavelengths in \f$nm\f$.
+   * Wavelengths in nm.
    */
   std::vector<double> wavelengths;
 };
@@ -41,36 +41,36 @@ class Spectrum {
   /**
    * Distance to radiation source.
    * 
-   * \return Distance in \f$au\f$.
+   * \return Distance in au.
    */
   virtual double distance() const = 0;
 
   /**
    * Distance to radiation source.
    * 
-   * \param distance Distance in \f$au\f$.
+   * \param distance Distance in au.
    */
   virtual void distance(const double value) = 0;
 
   /**
    * Maximal wavelength of the spectrum.
    * 
-   * \return Wavelength in \f$nm\f$.
+   * \return Wavelength in nm.
    */
   virtual double max_wavelength() const = 0;
 
   /**
    * Minimal wavelength of the spectrum.
    * 
-   * \return Wavelength in \f$nm\f$.
+   * \return Wavelength in nm.
    */
   virtual double min_wavelength() const = 0;
 
   /**
    * Spectral irradiance.
    * 
-   * \param wavelength Wavelength in \f$nm\f$.
-   * \return Spectral irradiance in \f$W \cdot m^{-2} \cdot nm^{-1}\f$.
+   * \param wavelength Wavelength in nm.
+   * \return Spectral irradiance in W m-2 nm-1.
    */
   virtual double spectral_irradiance(const double wavelength) const = 0;
 };

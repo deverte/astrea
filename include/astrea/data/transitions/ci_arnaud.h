@@ -21,39 +21,39 @@ namespace astrea {
  */
 struct ICIArnaudFit {
   /**
-   * Atomic number in \f$1\f$.
+   * Atomic number in 1.
    */
   const double Z;
   /**
-   * Number of electrons in \f$1\f$.
+   * Number of electrons in 1.
    */
   const double N;
   /**
-   * Shell principal quantum number in \f$1\f$.
+   * Shell principal quantum number in 1.
    */
   const double n;
   /**
-   * Shell orbital quantum number in \f$1\f$.
+   * Shell orbital quantum number in 1.
    */
   const double l;
   /**
-   * Ionization potential in \f$eV\f$.
+   * Ionization potential in eV.
    */
   const double E;
   /**
-   * Numerical approximation constant \f$A\f$ in \f$1\f$.
+   * Numerical approximation constant A in 1.
    */
   const double A;
   /**
-   * Numerical approximation constant \f$B\f$ in \f$1\f$.
+   * Numerical approximation constant B in 1.
    */
   const double B;
   /**
-   * Numerical approximation constant \f$C\f$ in \f$1\f$.
+   * Numerical approximation constant C in 1.
    */
   const double C;
   /**
-   * Numerical approximation constant \f$D\f$ in \f$1\f$.
+   * Numerical approximation constant D in 1.
    */
   const double D;
 };

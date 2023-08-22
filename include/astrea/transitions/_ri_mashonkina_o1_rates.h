@@ -1,7 +1,7 @@
 /**
  * \file astrea/transitions/pi_mashonkina_o1_rates.h
- * Photoionization transition for electrically neutral oxygen using Mashonkina
- * data.
+ * Radiative ionization (photoionization) transition for electrically neutral
+ * oxygen using Mashonkina data.
  * 
  * \copyright GPL
  * \author Artem Shepelin (4.shepelin@gmail.com)
@@ -31,15 +31,15 @@ namespace astrea {
 
 
 /**
- * Photoionization transition for electrically neutral oxygen using Mashonkina
- * data (from private communication).
+ * Radiative ionization (photoionization) transition for electrically neutral
+ * oxygen using Mashonkina data.
  * 
  * \param elements Elements.
  * \param spectrum Spectrum.
  * \param optical_depth Optical depth in \f$1\f$.
  * \return Transitions rates in \f$s^{-1}\f$.
  */
-inline Eigen::MatrixXd pi_mashonkina_o1_rates(
+inline Eigen::MatrixXd ri_mashonkina_o1_rates(
   const std::vector<std::shared_ptr<Element>> elements,
   const std::shared_ptr<Spectrum> spectrum,
   const double optical_depth
@@ -98,14 +98,13 @@ inline Eigen::MatrixXd pi_mashonkina_o1_rates(
   };
 
   Eigen::MatrixXd R_v = Eigen::MatrixXd::Zero(K(Z), K(Z));
-  const auto R_u = pow<-1>(second);
   const auto R = [&](int z) {
     return [&, z](int i, int j) -> double& { return R_v(i + K(z), j + K(z)); };
   };
   fm::family(0, Z - 2, [&](int z) {
     fm::family(0, k(z) - 1, [&](int i) {
       R(z)(i, k(z)) =
-        4.0 * pi<double>() * boost::math::quadrature::trapezoidal(
+        boost::math::quadrature::trapezoidal(
           [&, z, i](double nu) -> double {
             const auto nu_ = nu * pow<-1>(second);
             const auto lambda = c / nu_;

@@ -32,19 +32,19 @@ struct ILevel {
    */
   const std::string ground_state_term;
   /**
-   * Principal quantum number in \f$1\f$.
+   * Principal quantum number in 1.
    */
   const double principal_quantum_number;
   /**
-   * Statistical weight in \f$1\f$.
+   * Statistical weight in 1.
    */
   const double statistical_weight;
   /**
-   * Level energy in \f$eV\f$.
+   * Level energy in eV.
    */
   const double energy;
   /**
-   * Level ionization energy in \f$eV\f$.
+   * Level ionization energy in eV.
    */
   const double ionization_energy;
 };
@@ -55,15 +55,15 @@ struct ILevel {
  */
 struct IElement {
   /**
-   * Atomic number in \f$1\f$.
+   * Atomic number in 1.
    */
   double atomic_number;
   /**
-   * Mass in \f$u\f$ (\f$Da\f$).
+   * Mass in u (Da).
    */
   double mass;
   /**
-   * Ionization stage in \f$1\f$.
+   * Ionization stage in 1.
    */
   double ionization_stage;
   /**
@@ -97,14 +97,14 @@ class Element {
   /**
    * Atomic number.
    * 
-   * \return Atomic number in \f$1\f$.
+   * \return Atomic number in 1.
    */
   virtual const double atomic_number();
 
   /**
    * Ionization stage.
    * 
-   * \return Ionization stage in \f$1\f$.
+   * \return Ionization stage in 1.
    */
   virtual const double ionization_stage();
 
@@ -132,7 +132,7 @@ class Element {
   /**
    * Mass.
    * 
-   * \return Mass in \f$u\f$ (\f$Da\f$).
+   * \return Mass in u (Da).
    */
   virtual const double mass();
 

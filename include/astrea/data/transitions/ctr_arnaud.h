@@ -20,40 +20,39 @@ namespace astrea {
  */
 struct ICTRArnaudFit {
   /**
-   * Ionizing element atomic number in \f$1\f$.
+   * Ionizing element atomic number in 1.
    */
   const double ionizing_element_atomic_number;
   /**
-   * Ionizing element ionization stage in \f$1\f$.
+   * Ionizing element ionization stage in 1.
    */
   const double ionizing_element_ionization_stage;
   /**
-   * Atomic number in \f$1\f$.
+   * Atomic number in 1.
    */
   const double atomic_number;
   /**
-   * Ionization stage in \f$1\f$.
+   * Ionization stage in 1.
    */
   const double ionization_stage;
   /**
-   * Temperatures range in \f$K\f$.
+   * Temperatures range in K.
    */
   const std::vector<double> temperatures_range;
   /**
-   * Numeric approximation constant \f$a\f$ in
-   * \f$1.0e-9 \cdot cm^3 \cdot s^{-1}\f$.
+   * Numeric approximation constant a in 1.0e-9 cm3 s-1.
    */
   const double a;
   /**
-   * Numeric approximation constant \f$b\f$ in \f$1\f$.
+   * Numeric approximation constant b in 1.
    */
   const double b;
   /**
-   * Numeric approximation constant \f$c\f$ in \f$1\f$.
+   * Numeric approximation constant c in 1.
    */
   const double c;
   /**
-   * Numeric approximation constant \f$d\f$ in \f$1\f$.
+   * Numeric approximation constant d in 1.
    */
   const double d;
 };

@@ -35,14 +35,12 @@ namespace astrea {
  * data (from private communication).
  * 
  * \param elements Elements.
- * \param electron_temperature Electron temperature in \f$K\f$.
- * \param electron_number_density Electron number density in \f$cm^{-3}\f$.
- * \return Transitions rates in \f$s^{-1}\f$.
+ * \param temperature Temperature in \f$K\f$.
+ * \return Transitions rates in \f$s^{-1} \cdot cm^3\f$.
  */
 inline Eigen::MatrixXd ci_mashonkina_o1_rates(
   const std::vector<std::shared_ptr<Element>> elements,
-  const double electron_temperature,
-  const double electron_number_density
+  const double temperature
 ) {
   using astrea::units::si::centimeter;
   using boost::math::constants::pi;
@@ -66,22 +64,20 @@ inline Eigen::MatrixXd ci_mashonkina_o1_rates(
     return pow<static_rational<1, 2>>(2.0 * E / m_e);
   };
 
-  const auto N_e = electron_number_density * pow<-3>(centimeter);
-
   const auto v_0 = [&]() {
     const auto nu = rbf_mashonkina_o1.min_frequency() * pow<-1>(second);
     const auto E = h * nu;
     return pow<static_rational<1, 2>>(2.0 * E / m_e);
   };
 
-  const auto T_e = electron_temperature * kelvin;
+  const auto T = temperature * kelvin;
 
   const int Z = elements.size();
 
   Eigen::VectorXi k(Z);
-  fm::family(0, Z - 1, [&](int z) {
+  for (int z = 0; z < Z; z++) {
     k(z) = elements[z]->levels().size();
-  });
+  }
 
   const auto K = [&](int z) -> int {
     return fm::sum<int>(0, z - 1, [&](int z_) { return k(z_); });
@@ -90,35 +86,33 @@ inline Eigen::MatrixXd ci_mashonkina_o1_rates(
   const auto f = [&](quantity<velocity> v)
     -> quantity<decltype(pow<-1>(velocity()))> {
     return
-      + pow<static_rational<1, 2>>(m_e / (2.0 * pi<double>() * k_B * T_e))
-      * std::exp(-(m_e * pow<2>(v)) / (2.0 * k_B * T_e))
+      + pow<static_rational<1, 2>>(m_e / (2.0 * pi<double>() * k_B * T))
+      * std::exp(-(m_e * pow<2>(v)) / (2.0 * k_B * T))
     ;
   };
 
-  const auto sigma = [&](int z) {
+  const auto sigma = [&](int z) { // cm^2
     return [&, z](int i) {
-      return [&, z, i, rbf_mashonkina_o1](quantity<velocity> v) ->
-        quantity<area> {
+      return [&, z, i, rbf_mashonkina_o1](quantity<velocity> v) -> double {
         const auto E = m_e * pow<2>(v) / 2.0;
         const auto nu = E / h;
 
         return rbf_mashonkina_o1.rbf_cross_section(
           elements[z]->levels()[i].term,
           nu / pow<-1>(second)
-        ) * pow<2>(centimeter);
+        );
       };
     };
   };
 
-  Eigen::MatrixXd C_v = Eigen::MatrixXd::Zero(K(Z), K(Z));
-  const auto C_u = pow<-1>(second);
-  const auto C = [&](int z) {
-    return [&, z](int i, int j) -> double& { return C_v(i + K(z), j + K(z)); };
+  Eigen::MatrixXd q_v = Eigen::MatrixXd::Zero(K(Z), K(Z));
+  const auto q = [&](int z) {
+    return [&, z](int i, int j) -> double& { return q_v(i + K(z), j + K(z)); };
   };
-  fm::family(0, Z - 2, [&](int z) {
-    fm::family(0, k(z) - 1, [&, z](int i) {
-      C(z)(i, k(z)) =
-        N_e * boost::math::quadrature::trapezoidal(
+  for (int z = 0; z <  Z - 1; z++) {
+    for (int i = 0; i < k(z); i++) {
+      q(z)(i, k(z)) =
+        boost::math::quadrature::trapezoidal(
           [&, z, i](double v) -> double {
             const auto v_ = v * meter * pow<-1>(second);
 
@@ -126,17 +120,17 @@ inline Eigen::MatrixXd ci_mashonkina_o1_rates(
               + sigma(z)(i)(v_)
               * v_
               * f(v_)
-              / pow<2>(centimeter)
+              / (pow<2>(centimeter))
             ).value();
           },
           (v_0() / (meter * pow<-1>(second))).value(),
           (infty() / (meter * pow<-1>(second))).value()
-        ) * (pow<3>(centimeter) * pow<-1>(second)) / C_u
+        )
       ;
-    });
-  });
+    }
+  }
 
-  return C_v;
+  return q_v;
 }
 
 

@@ -33,11 +33,11 @@ struct ICBBMashonkinaO1Transition {
    */
   const std::string final;
   /**
-   * Collision rate coefficients in \f$cm^3 * s^{-1}\f$.
+   * Collision rate coefficients in cm3 s-1.
    */
   const std::vector<double> collision_rate_coefficients;
   /**
-   * Temperatures in \f$K\f$.
+   * Temperatures in K.
    */
   const std::vector<double> temperatures;
 };
@@ -72,8 +72,8 @@ class CBBMashonkinaO1 {
    * 
    * \param initial Initial term.
    * \param final Final term.
-   * \param temperature Temperature in \f$K\f$.
-   * \return Collisional rate coefficient in \f$cm^3 * s^{-1}\f$.
+   * \param temperature Temperature in K.
+   * \return Collisional rate coefficient in cm3 s-1.
    */
   double collision_rate_coefficient(
     const std::string initial,
@@ -87,8 +87,8 @@ class CBBMashonkinaO1 {
   ;
 
   /**
-   * Collision rate coefficient function of temperature in \f$K\f$, returns
-   * result in \f$cm^3 * s^{-1}\f$.
+   * Collision rate coefficient function of temperature in K, returns result in
+   * cm3 s-1.
    */
   std::vector<ni::LinearInterpolant> collision_rate_coefficients_;
 };

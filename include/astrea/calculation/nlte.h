@@ -25,8 +25,8 @@ namespace astrea {
 /**
  * Calculates NLTE transition operator.
  * 
- * \param rates_matrix Rates matrix in \f$s^{-1}\f$.
- * \return Transition operator in \f$1\f$.
+ * \param rates_matrix Rates matrix in s-1.
+ * \return Transition operator in 1.
  */
 inline Eigen::MatrixXd
 nlte_transition_operator(const Eigen::MatrixXd rates_matrix) {
@@ -75,10 +75,10 @@ nlte_transition_operator(const Eigen::MatrixXd rates_matrix) {
  * Previous electrons population is set manually. Current elements population
  * is calculated automatically.
  * 
- * \param electrons_population Previous electrons population in \f$1\f$.
- * \param delta_time Time step in \f$s\f$.
- * \param rates_matrix Rates matrix in \f$s^{-1}\f$.
- * \return Electrons population in \f$1\f$.
+ * \param electrons_population Previous electrons population in 1.
+ * \param delta_time Time step in s.
+ * \param rates_matrix Rates matrix in s-1.
+ * \return Electrons population in 1.
  */
 inline Eigen::VectorXd nlte_population_full(
   const Eigen::VectorXd electrons_population,
@@ -114,13 +114,13 @@ inline Eigen::VectorXd nlte_population_full(
  * is set manually.
  * 
  * \param elements Elements.
- * \param elements_population Elements population in \f$1\f$.
- * \param electrons_population Previous electrons population in \f$1\f$.
- * \param delta_time Time step in \f$s\f$.
- * \param rates_matrix Rates matrix in \f$s^{-1}\f$.
+ * \param elements_population Elements population in 1.
+ * \param electrons_population Previous electrons population in 1.
+ * \param delta_time Time step in s.
+ * \param rates_matrix Rates matrix in s-1.
  * \exception length_error \p elements and \p elements_population must have the
  * same size.
- * \return Electrons population in \f$1\f$.
+ * \return Electrons population in 1.
  */
 inline Eigen::VectorXd nlte_population_per_elements(
   const std::vector<std::shared_ptr<Element>> elements,
@@ -196,12 +196,12 @@ inline Eigen::VectorXd nlte_population_per_elements(
  * is set manually.
  * 
  * \param elements Elements.
- * \param elements_population Elements population in \f$1\f$.
- * \param electrons_population Previous electrons population in \f$1\f$.
- * \param rates_matrix Rates matrix in \f$s^{-1}\f$.
+ * \param elements_population Elements population in 1.
+ * \param electrons_population Previous electrons population in 1.
+ * \param rates_matrix Rates matrix in s-1.
  * \exception length_error \p elements and \p elements_population must have the
  * same size.
- * \return Electrons population in \f$1\f$.
+ * \return Electrons population in 1.
  */
 inline Eigen::VectorXd nlte_population_per_elements_explicit(
   const std::vector<std::shared_ptr<Element>> elements,

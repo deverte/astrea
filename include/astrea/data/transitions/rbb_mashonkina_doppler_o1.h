@@ -30,7 +30,7 @@ struct IRBBMashonkinaDopplerO1Transition {
    */
   const std::string final;
   /**
-   * Oscillator strength in \f$1\f$.
+   * Oscillator strength in 1.
    */
   const double oscillator_strength;
 };

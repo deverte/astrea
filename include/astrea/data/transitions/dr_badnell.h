@@ -20,29 +20,29 @@ namespace astrea {
  */
 struct IDRBadnellFit {
   /**
-   * Nuclear charge in \f$1\f$.
+   * Nuclear charge in 1.
    */
   const double Z;
   /**
-   * Isoelectronic sequence N in \f$1\f$ (where N=1,2 ... is the number of
+   * Isoelectronic sequence N in 1 (where N=1,2 ... is the number of
    * electrons of the initial target ion).
    */
   const double N;
   /**
-   * Initial metastable levels M in \f$1\f$ (where M=1 for the ground level
+   * Initial metastable levels M in 1 (where M=1 for the ground level
    * etc.) of the ground and metastable terms.
    */
   const double M;
   /**
-   * Numerical constant \f$W\f$ in \f$1\f$.
+   * Numerical constant W in 1.
    */
   const double W;
   /**
-   * Numerical constants \f$C\f$ in \f$1\f$.
+   * Numerical constants C in 1.
    */
   const std::vector<double> C;
   /**
-   * Numerical constants \f$E\f$ in \f$1\f$.
+   * Numerical constants E in 1.
    */
   const std::vector<double> E;
 };
