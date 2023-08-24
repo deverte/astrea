@@ -141,12 +141,9 @@ auto electrons_population_2 = astrea::nlte_population_per_elements(
 
 ##### Transitions
 
-Here will be used the following abbreviations: **CBB** - collisional
-bound-bound, **CI** - collisional ionization, **CTI** - charge transfer
-ionization, **CTR** - charge transfer recombination, **DR** - dielectronic
-recombination, **PI** - photoionization, **RBB** - radiative bound-bound,
-**RBF** - radiative bound-bound, **RR** - radiative recombination,
-**SE** - spontaneous emission, **TBR** - three-body recombination.
+Here will be used the following abbreviations: **CD** - collisional
+de-excitation, **CE** - collisional excitation, **RD** - radiative
+de-excitation, **RE** - radiative excitation (photoexcitation).
 
 Final rates matrix is a sum of per-process rate matrix:
 
@@ -168,18 +165,11 @@ auto rates_matrix = ci + tbr /* + ... */;
 
 The following transitions rates functions are available:
 
-- `astrea::cbb_mashonkina_o1_rates`
-- `astrea::cbb_regemorter_rates`
-- `astrea::ci_mashonkina_o1_seaton_rates`
-- `astrea::ci_mashonkina_o1_rates`
-- `astrea::pi_mashonkina_o1_rates`
-- `astrea::rbb_mashonkina_doppler_o1_rates`
-- `astrea::rbb_mashonkina_voigt_o1_rates`
-- `astrea::rbb_tasitsiomi_rates`
-- `astrea::rr_mashonkina_o1_rates`
-- `astrea::se_nist_o1_rates`
-- `astrea::tbr_mashonkina_o1_seaton_rates`
-- `astrea::tbr_mashonkina_o1_rates`
+- `astrea::cd_regemorter_rates`
+- `astrea::ce_regemorter_rates`
+- `astrea::rd_nist_o1_rates`
+- `astrea::re_lorentz_rates`
+- `astrea::re_tasitsiomi_rates`
 
 ### Elements
 
