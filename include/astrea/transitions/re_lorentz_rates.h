@@ -14,9 +14,6 @@
 #include <memory>
 #include <vector>
 
-#include <boost/units/systems/si.hpp>
-#include <boost/units/cmath.hpp>
-#include <boost/units/pow.hpp>
 #include <Eigen/Dense>
 
 #include "../data/elements/element.h"
@@ -24,7 +21,6 @@
 #include "../data/spectra/spectrum.h"
 #include "../data/spectra/spectrum_adapter.h"
 #include "../data/transitions/transitions_tensor.h"
-#include "../units/units.h"
 
 
 namespace astrea {
@@ -44,15 +40,13 @@ inline Eigen::MatrixXd re_lorentz_rates(
   const std::shared_ptr<Spectrum> spectrum,
   const Eigen::MatrixXd spontaneous_emission_rates
 ) {
-  using boost::units::pow;
+  const auto alpha = 6.681326651529935e-22; // nm-4 J-1 s m2
 
   const auto ea = ElementsAdapter(elements);
   const auto F = SpectrumAdapter(spectrum);
-  const auto A = TransitionsTensor(ea, spontaneous_emission_rates);
+  const auto A = TransitionsTensor(ea, spontaneous_emission_rates); // s-1
 
-  const auto alpha = 1.0643661630026106e-22; // nm-4 J-1 s m2
-
-  auto R = TransitionsTensor(ea);
+  auto R = TransitionsTensor(ea); // s-1
   for (int z = 0; z < ea.Z(); z++) {
     for (int i = 0; i < ea.k(z); i++) {
       for (int j = i + 1; j < ea.k(z); j++) {
@@ -60,7 +54,7 @@ inline Eigen::MatrixXd re_lorentz_rates(
           + alpha
           * A(z, j, i)
           * ea.g(z, j) / ea.g(z, i)
-          * pow<5>(ea.lambda_ij(z, i, j))
+          * std::pow(ea.lambda_ij(z, i, j), 5.0)
           * F.lambda(ea.lambda_ij(z, i, j))
         ;
       }

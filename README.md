@@ -42,11 +42,7 @@ git clone https://gitea.zarux.ru/astro/astrea
 
 Next, install the following dependencies:
 
-- [Boost](https://www.boost.org/) (or header-only versions
-  [Boost.Math](https://gitea.zarux.ru/astro/boost-math),
-  [Boost.Units](https://gitea.zarux.ru/astro/boost-units))
 - [Eigen](https://eigen.tuxfamily.org/index.php?title=Main_Page)
-- [fm](https://gitea.zarux.ru/astro/fm)
 - [ni](https://gitea.zarux.ru/astro/ni)
 
 ## Documentation
@@ -142,8 +138,10 @@ auto electrons_population_2 = astrea::nlte_population_per_elements(
 ##### Transitions
 
 Here will be used the following abbreviations: **CD** - collisional
-de-excitation, **CE** - collisional excitation, **RD** - radiative
-de-excitation, **RE** - radiative excitation (photoexcitation).
+de-excitation, **CE** - collisional excitation, **CI** - collisonal ionization,
+**CR** - collisional recombination, **RD** - radiative de-excitation, **RE** -
+radiative excitation (photoexcitation), **RI** - radiative ionization
+(photoionization), **RR** - radiative recombination.
 
 Final rates matrix is a sum of per-process rate matrix:
 
@@ -167,9 +165,13 @@ The following transitions rates functions are available:
 
 - `astrea::cd_regemorter_rates`
 - `astrea::ce_regemorter_rates`
+- `astrea::ci_mashonkina_o1_rate_coefficients`
+- `astrea::cr_mashonkina_o1_rate_coefficients`
+- `astrea::ce_regemorter_rates`
 - `astrea::rd_nist_o1_rates`
 - `astrea::re_lorentz_rates`
-- `astrea::re_tasitsiomi_rates`
+- `astrea::ri_mashonkina_o1_rates`
+- `astrea::rr_mashonkina_o1_rate_coefficients`
 
 ### Elements
 

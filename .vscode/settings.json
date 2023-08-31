@@ -91,7 +91,8 @@
         "syncstream": "cpp",
         "scoped_allocator": "cpp",
         "format": "cpp",
-        "stdfloat": "cpp"
+        "stdfloat": "cpp",
+        "*.yaml": "cpp"
     },
     "mesonbuild.configureOnOpen": false,
     "svg.preview.background": "white"

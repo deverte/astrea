@@ -14,13 +14,9 @@
 #include <memory>
 #include <vector>
 
-#include <boost/units/systems/si.hpp>
-#include <boost/units/systems/si/codata_constants.hpp>
-#include <boost/units/pow.hpp>
 #include <ni/ni.h>
 
 #include "./spectrum.h"
-#include "../../units/units.h"
 
 
 namespace astrea {
@@ -73,14 +69,10 @@ class Kelt9Fossati : public Spectrum {
   double spectral_irradiance(const double wavelength) const override;
 
  private:
-  boost::units::quantity<boost::units::si::length> distance_;
-
-  ni::LinearInterpolant interpolant_;
-
-  boost::units::quantity<boost::units::si::length> max_wavelength_;
-
-  boost::units::quantity<boost::units::si::length> min_wavelength_;
-
+  double distance_; // au
+  ni::LinearInterpolant interpolant_; // s-1 cm-2 A-1 au2
+  double max_wavelength_; // nm
+  double min_wavelength_; // nm
   const ISpectrum resource_ =
     #include "../../resources/spectra/kelt_9_fossati.yaml"
   ;
@@ -88,9 +80,9 @@ class Kelt9Fossati : public Spectrum {
 
 
 inline Kelt9Fossati::Kelt9Fossati() {
-  distance_ = resource_.distance * astrea::units::si::astronomical_unit;
+  distance_ = resource_.distance;
 
-  interpolant_.data_points(
+  interpolant_.data_points( // s-1 cm-2 A-1 au2
     resource_.wavelengths,
     resource_.spectral_irradiance
   );
@@ -99,65 +91,52 @@ inline Kelt9Fossati::Kelt9Fossati() {
     + *std::max_element(
         resource_.wavelengths.begin(),
         resource_.wavelengths.end()
-      )
-    * astrea::units::si::angstrom
+      ) // A
+    / 1.0e1 // nm
   ;
   min_wavelength_ =
     + *std::min_element(
         resource_.wavelengths.begin(),
         resource_.wavelengths.end()
-      )
-    * astrea::units::si::angstrom
+      ) // A
+    / 1.0e1 // nm
   ;
 }
 
 
 inline double Kelt9Fossati::distance() const {
-  return distance_ / astrea::units::si::astronomical_unit;
+  return distance_;
 }
 
 
 inline void Kelt9Fossati::distance(const double value) {
-  distance_ = value * astrea::units::si::astronomical_unit;
+  distance_ = value;
 }
 
 
 inline double Kelt9Fossati::max_wavelength() const {
-  return max_wavelength_ / astrea::units::si::nanometer;
+  return max_wavelength_;
 }
 
 
 inline double Kelt9Fossati::min_wavelength() const {
-  return min_wavelength_ / astrea::units::si::nanometer;
+  return min_wavelength_;
 }
 
 
 inline double Kelt9Fossati::spectral_irradiance(const double wavelength) const {
-  using astrea::units::si::angstrom;
-  using astrea::units::si::astronomical_unit;
-  using astrea::units::si::centimeter;
-  using astrea::units::si::erg;
-  using astrea::units::si::nanometer;
-  using boost::units::si::constants::codata::c;
-  using boost::units::si::constants::codata::h;
-  using boost::units::si::meter;
-  using boost::units::si::second;
-  using boost::units::si::watt;
-  using boost::units::pow;
+  const auto alpha_1 = 1.9864458571489286e-11; // m-2 A s W cm2
+  const auto alpha_2 = 1.0e1; // nm-1 A
 
-  const auto D = distance_;
-  const auto lambda = wavelength * nanometer;
-  const auto nu = c / lambda;
+  const auto& D = distance_; // au
+  const auto& lambda = wavelength; // nm
 
-  const auto E_e_lambda =
-    + (h * nu) * interpolant_((lambda / angstrom).value())
-    * pow<-1>(second) * pow<-2>(centimeter) * pow<-1>(angstrom)
-    * pow<2>(astronomical_unit)
-  ;
+  // W m-2 nm-1 au2
+  const auto E_e_lambda = alpha_1 / lambda * interpolant_(alpha_2 * lambda);
 
-  const auto E = E_e_lambda / pow<2>(D);
+  const auto E = E_e_lambda / std::pow(D, 2.0); // W m-2 nm-1
 
-  return E / (watt * pow<-2>(meter) * pow<-1>(nanometer));
+  return E; // W m-2 nm-1
 }
 
 

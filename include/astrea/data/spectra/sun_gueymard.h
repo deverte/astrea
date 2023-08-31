@@ -14,12 +14,9 @@
 #include <memory>
 #include <vector>
 
-#include <boost/units/systems/si.hpp>
-#include <boost/units/pow.hpp>
 #include <ni/ni.h>
 
 #include "./spectrum.h"
-#include "../../units/units.h"
 
 
 namespace astrea {
@@ -74,14 +71,10 @@ class SunGueymard : public Spectrum {
   double spectral_irradiance(const double wavelength) const override;
 
  private:
-  boost::units::quantity<boost::units::si::length> distance_;
-
+  double distance_; // au
   ni::LinearInterpolant interpolant_;
-
-  boost::units::quantity<boost::units::si::length> max_wavelength_;
-
-  boost::units::quantity<boost::units::si::length> min_wavelength_;
-
+  double max_wavelength_; // nm
+  double min_wavelength_; // nm
   const ISpectrum resource_ =
     #include "../../resources/spectra/sun_gueymard.yaml"
   ;
@@ -89,7 +82,7 @@ class SunGueymard : public Spectrum {
 
 
 inline SunGueymard::SunGueymard() {
-  distance_ = resource_.distance * astrea::units::si::astronomical_unit;
+  distance_ = resource_.distance; // au
 
   interpolant_.data_points(
     resource_.wavelengths,
@@ -97,63 +90,49 @@ inline SunGueymard::SunGueymard() {
   );
 
   max_wavelength_ =
-    + *std::max_element(
-        resource_.wavelengths.begin(),
-        resource_.wavelengths.end()
-      )
-    * astrea::units::si::nanometer
+    *std::max_element(
+      resource_.wavelengths.begin(),
+      resource_.wavelengths.end()
+    )
   ;
   min_wavelength_ =
-    + *std::min_element(
-        resource_.wavelengths.begin(),
-        resource_.wavelengths.end()
-      )
-    * astrea::units::si::nanometer
+    *std::min_element(
+      resource_.wavelengths.begin(),
+      resource_.wavelengths.end()
+    )
   ;
 }
 
 
 inline double SunGueymard::distance() const {
-  return distance_ / astrea::units::si::astronomical_unit;
+  return distance_;
 }
 
 
 inline void SunGueymard::distance(const double value) {
-  distance_ = value * astrea::units::si::astronomical_unit;;
+  distance_ = value;
 }
 
 
 inline double SunGueymard::max_wavelength() const {
-  return max_wavelength_ / astrea::units::si::nanometer;
+  return max_wavelength_;
 }
 
 
 inline double SunGueymard::min_wavelength() const {
-  return min_wavelength_ / astrea::units::si::nanometer;
+  return min_wavelength_;
 }
 
 
 inline double SunGueymard::spectral_irradiance(const double wavelength) const {
-  using astrea::units::si::astronomical_unit;
-  using astrea::units::si::nanometer;
-  using boost::units::si::meter;
-  using boost::units::si::watt;
-  using boost::units::pow;
+  const auto lambda = wavelength; // nm
 
-  const auto lambda = wavelength * nanometer;
+  const auto E_e_lambda = interpolant_(lambda); // W nm-2 m-1 au2
+  const auto D = distance_; // au
 
-  const auto E_e_lambda =
-    + interpolant_((lambda / nanometer).value())
-    * watt * pow<-2>(meter) * pow<-1>(nanometer) * pow<2>(astronomical_unit)
-    * pow<2>(astronomical_unit)
-  ;
-  const auto D = distance_;
+  const auto E = E_e_lambda / std::pow(D, 2.0); // W nm-2 m-1
 
-  const auto E = E_e_lambda / pow<2>(D);
-
-  return
-    E / (watt * pow<-2>(meter) * pow<-1>(nanometer) * pow<2>(astronomical_unit))
-  ;
+  return E;
 }
 
 

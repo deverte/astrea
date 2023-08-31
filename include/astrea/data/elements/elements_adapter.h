@@ -68,11 +68,25 @@ class ElementsAdapter {
   virtual const double E(int z, int i) const;
 
   /**
+   * Ionization energy in eV.
+   * 
+   * \return Energy in eV.
+   */
+  virtual const double I(int z, int i) const;
+
+  /**
    * Statistical weight.
    * 
    * \return Statistical weight.
    */
   virtual const double g(int z, int i) const;
+
+  /**
+   * Term.
+   * 
+   * \return Term.
+   */
+  virtual const std::string term(int z, int i) const;
 
   /**
    * Absolute energy difference in eV.
@@ -101,7 +115,9 @@ class ElementsAdapter {
   Eigen::VectorXi K_;
   Eigen::VectorXd m_i_;
   Eigen::VectorXd E_;
+  Eigen::VectorXd I_;
   Eigen::VectorXd g_;
+  std::vector<std::string> terms_;
 };
 
 
@@ -138,10 +154,24 @@ inline ElementsAdapter::ElementsAdapter(
     }
   }
 
+  I_.resize(K_(Z_));
+  for (int z = 0; z < Z_; z++) {
+    for (int i = 0; i < k_(z); i++) {
+      I_(i + K_(z)) = elements[z]->levels()[i].ionization_energy;
+    }
+  }
+
   g_.resize(K_(Z_));
   for (int z = 0; z < Z_; z++) {
     for (int i = 0; i < k_(z); i++) {
       g_(i + K_(z)) = elements[z]->levels()[i].statistical_weight;
+    }
+  }
+
+  terms_.resize(K_(Z_));
+  for (int z = 0; z < Z_; z++) {
+    for (int i = 0; i < k_(z); i++) {
+      terms_[i + K_(z)] = elements[z]->levels()[i].term;
     }
   }
 }
@@ -172,8 +202,18 @@ inline const double ElementsAdapter::E(int z, int i) const {
 }
 
 
+inline const double ElementsAdapter::I(int z, int i) const {
+  return I_(i + K(z));
+}
+
+
 inline const double ElementsAdapter::g(int z, int i) const {
   return g_(i + K(z));
+}
+
+
+inline const std::string ElementsAdapter::term(int z, int i) const {
+  return terms_[i + K(z)];
 }
 
 

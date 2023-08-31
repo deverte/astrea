@@ -11,12 +11,10 @@
 #include <memory>
 #include <vector>
 
-#include <boost/units/systems/si.hpp>
-#include <boost/units/pow.hpp>
 #include <Eigen/Dense>
-#include <fm/fm.h>
 
 #include "../data/elements/element.h"
+#include "../data/elements/elements_adapter.h"
 
 
 namespace astrea {
@@ -30,41 +28,25 @@ namespace astrea {
  */
 inline Eigen::MatrixXd
 nlte_transition_operator(const Eigen::MatrixXd rates_matrix) {
-  using boost::units::si::frequency;
-  using boost::units::si::second;
-  using boost::units::pow;
-  using boost::units::quantity;
-
-  const Eigen::MatrixXd R = rates_matrix;
-  const auto R_u = pow<-1>(second);
+  const Eigen::MatrixXd R = rates_matrix; // s-1
 
   const auto K = R.cols();
 
-  Eigen::MatrixXd Q = Eigen::MatrixXd(K, K);
-  const auto Q_u = pow<-1>(second);
-  fm::family(0, K - 1, [&](int i) {
-    fm::family(0, K - 1, [&, i](int j) {
-      Q(i, j) = fm::cases<quantity<frequency>>({
-        {
-          [&, i, j]() -> quantity<frequency> {
-            return
-              - fm::sum<quantity<frequency>>(0, K - 1, [&, i](int k) {
-                return fm::cases<quantity<frequency>>({
-                  {[&, i, k]() { return R(i, k) * R_u; }, i != k},
-                  {[&, i, k]() { return 0.0 * pow<-1>(second); }, i == k},
-                });
-              })
-            ;
-          },
-          i == j
-        },
-        {
-          [&, i, j]() -> quantity<frequency> { return R(j, i) * R_u; },
-          i != j
-        },
-      }) / Q_u;
-    });
-  });
+  Eigen::MatrixXd Q = Eigen::MatrixXd::Zero(K, K);
+  for (int i = 0; i < K; i++) {
+    for (int j = 0; j < K; j++) {
+      if (i == j) {
+        for (int k = 0; k < K; k++) {
+          if (i != k) {
+            Q(i, j) -= R(i, k);
+          }
+        }
+      }
+      else {
+        Q(i, j) = R(j, i);
+      }
+    }
+  }
 
   return Q;
 }
@@ -85,20 +67,14 @@ inline Eigen::VectorXd nlte_population_full(
   const double delta_time,
   const Eigen::MatrixXd rates_matrix
 ) {
-  using boost::units::si::frequency;
-  using boost::units::si::second;
-  using boost::units::pow;
-
   const Eigen::MatrixXd Q = nlte_transition_operator(rates_matrix);
-  const auto Q_u = pow<-1>(second);
 
-  const auto delta_t = delta_time * second;
+  const auto& delta_t = delta_time; // s
+  const auto& n_t = electrons_population; // 1
 
   const auto I = Eigen::MatrixXd::Identity(Q.rows(), Q.cols());
 
-  const auto& n_t = electrons_population;
-
-  const auto P = (I - Q * (delta_t * Q_u)).inverse();
+  const auto P = (I - Q * (delta_t)).inverse();
 
   const auto n_t_plus_delta_t_ = P * n_t;
 
@@ -136,57 +112,35 @@ inline Eigen::VectorXd nlte_population_per_elements(
     );
   }
 
-  using boost::units::si::second;
+  const auto ea = ElementsAdapter(elements);
 
-  const int Z = elements.size();
-
-  Eigen::VectorXi k(Z);
-  fm::family(0, Z - 1, [&](int z) {
-    k(z) = elements[z]->levels().size();
-  });
-
-  const auto K = [&](int z) {
-    return fm::sum<int>(0, z - 1, [&](int z_) -> int { return k(z_); });
-  };
-
-  const auto& N = elements_population;
+  const auto& N = elements_population; // 1
+  const auto& delta_t = delta_time; // s
+  const auto& n_t = electrons_population; // 1
 
   const Eigen::MatrixXd Q = nlte_transition_operator(rates_matrix);
-  const auto Q_u = pow<-1>(second);
 
-  const auto delta_t = delta_time * second;
+  const Eigen::MatrixXd I = Eigen::MatrixXd::Identity(Q.rows(), Q.cols());
 
-  const auto I = Eigen::MatrixXd::Identity(Q.rows(), Q.cols());
-
-  const auto& n_t = electrons_population;
-
-  const auto P = (I - Q * (delta_t * Q_u)).inverse();
+  const auto P = (I - Q * delta_t).inverse();
 
   const auto n_t_plus_delta_t_ = P * n_t;
 
-  const auto n_t_plus_delta_t__ = [&](int z) {
-    return [&, z](int i) -> double {
-      return n_t_plus_delta_t_(i + K(z));
-    };
-  };
+  Eigen::VectorXd n_t_plus_delta_t(ea.K(ea.Z()));
+  for (int z = 0; z < ea.Z(); z++) {
+    for (int i = 0; i < ea.k(z); i++) {
+      auto sum = 0.0;
+      for (int j = 0; j < ea.k(z); j++) {
+        sum += n_t_plus_delta_t_(j + ea.K(z));
+      }
 
-  Eigen::VectorXd n_t_plus_delta_t_v(K(Z));
-  const auto n_t_plus_delta_t = [&](int z) {
-    return [&, z](int i) -> double& { return n_t_plus_delta_t_v(i + K(z)); };
-  };
-  fm::family(0, Z - 1, [&](int z) {
-    fm::family(0, k(z) - 1, [&, z](int i) {
-      n_t_plus_delta_t(z)(i) =
-        + n_t_plus_delta_t__(z)(i)
-        / fm::sum<double>(0, k(z) - 1, [&, z](int j) {
-          return n_t_plus_delta_t__(z)(j);
-        })
-        * N(z)
+      n_t_plus_delta_t(i + ea.K(z)) =
+        n_t_plus_delta_t_(i + ea.K(z)) / sum * N(z)
       ;
-    });
-  });
+    }
+  }
 
-  return n_t_plus_delta_t_v;
+  return n_t_plus_delta_t;
 }
 
 
@@ -216,51 +170,30 @@ inline Eigen::VectorXd nlte_population_per_elements_explicit(
     );
   }
 
-  using boost::units::si::second;
+  const auto ea = ElementsAdapter(elements);
 
-  const int Z = elements.size();
-
-  Eigen::VectorXi k(Z);
-  fm::family(0, Z - 1, [&](int z) {
-    k(z) = elements[z]->levels().size();
-  });
-
-  const auto K = [&](int z) {
-    return fm::sum<int>(0, z - 1, [&](int z_) -> int { return k(z_); });
-  };
-
-  const auto& N = elements_population;
+  const auto& N = elements_population; // 1
+  const auto& n_t = electrons_population; // 1
 
   const Eigen::MatrixXd Q = nlte_transition_operator(rates_matrix);
-  const auto Q_u = pow<-1>(second);
-
-  const auto& n_t = electrons_population;
 
   const auto n_t_plus_delta_t_ = Q * n_t;
 
-  const auto n_t_plus_delta_t__ = [&](int z) {
-    return [&, z](int i) -> double {
-      return n_t_plus_delta_t_(i + K(z));
-    };
-  };
+  Eigen::VectorXd n_t_plus_delta_t(ea.K(ea.Z()));
+  for (int z = 0; z < ea.Z(); z++) {
+    for (int i = 0; i < ea.k(z); i++) {
+      auto sum = 0.0;
+      for (int j = 0; j < ea.k(z); j++) {
+        sum += n_t_plus_delta_t_(j + ea.K(z));
+      }
 
-  Eigen::VectorXd n_t_plus_delta_t_v(K(Z));
-  const auto n_t_plus_delta_t = [&](int z) {
-    return [&, z](int i) -> double& { return n_t_plus_delta_t_v(i + K(z)); };
-  };
-  fm::family(0, Z - 1, [&](int z) {
-    fm::family(0, k(z) - 1, [&, z](int i) {
-      n_t_plus_delta_t(z)(i) =
-        + n_t_plus_delta_t__(z)(i)
-        / fm::sum<double>(0, k(z) - 1, [&, z](int j) {
-          return n_t_plus_delta_t__(z)(j);
-        })
-        * N(z)
+      n_t_plus_delta_t(i + ea.K(z)) =
+        n_t_plus_delta_t_(i + ea.K(z)) / sum * N(z)
       ;
-    });
-  });
+    }
+  }
 
-  return n_t_plus_delta_t_v;
+  return n_t_plus_delta_t;
 }
 
 

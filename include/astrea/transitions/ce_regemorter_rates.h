@@ -12,8 +12,6 @@
 #include <memory>
 #include <vector>
 
-#include <boost/units/systems/si.hpp>
-#include <boost/units/pow.hpp>
 #include <Eigen/Dense>
 
 #include "../data/elements/element.h"
@@ -37,22 +35,19 @@ inline Eigen::MatrixXd ce_regemorter_rates(
   const double temperature,
   const double electron_number_density
 ) {
-  using boost::units::pow;
-  using boost::units::static_rational;
+  const auto zeta = 8.62913210858377e-6; // cm3 s-1 K1/2
+  const auto k_B = 8.617333262e-5; // eV K-1
 
   const auto ea = ElementsAdapter(elements);
   const auto& T = temperature; // K
   const auto& N_e = electron_number_density; // cm-3
 
-  const auto zeta = 8.62913210858377e-6; // cm3 s-1 K1/2
-  const auto k_B = 8.617333262e-5; // eV K-1
-
-  auto R = TransitionsTensor(ea);
+  auto R = TransitionsTensor(ea); // s-1
   for (int z = 0; z < ea.Z(); z++) {
     for (int i = 0; i < ea.k(z); i++) {
       for (int j = i + 1; j < ea.k(z); j++) {
         R(z, i, j) =
-          + zeta * N_e * pow<static_rational<-1, 2>>(T) / ea.g(z, i)
+          + zeta * N_e * std::pow(T, -1.0 / 2.0) / ea.g(z, i)
           * std::exp(-ea.E_ij(z, j, i) / (k_B * T))
         ;
       }

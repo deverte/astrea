@@ -13,16 +13,10 @@
 #include <stdexcept>
 #include <vector>
 
-#include <boost/math/constants/constants.hpp>
-#include <boost/units/systems/si/codata_constants.hpp>
-#include <boost/units/systems/si/prefixes.hpp>
-#include <boost/units/systems/si.hpp>
-#include <boost/units/pow.hpp>
 #include <Eigen/Dense>
-#include <fm/fm.h>
 
 #include "../data/elements/element.h"
-#include "../units/units.h"
+#include "../data/elements/elements_adapter.h"
 
 
 namespace astrea {
@@ -51,68 +45,33 @@ inline Eigen::VectorXd lte_boltzmann_population(
     );
   }
 
-  using astrea::units::si::electronvolt;
-  using boost::units::si::constants::codata::k_B;
-  using boost::units::si::energy;
-  using boost::units::si::kelvin;
-  using boost::units::quantity;
+  const auto k_B = 8.617333262e-5; // eV K-1
 
-  const auto T = temperature * kelvin;
-
-  const int Z = elements.size();
-
-  const auto& N_ = elements_population;
+  const auto ea = ElementsAdapter(elements);
+  const auto& T = temperature; // K
+  const auto& N_ = elements_population; // 1
 
   Eigen::VectorXd N = N_ / N_.sum();
 
-  Eigen::VectorXi k(Z);
-  fm::family(0, Z - 1, [&](int z) {
-    k(z) = elements[z]->levels().size();
-  });
-
-  const auto K = [&](int z) -> int {
-    return fm::sum<int>(0, z - 1, [&](int z_) -> int { return k(z_); });
-  };
-
-  Eigen::Vector<quantity<energy>, Eigen::Dynamic> E_v(K(Z));
-  const auto E = [&](int z) {
-    return [&, z](int i) -> quantity<energy>& { return E_v(i + K(z)); };
-  };
-  fm::family(0, Z - 1, [&](int z) {
-    fm::family(0, k(z) - 1, [&, z](int i) {
-      E(z)(i) = elements[z]->levels()[i].energy * electronvolt;
-    });
-  });
-
-  Eigen::VectorXd g_v(K(Z));
-  const auto g = [&](int z) {
-    return [&, z](int i) -> double& { return g_v(i + K(z)); };
-  };
-  fm::family(0, Z - 1, [&](int z) {
-    fm::family(0, k(z) - 1, [&, z](int i) {
-      g(z)(i) = elements[z]->levels()[i].statistical_weight;
-    });
-  });
-
   // Boltzmann distribution
-  Eigen::VectorXd n_v(K(Z));
-  const auto n = [&](int z) {
-    return [&, z](int i) -> double& { return n_v(i + K(z)); };
-  };
-  fm::family(0, Z - 1, [&](int z) {
-    fm::family(0, k(z) - 1, [&, z](int i) {
-      n(z)(i) =
-        + g(z)(i)
-        * std::exp(-E(z)(i) / (k_B * T))
-        / fm::sum<double>(0, k(z) - 1, [&, z](int j) -> double {
-          return g(z)(j) * std::exp(-E(z)(j) / (k_B * T));
-        })
+  Eigen::VectorXd n(ea.K(ea.Z()));
+  for (int z = 0; z < ea.Z(); z++) {
+    for (int i = 0; i < ea.k(z); i++) {
+      auto sum_g_exp = 0.0;
+      for (int j = 0; j < ea.k(z); j++) {
+        sum_g_exp += ea.g(z, j) * std::exp(-ea.E(z, j) / (k_B * T));
+      }
+
+      n(i + ea.K(z)) =
+        + ea.g(z, i)
+        * std::exp(-ea.E(z, i) / (k_B * T))
+        / sum_g_exp
         * N(z)
       ;
-    });
-  });
+    }
+  }
 
-  return n_v;
+  return n;
 }
 
 
@@ -122,125 +81,79 @@ inline Eigen::VectorXd lte_boltzmann_population(
  * 
  * \param elements Elements.
  * \param temperature Temperature in K.
- * \param electron_temperature Electron temperature in K.
  * \param electron_number_density Electron number density in cm-3.
  * \return Electrons population in 1.
  */
 inline Eigen::VectorXd lte_boltzmann_saha_population(
   const std::vector<std::shared_ptr<Element>> elements,
   const double temperature,
-  const double electron_temperature,
   const double electron_number_density
 ) {
-  using astrea::units::si::centimeter;
-  using astrea::units::si::electronvolt;
-  using boost::math::constants::pi;
-  using boost::units::si::constants::codata::h;
-  using boost::units::si::constants::codata::k_B;
-  using boost::units::si::constants::codata::m_e;
-  using boost::units::si::energy;
-  using boost::units::si::kelvin;
-  using boost::units::si::volume;
-  using boost::units::pow;
-  using boost::units::quantity;
-  using boost::units::static_rational;
+  const auto k_B = 8.617333262e-5; // eV K-1
+  const auto gamma = 2.0706651010884884e-16; // K3/2 cm3
 
-  const auto N_e = electron_number_density * pow<-3>(centimeter);
-
-  const auto T = temperature * kelvin;
-
-  const auto T_e = electron_temperature * kelvin;
-
-  const int Z = elements.size();
-
-  Eigen::VectorXi k(Z);
-  fm::family(0, Z - 1, [&](int z) {
-    k(z) = elements[z]->levels().size();
-  });
-
-  const auto K = [&](int z) -> int {
-    return fm::sum<int>(0, z - 1, [&](int z_) -> int { return k(z_); });
-  };
-
-  Eigen::Vector<quantity<energy>, Eigen::Dynamic> I(Z);
-  fm::family(0, Z - 1, [&](int z) {
-    I(z) = elements[z]->levels()[0].ionization_energy * electronvolt;
-  });
-
-  Eigen::Vector<quantity<energy>, Eigen::Dynamic> E_v(K(Z));
-  const auto E = [&](int z) {
-    return [&, z](int i) -> quantity<energy>& { return E_v(i + K(z)); };
-  };
-  fm::family(0, Z - 1, [&](int z) {
-    fm::family(0, k(z) - 1, [&, z](int i) {
-      E(z)(i) = elements[z]->levels()[i].energy * electronvolt;
-    });
-  });
-
-  Eigen::VectorXd g_v(K(Z));
-  const auto g = [&](int z) {
-    return [&, z](int i) -> double& { return g_v(i + K(z)); };
-  };
-  fm::family(0, Z - 1, [&](int z) {
-    fm::family(0, k(z) - 1, [&, z](int i) {
-      g(z)(i) = elements[z]->levels()[i].statistical_weight;
-    });
-  });
-
-  const auto tilde_lambda = pow<static_rational<1, 2>>(
-    pow<2>(h) / (2.0 * pi<double>() * m_e * k_B * T_e)
-  );
+  const auto ea = ElementsAdapter(elements);
+  const auto& N_e = electron_number_density; // cm-3
+  const auto& T = temperature; // K
 
   // Saha Equation
-  Eigen::Vector<quantity<volume>, Eigen::Dynamic> Phi_v(Z - 1);
-  const auto Phi_u = pow<3>(centimeter);
-  const auto Phi = [&](int z) -> quantity<volume>& { return Phi_v(z); };
-  fm::family(0, Z - 2, [&](int z) {
-    Phi(z) =
-      + fm::sum<double>(0, k(z) - 1, [&, z](int i) -> double {
-        return g(z)(i) * std::exp(-E(z)(i) / (k_B * T));
-      })
-      / fm::sum<double>(0, k(z + 1) - 1, [&, z](int i) -> double {
-        return g(z + 1)(i) * std::exp(-E(z + 1)(i) / (k_B * T));
-      })
-      * pow<3>(tilde_lambda) / 2.0
-      * std::exp(I(z) / (k_B * T_e))
-    ;
-  });
+  Eigen::VectorXd Phi(ea.Z() - 1); // cm3
+  for (int z = 0; z < ea.Z() - 1; z++) {
+    auto numerator = 0.0;
+    for (int i = 0; i < ea.k(z); i++) {
+      numerator += ea.g(z, i) * std::exp(-ea.E(z, i) / (k_B * T));
+    }
 
-  Eigen::VectorXd N(Z);
-  fm::family(0, Z - 1, [&](int z) {
-    N(z) =
-      + fm::prod<double>(z, Z - 2, [&](int i) -> double {
-        return N_e * Phi(i);
-      })
-      / fm::sum<double>(0, Z - 1, [&](int k) -> double {
-        return fm::prod<double>(k, Z - 2, [&](int i) -> double {
-          return N_e * Phi(i);
-        });
-      })
+    auto denomenator = 0.0;
+    for (int i = 0; i < ea.k(z + 1); i++) {
+      denomenator += ea.g(z + 1, i) * std::exp(-ea.E(z + 1, i) / (k_B * T));
+    }
+
+    Phi(z) =
+      + numerator / denomenator
+      * gamma * std::pow(T, -3.0 / 2.0)
+      * std::exp(ea.I(z, 0) / (k_B * T))
     ;
-  });
+  }
+
+  Eigen::VectorXd N(ea.Z()); // 1
+  for (int z = 0; z < ea.Z(); z++) {
+    auto numerator = 1.0; // 1
+    for (int i = z; i < ea.Z() - 1; i++) {
+      numerator *= N_e * Phi(i);
+    }
+
+    auto denomenator = 0.0; // 1
+    for (int k = 0; k < ea.Z(); k++) {
+      auto product = 1.0; // 1
+      for (int i = k; k < ea.Z() - 1; i++) {
+        product *= N_e * Phi(i);
+      }
+
+      denomenator += product;
+    }
+
+    N(z) = numerator / denomenator;
+  }
 
   // Boltzmann distribution
-  Eigen::VectorXd n_v(K(Z));
-  const auto n = [&](int z) {
-    return [&, z](int i) -> double& { return n_v(i + K(z)); };
-  };
-  fm::family(0, Z - 1, [&](int z) {
-    fm::family(0, k(z) - 1, [&, z](int i) {
-      n(z)(i) =
-        + g(z)(i)
-        * std::exp(-E(z)(i) / (k_B * T))
-        / fm::sum<double>(0, k(z) - 1, [&, z](int j) -> double {
-          return g(z)(j) * std::exp(-E(z)(j) / (k_B * T));
-        })
+  Eigen::VectorXd n(ea.K(ea.Z()));
+  for (int z = 0; z < ea.Z(); z++) {
+    for (int i = 0; i < ea.k(z); i++) {
+      auto sum = 0.0; // 1
+      for (int j = 0; j < ea.k(z); j++) {
+        sum += ea.g(z, j) * std::exp(-ea.E(z, j) / (k_B * T));
+      }
+
+      n(i + ea.K(z)) =
+        + ea.g(z, i)
+        * std::exp(-ea.E(z, i) / (k_B * T)) / sum
         * N(z)
       ;
-    });
-  });
+    }
+  }
 
-  return n_v;
+  return n;
 }
 
 

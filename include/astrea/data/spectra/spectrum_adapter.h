@@ -8,12 +8,12 @@
 #pragma once
 
 
+#include <cmath>
 #include <memory>
 #include <vector>
 #include <string>
 
 #include <Eigen/Dense>
-#include <fm/fm.h>
 
 #include "./spectrum.h"
 
@@ -37,6 +37,15 @@ class SpectrumAdapter {
    */
   virtual const double lambda(double lambda_) const;
 
+  /**
+   * Spectral flux density in W m-2 s.
+   * 
+   * \param nu_ in s-1.
+   * 
+   * \return Spectral flux density in W m-2 s.
+   */
+  virtual const double nu(double nu_) const;
+
  private:
   std::shared_ptr<Spectrum> spectrum_;
 };
@@ -50,6 +59,13 @@ SpectrumAdapter::SpectrumAdapter(const std::shared_ptr<Spectrum> spectrum) {
 
 inline const double SpectrumAdapter::lambda(double lambda_) const {
   return spectrum_->spectral_irradiance(lambda_);
+}
+
+
+inline const double SpectrumAdapter::nu(double nu_) const {
+  const auto c = 2.99792458e17; // nm s-1
+  const auto lambda_ = c / nu_; // nm
+  return c / std::pow(nu_, 2.0) * spectrum_->spectral_irradiance(lambda_);
 }
 
 

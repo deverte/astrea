@@ -36,7 +36,7 @@ rd_nist_o1_rates(const std::vector<std::shared_ptr<Element>> elements) {
 
   const auto rd_nist_o1 = RDNistO1();
 
-  auto A = TransitionsTensor(ea);
+  auto A = TransitionsTensor(ea); // s-1
   for (int z = 0; z < ea.Z(); z++) {
     for (int i = 0; i < ea.k(z); i++) {
       for (int j = i + 1; j < ea.k(z); j++) {
