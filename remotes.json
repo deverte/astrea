@@ -4,11 +4,6 @@
             "name": "conancenter",
             "url": "https://center.conan.io",
             "verify_ssl": true
-        },
-        {
-            "name": "astro",
-            "url": "https://gitea.zarux.ru/api/packages/astro/conan",
-            "verify_ssl": true
         }
     ]
 }
