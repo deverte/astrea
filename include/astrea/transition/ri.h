@@ -13,6 +13,9 @@
 
 #include <Eigen/Dense>
 
+#include "astrea/math/interp1d_linear.h"
+#include "astrea/math/trapezoid.h"
+
 
 namespace astrea::transition::ri {
 
@@ -21,59 +24,51 @@ namespace astrea::transition::ri {
  * Radiative ionization (photoionization) transition rate at coordinate x for
  * element z for i->k transition.
  * 
- * \param sigma_z_k Photoionization cross section of element z of term k in cm2.
- * \param F_lambda Spectrum. Row 0: wavelengths in nm. Row 1: spectral flux
- * density in W m-2 nm-1.
+ * \param sigma_vs_nu_z_i Photoionization cross section of element z of term
+ * i in cm2.
+ * Axis 0: Bivariate data (row). Row 0: Frequency in s-1. Row 1: Cross section
+ * in cm2.
+ * Axis 1: Bivariate pair index (column).
+ * Must be sorted in ascending order over energies of the source element.
+ * \param F_lambda_vs_lambda Spectrum.
+ * Axis 0: Bivariate data (row). Row 0: Wavelength in nm. Row 1: Spectral
+ * irradiance in W m-2 nm-1.
+ * Axis 1: Bivariate pair index (column).
  * \return Transition rate in s-1.
  */
-inline double
-R_x_z_ik(const Eigen::Matrix2Xd& sigma_z_k, const Eigen::Matrix2Xd& F_lambda) {
+inline double R_x_z_ik(
+  const Eigen::Matrix2Xd& sigma_vs_nu_z_i,
+  const Eigen::Matrix2Xd& F_lambda_vs_lambda
+) {
   const auto a = 1.5091901796421518e29; // cm-2 s-2 W-1 m2
   const auto c = 2.99792458e17; // nm s-1
+  const auto& nu_sigma = sigma_vs_nu_z_i.row(0); // nm
+  const auto& sigma_sigma = sigma_vs_nu_z_i.row(1); // cm2
+  const auto& lambda_F_lambda = F_lambda_vs_lambda.row(0); // nm
+  const auto& F_lambda_F_lambda = F_lambda_vs_lambda.row(1); // W m-2 nm-1
 
-  const auto nu_0 = std::max(
-    sigma_z_k.row(0).minCoeff(),
-    (c / F_lambda.row(0).array()).minCoeff()
-  );
-  const auto infty = std::min(
-    sigma_z_k.row(0).maxCoeff(),
-    (c / F_lambda.row(0).array()).maxCoeff()
-  );
-  const auto d_nu = (infty - nu_0) / sigma_z_k.cols(); // s-1
+  const auto nu_F_lambda = c / lambda_F_lambda.array();
 
-  // Integration using trapezoidal rule
-  auto R_z_ik = 0.0;
-  for (double nu = nu_0; nu < infty - d_nu; nu += d_nu) {
-    const auto& nu_a = nu; // s-1
-    const auto nu_b = nu + d_nu; // s-1
+  const auto nu_0 = std::max(nu_sigma.minCoeff(), nu_F_lambda.minCoeff());
+  const auto nu_infty = std::min(nu_sigma.maxCoeff(), nu_F_lambda.maxCoeff());
+  const auto d_nu = (nu_infty - nu_0) / sigma_vs_nu_z_i.cols(); // s-1
 
-    // Nearest neighbor interpolation
-    Eigen::Index F_lambda_a_index;
-    (F_lambda.row(0).array() - c / nu_a).abs().minCoeff(&F_lambda_a_index);
-    const auto F_nu_a =
-      c / std::pow(nu_a, 2.0) * F_lambda.row(1)(F_lambda_a_index); // m-2 W s
+  const Eigen::VectorXd nu = // s-1
+    Eigen::VectorXd::LinSpaced(sigma_vs_nu_z_i.cols(), nu_0, nu_infty);
+  const Eigen::VectorXd lambda = c / nu.array(); // nm
 
-    // Nearest neighbor interpolation
-    Eigen::Index F_lambda_b_index;
-    (F_lambda.row(0).array() - c / nu_b).abs().minCoeff(&F_lambda_b_index);
-    const auto F_nu_b =
-      c / std::pow(nu_b, 2.0) * F_lambda.row(1)(F_lambda_b_index); // m-2 W s
+  const Eigen::VectorXd F_lambda = // W m-2 nm-1
+    astrea::math::interp1d_linear_xs(lambda_F_lambda, F_lambda_F_lambda, lambda)
+  ;
+  const Eigen::VectorXd F_nu = c / nu.array().pow(2) * F_lambda.array(); // W m-2 s
 
-    // Nearest neighbor interpolation
-    Eigen::Index sigma_a_index;
-    (sigma_z_k.row(0).array() - nu_a).abs().minCoeff(&sigma_a_index);
-    const auto sigma_a = sigma_z_k.row(1)(sigma_a_index); // cm2
+  const Eigen::VectorXd sigma = // cm2
+    astrea::math::interp1d_linear_xs(nu_sigma, sigma_sigma, nu);
 
-    // Nearest neighbor interpolation
-    Eigen::Index sigma_b_index;
-    (sigma_z_k.row(0).array() - nu_b).abs().minCoeff(&sigma_b_index);
-    const auto sigma_b = sigma_z_k.row(1)(sigma_b_index); // cm2
+  const Eigen::VectorXd C = a * sigma.array() * F_nu.array() / nu.array(); // 1
 
-    const auto C_a = sigma_a * F_nu_a / nu_a; // m-2 W cm2 s2
-    const auto C_b = sigma_b * F_nu_b / nu_b; // m-2 W cm2 s2
+  const auto R_z_ik = astrea::math::trapezoid_dx(C, d_nu); // s-1
 
-    R_z_ik += a * (C_a + C_b) / 2.0 * d_nu;
-  }
   return R_z_ik;
 }
 
@@ -82,20 +77,27 @@ R_x_z_ik(const Eigen::Matrix2Xd& sigma_z_k, const Eigen::Matrix2Xd& F_lambda) {
  * Radiative ionization (photoionization) transition rates at coordinate x for
  * element z.
  * 
- * \param sigma_z Photoionization cross sections of element z in cm2. Must be
- * sorted in ascending order over energies of the source element.
- * \param F_lambda Spectrum. Row 0: wavelengths in nm. Row 1: spectral flux
- * density in W m-2 nm-1.
+ * \param sigma_vs_nu_z Photoionization cross sections of element z in cm2.
+ * Axis 0: Initial term (i-index).
+ * Axis 1: Bivariate data (row). Row 0: Frequency in s-1. Row 1: Cross section
+ * in cm2.
+ * Axis 2: Bivariate pair index (column).
+ * Must be sorted in ascending order over energies of the source element.
+ * \param F_lambda_vs_lambda Spectrum.
+ * Axis 0: Bivariate data (row). Row 0: Wavelength in nm. Row 1: Spectral
+ * irradiance in W m-2 nm-1.
+ * Axis 1: Bivariate pair index (column).
  * \return Transition rate in s-1.
+ * Axis 0: Term.
  */
 inline Eigen::VectorXd R_x_z(
-  const std::vector<Eigen::Matrix2Xd>& sigma_z,
-  const Eigen::Matrix2Xd& F_lambda
+  const std::vector<Eigen::Matrix2Xd>& sigma_vs_nu_z,
+  const Eigen::Matrix2Xd& F_lambda_vs_lambda
 ) {
-  const auto& k = sigma_z.size();
+  const auto& k = sigma_vs_nu_z.size();
   Eigen::VectorXd R_x_z = Eigen::VectorXd::Zero(k);
   for (int i = 0; i < k; i++) {
-    R_x_z(i) = R_x_z_ik(sigma_z[i], F_lambda);
+    R_x_z(i) = R_x_z_ik(sigma_vs_nu_z[i], F_lambda_vs_lambda);
   }
   return R_x_z;
 }
@@ -104,23 +106,69 @@ inline Eigen::VectorXd R_x_z(
 /**
  * Radiative ionization (photoionization) transition rates at coordinate x.
  * 
- * \param sigma Photoionization cross sections in cm2. Must be
- * sorted in ascending order over energies of the source element for each
- * element.
- * \param F_lambda Spectrum. Row 0: wavelengths in nm. Row 1: spectral flux
- * density in W m-2 nm-1.
+ * \param sigma_vs_nu Photoionization cross sections in cm2.
+ * Axis 0: Element index.
+ * Axis 1: Initial term (i-index).
+ * Axis 2: Bivariate data (row). Row 0: Frequency in s-1. Row 1: Cross section
+ * in cm2.
+ * Axis 3: Bivariate pair index (column).
+ * Must be sorted in ascending order over energies of the source element for
+ * each element.
+ * \param F_lambda_vs_lambda Spectrum.
+ * Axis 0: Bivariate data (row). Row 0: Wavelength in nm. Row 1: Spectral
+ * irradiance in W m-2 nm-1.
+ * Axis 1: Bivariate pair index (column).
  * \return Transition rate in s-1.
+ * Axis 0: Element index.
+ * Axis 1: Term.
  */
 inline std::vector<Eigen::VectorXd> R_x(
-  const std::vector<std::vector<Eigen::Matrix2Xd>>& sigma,
-  const Eigen::Matrix2Xd& F_lambda
+  const std::vector<std::vector<Eigen::Matrix2Xd>>& sigma_vs_nu,
+  const Eigen::Matrix2Xd& F_lambda_vs_lambda
 ) {
-  const auto& Z = sigma.size();
+  const auto& Z = sigma_vs_nu.size();
   std::vector<Eigen::VectorXd> R_x(Z);
   for (int z = 0; z < Z - 1; z++) {
-    R_x[z] = R_x_z(sigma[z], F_lambda);
+    R_x[z] = R_x_z(sigma_vs_nu[z], F_lambda_vs_lambda);
   }
   return R_x;
+}
+
+
+/**
+ * Radiative ionization (photoionization) transition rates at coordinate x.
+ * 
+ * \param x Any vector with shape corresponding to spatial points.
+ * Axis 0: Coordinate index.
+ * \param sigma_vs_nu Photoionization cross sections in cm2.
+ * Axis 0: Element index.
+ * Axis 1: Initial term (i-index).
+ * Axis 2: Bivariate data (row). Row 0: Frequency in s-1. Row 1: Cross section
+ * in cm2.
+ * Axis 3: Bivariate pair index (column).
+ * Must be sorted in ascending order over energies of the source element for
+ * each element.
+ * \param F_lambda_vs_lambda Spectrum.
+ * Axis 0: Bivariate data (row). Row 0: Wavelength in nm. Row 1: Spectral
+ * irradiance in W m-2 nm-1.
+ * Axis 1: Bivariate pair index (column).
+ * \return Transition rate in s-1.
+ * Axis 0: Coordinate index.
+ * Axis 1: Element index.
+ * Axis 2: Term.
+ */
+inline std::vector<std::vector<Eigen::VectorXd>> R(
+  const Eigen::VectorXd& x,
+  const std::vector<std::vector<Eigen::Matrix2Xd>>& sigma_vs_nu,
+  const Eigen::Matrix2Xd& F_lambda_vs_lambda
+) {
+  const auto& X = x.size();
+  std::vector<std::vector<Eigen::VectorXd>> R(X);
+  const auto R_x_ = R_x(sigma_vs_nu, F_lambda_vs_lambda);
+  for (int i = 0; i < X; i++) {
+    R[i] = R_x_;
+  }
+  return R;
 }
 
 

@@ -1,5 +1,5 @@
 /**
- * \file astrea/population/nlte.h
+ * \file astrea/population/balance_equation.h
  * NLTE electrons population calculation using balance equation.
  * 
  * \copyright GPL
@@ -20,7 +20,11 @@ namespace astrea::population::balance_equation {
  * Builds single transitions rates matrix Q from S.
  * 
  * \param S_x Transitions rates matrix at coordinate x in s-1.
+ * Axis 0: Initial term.
+ * Axis 1: Final term.
  * \return Single transitions rates matrix at coordinate x in s-1.
+ * Axis 0: Initial term.
+ * Axis 1: Final term.
  */
 inline Eigen::MatrixXd Q_x(const Eigen::MatrixXd& S_x) {
   Eigen::MatrixXd Q_x = S_x.transpose();
@@ -39,8 +43,12 @@ inline Eigen::MatrixXd Q_x(const Eigen::MatrixXd& S_x) {
  * Calculates single transition operator using transition rates matrix.
  * 
  * \param Q_x Transition rates matrix in s-1.
+ * Axis 0: Initial term.
+ * Axis 1: Final term.
  * \param Delta_t Time difference in s.
  * \return Transition operator at coordinate x in s-1.
+ * Axis 0: Initial term.
+ * Axis 1: Final term.
  */
 inline Eigen::MatrixXd P_x(const Eigen::MatrixXd& Q_x, const double Delta_t) {
   Eigen::MatrixXd I = Eigen::MatrixXd::Identity(Q_x.rows(), Q_x.cols());
@@ -54,8 +62,12 @@ inline Eigen::MatrixXd P_x(const Eigen::MatrixXd& Q_x, const double Delta_t) {
  * electrons populations single vector and single transition operator P.
  * 
  * \param p_x_t Previous electrons population at coordinate x in 1.
+ * Axis 0: Term.
  * \param P_x Transition operator in s-1.
+ * Axis 0: Initial term.
+ * Axis 1: Final term.
  * \return Single electrons population vector at coordinate x in 1.
+ * Axis 0: Term.
  */
 inline Eigen::VectorXd
 p_x_t_plus_Delta_t(const Eigen::VectorXd& p_x_t, const Eigen::MatrixXd& P_x) {
@@ -67,8 +79,11 @@ p_x_t_plus_Delta_t(const Eigen::VectorXd& p_x_t, const Eigen::MatrixXd& P_x) {
 /**
  * Builds single electrons population vector p_t from set of n_t vectors.
  * 
- * \param n_x_t Previous electrons population at coordinate x in 1.
+ * \param n_x_t Previous electrons population at coordinate x.
+ * Axis 0: Element index.
+ * Axis 1: Term.
  * \return Single electrons population vector at coordinate x in 1.
+ * Axis 0: Term.
  */
 inline Eigen::VectorXd p_x_t(const std::vector<Eigen::VectorXd>& n_x_t) {
   int size = 0;
@@ -91,10 +106,22 @@ inline Eigen::VectorXd p_x_t(const std::vector<Eigen::VectorXd>& n_x_t) {
  * Builds single transitions rates matrix S from set of R matrices.
  * 
  * \param R_x_ij Excitation transitions rates at coordinate x in s-1.
+ * Axis 0: Element index.
+ * Axis 1: Initial term.
+ * Axis 2: Final term.
  * \param R_x_ji De-excitation transitions rates at coordinate x in s-1.
+ * Axis 0: Element index.
+ * Axis 1: Initial term.
+ * Axis 2: Final term.
  * \param R_x_ik Ionization transitions rates at coordinate x in s-1.
+ * Axis 0: Element index.
+ * Axis 1: Initial term.
  * \param R_x_ki Recombination transitions rates at coordinate x in s-1.
+ * Axis 0: Element index.
+ * Axis 1: Final term.
  * \return Single transitions rates matrix at coordinate x in s-1.
+ * Axis 0: Initial term.
+ * Axis 1: Final term.
  */
 inline Eigen::MatrixXd S_x(
   const std::vector<Eigen::MatrixXd>& R_x_ij,
@@ -130,12 +157,26 @@ inline Eigen::MatrixXd S_x(
  * Calculates NLTE electrons population using balance equation.
  * 
  * \param n_x_t Previous electrons population at coordinate x.
+ * Axis 0: Element index.
+ * Axis 1: Term.
  * \param R_x_ij Excitation transitions rates at coordinate x in s-1.
+ * Axis 0: Element index.
+ * Axis 1: Initial term.
+ * Axis 2: Final term.
  * \param R_x_ji De-excitation transitions rates at coordinate x in s-1.
+ * Axis 0: Element index.
+ * Axis 1: Initial term.
+ * Axis 2: Final term.
  * \param R_x_ik Ionization transitions rates at coordinate x in s-1.
+ * Axis 0: Element index.
+ * Axis 1: Initial term.
  * \param R_x_ki Recombination transitions rates at coordinate x in s-1.
+ * Axis 0: Element index.
+ * Axis 1: Final term.
  * \param Delta_t Time difference in s.
  * \return Electrons population at coordinate x in 1.
+ * Axis 0: Element index.
+ * Axis 1: Term.
  */
 inline std::vector<Eigen::VectorXd> n_x_t_plus_Delta_t(
   const std::vector<Eigen::VectorXd>& n_x_t,
@@ -159,6 +200,59 @@ inline std::vector<Eigen::VectorXd> n_x_t_plus_Delta_t(
   }
 
   return n_x_t_plus_Delta_t_;
+}
+
+
+/**
+ * Calculates NLTE electrons population using balance equation across all
+ * spatial points.
+ * 
+ * \param x Any vector with shape corresponding to spatial points.
+ * Axis 0: Coordinate index.
+ * \param n_t Previous electrons population.
+ * Axis 0: Coordinate index.
+ * Axis 1: Element index.
+ * Axis 2: Term.
+ * \param R_ij Excitation transitions rates.
+ * Axis 0: Coordinate index.
+ * Axis 1: Element index.
+ * Axis 2: Initial term.
+ * Axis 3: Final term.
+ * \param R_ji De-excitation transitions rates.
+ * Axis 0: Coordinate index.
+ * Axis 1: Element index.
+ * Axis 2: Initial term.
+ * Axis 3: Final term.
+ * \param R_ik Ionization transitions rates.
+ * Axis 0: Coordinate index.
+ * Axis 1: Element index.
+ * Axis 2: Initial term.
+ * \param R_ki Recombination transitions rates.
+ * Axis 0: Coordinate index.
+ * Axis 1: Element index.
+ * Axis 2: Final term.
+ * \param Delta_t Time difference in s.
+ * \return Electrons population in 1.
+ * Axis 0: Coordinate index.
+ * Axis 1: Element index.
+ * Axis 2: Term.
+ */
+inline std::vector<std::vector<Eigen::VectorXd>> n_t_plus_Delta_t(
+  const Eigen::VectorXd& x,
+  const std::vector<std::vector<Eigen::VectorXd>>& n_t,
+  const std::vector<std::vector<Eigen::MatrixXd>>& R_ij,
+  const std::vector<std::vector<Eigen::MatrixXd>>& R_ji,
+  const std::vector<std::vector<Eigen::VectorXd>>& R_ik,
+  const std::vector<std::vector<Eigen::VectorXd>>& R_ki,
+  const double Delta_t
+) {
+  const auto& X = x.size();
+  std::vector<std::vector<Eigen::VectorXd>> n_t_plus_Delta_t(X);
+  for (int i = 0; i < X; i++) {
+    n_t_plus_Delta_t[i] =
+      n_x_t_plus_Delta_t(n_t[i], R_ij[i], R_ji[i], R_ik[i], R_ki[i], Delta_t);
+  }
+  return n_t_plus_Delta_t;
 }
 
 
