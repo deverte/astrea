@@ -3,11 +3,33 @@
 ![logo](assets/logo.svg)
 
 Header-only C++17 library for statistical equilibrium calculations in plasma.
-Supports the following detailed balance pairs: collisional bound-bound
-transitions, collisional ionization-three-body recombination, radiative
-bound-bound transitions, photoionization-radiative recombination-dielectronic
-recombination, charge transfer ionization-recombination, and spontaneous
-emission.
+
+Available detailed balance pairs:
+
+- collisional bound-bound transitions
+- collisional ionization-three-body recombination
+- radiative bound-bound transitions
+- photoionization-radiative recombination-dielectronic recombination
+- charge transfer ionization-recombination
+- spontaneous emission
+
+Available elements:
+
+- C I
+- C II
+- C III
+- O I
+- O II
+- Mg I
+- Mg II
+- Mg III
+- Fe I
+- Fe II
+- Fe III
+
+Available spectra:
+
+- KELT-9
 
 > See also Python version [astrea_py](https://gitea.zarux.ru/astro/astrea_py)
 > and high-level API [urania](https://gitea.zarux.ru/astro/urania) with Jupyter

@@ -8,8 +8,17 @@
 #pragma once
 
 
-#include "./element/o_i_mashonkina.h"
-#include "./element/o_ii_mashonkina.h"
+#include "./element/c_i.h"
+#include "./element/c_ii.h"
+#include "./element/c_iii.h"
+#include "./element/fe_i.h"
+#include "./element/fe_ii.h"
+#include "./element/fe_iii.h"
+#include "./element/mg_i.h"
+#include "./element/mg_ii.h"
+#include "./element/mg_iii.h"
+#include "./element/o_i.h"
+#include "./element/o_ii.h"
 #include "./math/interp1d_linear.h"
 #include "./math/interp1d_nearest.h"
 #include "./math/trapezoid.h"
