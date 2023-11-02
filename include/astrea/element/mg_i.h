@@ -2,7 +2,8 @@
  * \file astrea/element/mg_i.h
  * Mg I data by Alexeeva+2018, Merle+2015, Lemke+1987, Osorio2015, Green1957,
  * NIST (https://www.nist.gov/pml/atomic-spectra-database),
- * TOPBASE (https://cdsweb.u-strasbg.fr/topbase/xsections.html).
+ * TOPBASE (https://cdsweb.u-strasbg.fr/topbase/xsections.html), Gnat+2011
+ * (http://wise-obs.tau.ac.il/~orlyg/ion_by_ion/).
  * 
  * \copyright GPL
  * \author Artem Shepelin (4.shepelin@gmail.com)
@@ -10,6 +11,7 @@
 #pragma once
 
 
+#include "astrea/element/mg_i/cooling_efficiency.h"
 #include "astrea/element/mg_i/effective_collision_strengths.h"
 #include "astrea/element/mg_i/energies.h"
 #include "astrea/element/mg_i/info.h"

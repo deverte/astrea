@@ -8,6 +8,8 @@
 #pragma once
 
 
+#include "./cooling/cooling_rate_approximation.h"
+#include "./cooling/cooling_rate.h"
 #include "./element/c_i.h"
 #include "./element/c_ii.h"
 #include "./element/c_iii.h"

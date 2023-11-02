@@ -3,7 +3,8 @@
  * O I data by Barklem2007, Przybilla2000, Sitnova2012, Sitnova+2013,
  * Sitnova2017, NIST (https://www.nist.gov/pml/atomic-spectra-database), TOPBASE
  * (https://cdsweb.u-strasbg.fr/topbase/xsections.html), Mashonkina
- * (private communication).
+ * (private communication), Gnat+2011
+ * (http://wise-obs.tau.ac.il/~orlyg/ion_by_ion/).
  * 
  * \copyright GPL
  * \author Artem Shepelin (4.shepelin@gmail.com)
@@ -12,6 +13,7 @@
 
 
 #include "astrea/element/o_i/collision_rate_coefficients.h"
+#include "astrea/element/o_i/cooling_efficiency.h"
 #include "astrea/element/o_i/energies.h"
 #include "astrea/element/o_i/info.h"
 #include "astrea/element/o_i/oscillator_strengths.h"

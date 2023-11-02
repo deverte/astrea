@@ -2,7 +2,8 @@
  * \file astrea/element/c_ii.h
  * C II data by Alexeeva+2015, Wilson+2005, NIST
  * (https://www.nist.gov/pml/atomic-spectra-database), TOPBASE
- * (https://cdsweb.u-strasbg.fr/topbase/xsections.html).
+ * (https://cdsweb.u-strasbg.fr/topbase/xsections.html), Gnat+2011
+ * (http://wise-obs.tau.ac.il/~orlyg/ion_by_ion/).
  * 
  * \copyright GPL
  * \author Artem Shepelin (4.shepelin@gmail.com)
@@ -10,6 +11,7 @@
 #pragma once
 
 
+#include "astrea/element/c_ii/cooling_efficiency.h"
 #include "astrea/element/c_ii/effective_collision_strengths.h"
 #include "astrea/element/c_ii/energies.h"
 #include "astrea/element/c_ii/info.h"

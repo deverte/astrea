@@ -2,16 +2,15 @@
 
 ![logo](assets/logo.svg)
 
-Header-only C++17 library for statistical equilibrium calculations in plasma.
+Header-only C++17 library for statistical equilibrium calculations in cosmic
+plasma.
 
 Available detailed balance pairs:
 
 - collisional bound-bound transitions
-- collisional ionization-three-body recombination
 - radiative bound-bound transitions
-- photoionization-radiative recombination-dielectronic recombination
-- charge transfer ionization-recombination
-- spontaneous emission
+- collisional ionization / recombination (in progress)
+- radiative ionization / recombination (in progress)
 
 Available elements:
 
@@ -35,8 +34,6 @@ Available spectra:
 > and high-level API [urania](https://gitea.zarux.ru/astro/urania) with Jupyter
 > Notebook
 > [examples](https://gitea.zarux.ru/astro/urania/src/branch/main/examples).
-
-> Notice: library is under development, some functionality may be invalid.
 
 ## Installation
 
