@@ -1,6 +1,6 @@
 /**
- * \file astrea/cooling/cooling_rate.h
- * Cooling rate.
+ * \file astrea/cooling/heating_rate.h
+ * Heating rate.
  * 
  * \copyright GPL
  * \author Artem Shepelin (4.shepelin@gmail.com)
@@ -17,7 +17,7 @@ namespace astrea::cooling {
 
 
 /**
- * Cooling rate.
+ * Heating rate.
  * 
  * \param n_x_z Electrons population at point x for element z in 1.
  * Axis 0: Term index.
@@ -29,9 +29,9 @@ namespace astrea::cooling {
  * \param E_z Energies of element z in eV.
  * Axis 0: Term index.
  * Must be sorted!
- * \return Cooling rate in erg s-1 cm-3.
+ * \return Heating rate in erg s-1 cm-3.
  */
-inline double L_x(
+inline double H_x(
   const Eigen::VectorXd& n_x_z,
   const Eigen::MatrixXd& R_x_z,
   const Eigen::VectorXd& E_z
@@ -39,17 +39,17 @@ inline double L_x(
   const auto a = 1.602176634e-12; // erg eV-1
   const auto& K = n_x_z.size();
 
-  auto L_x = 0.0;
+  auto H_x = 0.0;
   for (int i = 0; i < K; i++) {
-    L_x += a * E_z(i) * R_x_z(0, i) * n_x_z(0);
+    H_x += a * E_z(i) * R_x_z(i, 0) * n_x_z(i);
   }
 
-  return L_x;
+  return H_x;
 }
 
 
 /**
- * Cooling rate.
+ * Heating rate.
  * 
  * \param x Any array with coordinates shape.
  * Axis 0: Coordinate index.
@@ -65,10 +65,10 @@ inline double L_x(
  * \param E_z Energies of element z in eV.
  * Axis 0: Term index.
  * Must be sorted!
- * \return Cooling rates in erg s-1 cm-3.
+ * \return Heating rates in erg s-1 cm-3.
  * Axis 0: Coordinate index.
  */
-inline Eigen::VectorXd L(
+inline Eigen::VectorXd H(
   const Eigen::VectorXd& x,
   const std::vector<Eigen::VectorXd>& n_z,
   const std::vector<Eigen::MatrixXd>& R_z,
@@ -76,12 +76,12 @@ inline Eigen::VectorXd L(
 ) {
   const auto& X = x.size();
 
-  Eigen::VectorXd L = Eigen::VectorXd::Zero(X);
+  Eigen::VectorXd H = Eigen::VectorXd::Zero(X);
   for (int i = 0; i < X; i++) {
-    L(i) = L_x(n_z[i], R_z[i], E_z);
+    H(i) = H_x(n_z[i], R_z[i], E_z);
   }
 
-  return L;
+  return H;
 }
 
 
