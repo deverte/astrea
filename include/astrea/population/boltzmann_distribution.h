@@ -18,93 +18,73 @@ namespace astrea::population::boltzmann_distribution {
 
 
 /**
- * Calculates LTE electrons population using Boltzmann distribution at
- * coordinate x for element z.
+ * Calculates LTE electrons population using Boltzmann distribution.
  * 
- * \param T_x Temperature at coordinate x in K.
- * \param g_z Statistical weights for element z in 1.
- * Axis 0: Term.
- * \param E_z Energies for element z in eV.
- * Axis 0: Term.
- * \return Electrons population at point x for element z in 1.
- * Axis 0: Term.
+ * \param T Temperature in K.
+ * \param g_K Statistical weights in 1.
+ * \param E_K Energies in eV.
+ * \return Electrons population in 1.
  */
-inline Eigen::VectorXd n_x_z(
-  const double T_x,
-  const Eigen::VectorXd& g_z,
-  const Eigen::VectorXd& E_z
+inline Eigen::VectorXd n_K(
+  const double& T,
+  const Eigen::VectorXd& g_K,
+  const Eigen::VectorXd& E_K
 ) {
   const auto k_B = 8.617333262e-5; // eV K-1
-  const auto& k = g_z.size(); // 1
-  Eigen::VectorXd n_x_z = Eigen::VectorXd::Zero(k);
+  const auto& K = g_K.size(); // 1
+  Eigen::VectorXd n_K = Eigen::VectorXd::Zero(K);
   auto S = 0.0;
-  for (int j = 0; j < k; j++) {
-    S += g_z(j) * std::exp(-E_z(j) / (k_B * T_x));
+  for (int j = 0; j < K; j++) {
+    S += g_K(j) * std::exp(-E_K(j) / (k_B * T));
   }
-  for (int i = 0; i < k; i++) {
-    n_x_z(i) = g_z(i) * std::exp(-E_z(i) / (k_B * T_x)) / S;
+  for (int i = 0; i < K; i++) {
+    n_K(i) = g_K(i) * std::exp(-E_K(i) / (k_B * T)) / S;
   }
-  return n_x_z;
+  return n_K;
 }
 
 
 /**
- * Calculates LTE electrons population using Boltzmann distribution at
- * coordinate x.
+ * Calculates LTE electrons population using Boltzmann distribution.
  * 
- * \param T_x Temperature at coordinate x in K.
+ * \param T Temperature at coordinate x in K.
  * \param g Statistical weights in 1.
- * Axis 0: Element index.
- * Axis 1: Term.
  * \param E Energies in eV.
- * Axis 0: Element index.
- * Axis 1: Term.
  * \return Electrons population at point x in 1.
- * Axis 0: Element index.
- * Axis 1: Term.
  */
-inline std::vector<Eigen::VectorXd> n_x(
-  const double T_x,
-  const std::vector<Eigen::VectorXd>& g,
-  const std::vector<Eigen::VectorXd>& E
+inline std::vector<Eigen::VectorXd> n_ZK(
+  const double& T,
+  const std::vector<Eigen::VectorXd>& g_ZK,
+  const std::vector<Eigen::VectorXd>& E_ZK
 ) {
-  const auto& Z = g.size(); // 1
-  std::vector<Eigen::VectorXd> n_x(Z);
+  const auto& Z = g_ZK.size(); // 1
+  std::vector<Eigen::VectorXd> n_ZK(Z);
   for (int z = 0; z < Z; z++) {
-    n_x[z] = n_x_z(T_x, g[z], E[z]);
+    n_ZK[z] = n_K(T, g_ZK[z], E_ZK[z]);
   }
-  return n_x;
+  return n_ZK;
 }
 
 
 /**
- * Calculates LTE electrons population using Boltzmann distribution across all
- * spatial points.
+ * Calculates LTE electrons population using Boltzmann distribution.
  * 
- * \param T Temperatures in K.
- * Axis 0: Coordinate index.
- * \param g Statistical weights in 1.
- * Axis 0: Element index.
- * Axis 1: Term.
- * \param E Energies in eV.
- * Axis 0: Element index.
- * Axis 1: Term.
+ * \param T_X Temperatures in K.
+ * \param g_ZK Statistical weights in 1.
+ * \param E_ZK Energies in eV.
  * \return Electrons population in 1.
- * Axis 0: Coordinate index.
- * Axis 1: Element index.
- * Axis 2: Term.
  */
-inline std::vector<std::vector<Eigen::VectorXd>> n(
-  const Eigen::VectorXd& T,
-  const std::vector<Eigen::VectorXd>& g,
-  const std::vector<Eigen::VectorXd>& E
+inline std::vector<std::vector<Eigen::VectorXd>> n_XZK(
+  const Eigen::VectorXd& T_X,
+  const std::vector<Eigen::VectorXd>& g_ZK,
+  const std::vector<Eigen::VectorXd>& E_ZK
 ) {
-  const auto& X = T.size(); // 1
-  std::vector<std::vector<Eigen::VectorXd>> n(X);
+  const auto& X = T_X.size(); // 1
+  std::vector<std::vector<Eigen::VectorXd>> n_XZK(X);
   for (int x = 0; x < X; x++) {
-    n[x] = n_x(T(x), g, E);
+    n_XZK[x] = n_ZK(T_X(x), g_ZK, E_ZK);
   }
-  return n;
+  return n_XZK;
 }
 
 

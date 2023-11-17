@@ -20,133 +20,113 @@ namespace astrea::transition::ce {
 
 
 /**
- * Collisional excitation transitions rate at coordinate x for element z for
- * i->j transition.
+ * Collisional excitation transitions rate.
  * 
- * \param T_x Temperature at coordinate x in K.
- * \param N_e_x Electron number density at coordinate x in cm-3.
- * \param C_vs_T_z_ij Collision rate coefficient of element z for i->j
- * transition.
+ * \param T Temperature in K.
+ * \param N_e Electron number density in cm-3.
+ * \param C_vs_T Collision rate coefficient.
  * Axis 0: Bivariate data (row). Row 0: Temperature in K. Row 1: Collision rate
  * coefficient in cm3 s-1.
  * Axis 1: Bivariate pair index (column).
  * Must be sorted in ascending order over energies!
  * \return Transitions rate in s-1.
  */
-inline double R_x_z_ij(
-  const double T_x,
-  const double N_e_x,
-  const Eigen::Matrix2Xd& C_vs_T_z_ij
+inline double R_ij(
+  const double& T,
+  const double& N_e,
+  const Eigen::Matrix2Xd& C_vs_T
 ) {
-  auto C_x_z_ij = 0.0;
-  if (C_vs_T_z_ij.cols() > 0) {
-    const auto& T_z_ij = C_vs_T_z_ij.row(0);
-    const auto& C_z_ij = C_vs_T_z_ij.row(1);
+  auto C_ij = 0.0;
+  if (C_vs_T.cols() > 0) {
+    const auto& T_X = C_vs_T.row(0);
+    const auto& C_X = C_vs_T.row(1);
 
-    C_x_z_ij = astrea::math::interp1d_linear_x(T_z_ij, C_z_ij, T_x);
+    C_ij = astrea::math::interp1d_linear(T_X, C_X, T);
   }
 
-  const auto R_x_z_ij = N_e_x * C_x_z_ij;
+  const auto R_ij = N_e * C_ij;
 
-  return R_x_z_ij;
+  return R_ij;
 }
 
 
 /**
- * Collisional excitation transitions rate at coordinate x for element z.
+ * Collisional excitation transitions rate.
  * 
- * \param T_x Temperature at coordinate x in K.
- * \param N_e_x Electron number density at coordinate x in cm-3.
- * \param C_vs_T_z Collision rate coefficient of element z.
- * Axis 0: Initial term (i-index).
- * Axis 1: Final term (j-index).
- * Axis 2: Bivariate data (row). Row 0: Temperature in K. Row 1: Collision rate
+ * \param T Temperature in K.
+ * \param N_e Electron number density in cm-3.
+ * \param C_vs_T_KK Collision rate coefficient.
+ * Axis 0: Bivariate data (row). Row 0: Temperature in K. Row 1: Collision rate
  * coefficient in cm3 s-1.
- * Axis 3: Bivariate pair index (column).
+ * Axis 1: Bivariate pair index (column).
  * Must be sorted in ascending order over energies!
  * \return Transitions rates in s-1.
- * Axis 0: Initial term.
- * Axis 1: Final term.
  */
-inline Eigen::MatrixXd R_x_z(
-  const double T_x,
-  const double N_e_x,
-  const std::vector<std::vector<Eigen::Matrix2Xd>>& C_vs_T_z
+inline Eigen::MatrixXd R_KK(
+  const double& T,
+  const double& N_e,
+  const std::vector<std::vector<Eigen::Matrix2Xd>>& C_vs_T_KK
 ) {
-  const auto& k = C_vs_T_z.size();
-  Eigen::MatrixXd R_z = Eigen::MatrixXd::Zero(k, k);
-  for (int i = 0; i < k; i++) {
-    for (int j = i + 1; j < k; j++) {
-      R_z(i, j) = R_x_z_ij(T_x, N_e_x, C_vs_T_z[i][j]);
+  const auto& K = C_vs_T_KK.size();
+  Eigen::MatrixXd R_KK = Eigen::MatrixXd::Zero(K, K);
+  for (int i = 0; i < K; i++) {
+    for (int j = i + 1; j < K; j++) {
+      R_KK(i, j) = R_ij(T, N_e, C_vs_T_KK[i][j]);
     }
   }
-  return R_z;
+  return R_KK;
 }
 
 
 /**
- * Collisional excitation transitions rate at coordinate x.
+ * Collisional excitation transitions rate.
  * 
- * \param T_x Temperature in K.
- * \param N_e_x Electron number density at coordinate x in cm-3.
- * \param C_vs_T Collision rate coefficients.
- * Axis 0: Element index.
- * Axis 1: Initial term (i-index).
- * Axis 2: Final term (j-index).
- * Axis 3: Bivariate data (row). Row 0: Temperature in K. Row 1: Collision rate
+ * \param T Temperature in K.
+ * \param N_e Electron number density in cm-3.
+ * \param C_vs_T_ZKK Collision rate coefficients.
+ * Axis 0: Bivariate data (row). Row 0: Temperature in K. Row 1: Collision rate
  * coefficient in cm3 s-1.
- * Axis 4: Bivariate pair index (column).
+ * Axis 1: Bivariate pair index (column).
  * Must be sorted in ascending order over energies!
  * \return Transitions rates in s-1.
- * Axis 0: Element index.
- * Axis 1: Initial term.
- * Axis 2: Final term.
  */
-inline std::vector<Eigen::MatrixXd> R_x(
-  const double T_x,
-  const double N_e_x,
-  const std::vector<std::vector<std::vector<Eigen::Matrix2Xd>>>& C_vs_T
+inline std::vector<Eigen::MatrixXd> R_ZKK(
+  const double& T,
+  const double& N_e,
+  const std::vector<std::vector<std::vector<Eigen::Matrix2Xd>>>& C_vs_T_ZKK
 ) {
-  const auto& Z = C_vs_T.size();
-  std::vector<Eigen::MatrixXd> R_x(Z);
+  const auto& Z = C_vs_T_ZKK.size();
+  std::vector<Eigen::MatrixXd> R_ZKK(Z);
   for (int z = 0; z < Z; z++) {
-    R_x[z] = R_x_z(T_x, N_e_x, C_vs_T[z]);
+    R_ZKK[z] = R_KK(T, N_e, C_vs_T_ZKK[z]);
   }
-  return R_x;
+  return R_ZKK;
 }
 
 
 /**
  * Collisional excitation transitions rates.
  * 
- * \param T Temperatures in K. Axis 0: Coordinate index.
- * \param N_e Electron number densities in cm-3.
- * Axis 0: Coordinate index.
- * \param C_vs_T Collision rate coefficients.
- * Axis 0: Element index.
- * Axis 1: Initial term (i-index).
- * Axis 2: Final term (j-index).
- * Axis 3: Bivariate data (row). Row 0: Temperature in K. Row 1: Collision rate
+ * \param T_X Temperatures in K.
+ * \param N_e_X Electron number densities in cm-3.
+ * \param C_vs_T_ZKK Collision rate coefficients.
+ * Axis 0: Bivariate data (row). Row 0: Temperature in K. Row 1: Collision rate
  * coefficient in cm3 s-1.
- * Axis 4: Bivariate pair index (column).
+ * Axis 1: Bivariate pair index (column).
  * Must be sorted in ascending order over energies!
  * \return Transitions rates in s-1.
- * Axis 0: Coordinate index.
- * Axis 1: Element index.
- * Axis 2: Initial term.
- * Axis 3: Final term.
  */
-inline std::vector<std::vector<Eigen::MatrixXd>> R(
-  const Eigen::VectorXd& T,
-  const Eigen::VectorXd& N_e,
-  const std::vector<std::vector<std::vector<Eigen::Matrix2Xd>>>& C_vs_T
+inline std::vector<std::vector<Eigen::MatrixXd>> R_XZKK(
+  const Eigen::VectorXd& T_X,
+  const Eigen::VectorXd& N_e_X,
+  const std::vector<std::vector<std::vector<Eigen::Matrix2Xd>>>& C_vs_T_ZKK
 ) {
-  const auto& X = T.size();
-  std::vector<std::vector<Eigen::MatrixXd>> R(X);
+  const auto& X = T_X.size();
+  std::vector<std::vector<Eigen::MatrixXd>> R_XZKK(X);
   for (int x = 0; x < X; x++) {
-    R[x] = R_x(T(x), N_e(x), C_vs_T);
+    R_XZKK[x] = R_ZKK(T_X(x), N_e_X(x), C_vs_T_ZKK);
   }
-  return R;
+  return R_XZKK;
 }
 
 

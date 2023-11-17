@@ -13,7 +13,7 @@
 #include "astrea/math/interp1d_linear.h"
 
 
-namespace astrea::cooling {
+namespace astrea::cooling::cooling_rate_approximation {
 
 
 /**
@@ -24,27 +24,23 @@ namespace astrea::cooling {
  *   0: Temperature in K.
  *   1: Cooling efficiency in erg s-1 cm3.
  * Axis 1: Bivariate pair index (column).
- * \param T Temperatures in K.
- * Axis 0: Coordinate index.
- * \param N_e Electron number densities in cm-3.
- * Axis 0: Coordinate index.
- * \param N_A Element number densities in cm-3.
- * Axis 0: Coordinate index.
+ * \param T_X Temperatures in K.
+ * \param N_e_X Electron number densities in cm-3.
+ * \param N_A_X Element number densities in cm-3.
  * \return Cooling rates in erg s-1 cm-3.
- * Axis 0: Coordinate index.
  */
-inline Eigen::VectorXd L_approximation(
+inline Eigen::VectorXd L_X(
   const Eigen::MatrixXd& Lambda_vs_T,
-  const Eigen::VectorXd& T,
-  const Eigen::VectorXd& N_e,
-  const Eigen::VectorXd& N_A
+  const Eigen::VectorXd& T_X,
+  const Eigen::VectorXd& N_e_X,
+  const Eigen::VectorXd& N_A_X
 ) {
   const auto& T_ = Lambda_vs_T.row(0);
   const auto& Lambda_ = Lambda_vs_T.row(1);
 
-  const auto Lambda = astrea::math::interp1d_linear_xs(T_, Lambda_, T);
+  const auto Lambda = astrea::math::interp1d_linear_X(T_, Lambda_, T_X);
 
-  const auto L = Lambda.array() * N_A.array() * N_e.array();
+  const auto L = Lambda.array() * N_A_X.array() * N_e_X.array();
 
   return L;
 }

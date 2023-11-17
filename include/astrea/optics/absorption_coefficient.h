@@ -13,7 +13,7 @@
 #include <Eigen/Dense>
 
 
-namespace astrea::optics {
+namespace astrea::optics::absorption_coefficient {
 
 
 /**

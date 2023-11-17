@@ -17,14 +17,14 @@ namespace astrea::math {
 /**
  * Trapezoidal integration.
  * 
- * \param y Input array.
+ * \param y_X Input array.
  * \param dx Spacing between sample points.
  * \return Definite integral.
  */
-inline double trapezoid_dx(const Eigen::VectorXd& y, const double dx) {
+inline double trapezoid_dx(const Eigen::VectorXd& y_X, const double& dx) {
   auto trapezoid = 0.0;
-  for (int i = 0; i < y.size() - 1; i++) {
-    trapezoid += (y(i) + y(i + 1)) / 2.0 * dx;
+  for (int i = 0; i < y_X.size() - 1; i++) {
+    trapezoid += (y_X(i) + y_X(i + 1)) / 2.0 * dx;
   }
   return trapezoid;
 }
@@ -33,15 +33,16 @@ inline double trapezoid_dx(const Eigen::VectorXd& y, const double dx) {
 /**
  * Trapezoidal integration.
  * 
- * \param y Input array.
- * \param x Sample points corresponding to y values.
+ * \param y_X Input array.
+ * \param x_X Sample points corresponding to y values.
  * \return Definite integral.
  */
-inline double trapezoid_x(const Eigen::VectorXd& y, const Eigen::VectorXd& x) {
+inline double
+trapezoid(const Eigen::VectorXd& y_X, const Eigen::VectorXd& x_X) {
   auto trapezoid = 0.0;
-  for (int i = 0; i < y.size() - 1; i++) {
-    const auto dx = x(i + 1) - x(i);
-    trapezoid += (y(i) + y(i + 1)) / 2.0 * dx;
+  for (int i = 0; i < y_X.size() - 1; i++) {
+    const auto dx = x_X(i + 1) - x_X(i);
+    trapezoid += (y_X(i) + y_X(i + 1)) / 2.0 * dx;
   }
   return trapezoid;
 }

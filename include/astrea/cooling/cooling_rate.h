@@ -13,75 +13,63 @@
 #include <Eigen/Dense>
 
 
-namespace astrea::cooling {
+namespace astrea::cooling::cooling_rate {
 
 
 /**
  * Cooling rate.
  * 
- * \param n_x_z Electrons population at point x for element z in 1.
- * Axis 0: Term index.
+ * \param n_K Electrons population in 1.
  * Must be sorted over energies!
- * \param R_x_z Transitions rates at point x for element z in s-1.
- * Axis 0: Initial term.
- * Axis 1: Final term.
+ * \param R_KK Transitions rates in s-1.
  * Must be sorted over energies!
- * \param E_z Energies of element z in eV.
- * Axis 0: Term index.
+ * \param E_K Energies of element z in eV.
  * Must be sorted!
  * \return Cooling rate in erg s-1 cm-3.
  */
-inline double L_x(
-  const Eigen::VectorXd& n_x_z,
-  const Eigen::MatrixXd& R_x_z,
-  const Eigen::VectorXd& E_z
+inline double L(
+  const Eigen::VectorXd& n_K,
+  const Eigen::MatrixXd& R_KK,
+  const Eigen::VectorXd& E_K
 ) {
   const auto a = 1.602176634e-12; // erg eV-1
-  const auto& K = n_x_z.size();
+  const auto& K = n_K.size();
 
-  auto L_x = 0.0;
-  for (int i = 0; i < K; i++) {
-    L_x += a * E_z(i) * R_x_z(0, i) * n_x_z(0);
+  auto L = 0.0;
+  for (int j = 0; j < K; j++) {
+    L += a * E_K(j) * R_KK(0, j) * n_K(0);
   }
 
-  return L_x;
+  return L;
 }
 
 
 /**
  * Cooling rate.
  * 
- * \param x Any array with coordinates shape.
- * Axis 0: Coordinate index.
- * \param n_z Electrons population for element z in 1.
- * Axis 0: Coordinate index.
- * Axis 1: Term index.
+ * \param x_X Any array with coordinates shape.
+ * \param n_XK Electrons population in 1.
  * Must be sorted over energies!
- * \param R_x_z Transitions rates for element z in s-1.
- * Axis 0: Coordinate index.
- * Axis 1: Initial term.
- * Axis 2: Final term.
+ * \param R_XKK Transitions rates in s-1.
  * Must be sorted over energies!
- * \param E_z Energies of element z in eV.
- * Axis 0: Term index.
+ * \param E_K Energies of element z in eV.
  * Must be sorted!
  * \return Cooling rates in erg s-1 cm-3.
- * Axis 0: Coordinate index.
  */
-inline Eigen::VectorXd L(
-  const Eigen::VectorXd& x,
-  const std::vector<Eigen::VectorXd>& n_z,
-  const std::vector<Eigen::MatrixXd>& R_z,
-  const Eigen::VectorXd& E_z
+inline Eigen::VectorXd L_X(
+  const Eigen::VectorXd& x_X,
+  const std::vector<Eigen::VectorXd>& n_XK,
+  const std::vector<Eigen::MatrixXd>& R_XKK,
+  const Eigen::VectorXd& E_K
 ) {
-  const auto& X = x.size();
+  const auto& X = x_X.size();
 
-  Eigen::VectorXd L = Eigen::VectorXd::Zero(X);
-  for (int i = 0; i < X; i++) {
-    L(i) = L_x(n_z[i], R_z[i], E_z);
+  Eigen::VectorXd L_X = Eigen::VectorXd::Zero(X);
+  for (int x = 0; x < X; x++) {
+    L_X(x) = L(n_XK[x], R_XKK[x], E_K);
   }
 
-  return L;
+  return L_X;
 }
 
 

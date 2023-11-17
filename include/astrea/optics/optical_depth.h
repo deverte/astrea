@@ -14,7 +14,7 @@
 #include "astrea/optics/absorption_coefficient.h"
 
 
-namespace astrea::optics {
+namespace astrea::optics::optical_depth {
 
 
 /**
@@ -36,8 +36,9 @@ inline double tau(
   const Eigen::MatrixXd& A_KK,
   const double& nu
 ) {
-  const auto alpha_nu_X_ = alpha_nu_X(n_X, g_K, E_K, A_KK, nu);
-  const auto tau = astrea::math::trapezoid_x(alpha_nu_X_, x_X);
+  const auto alpha_nu_X_ =
+    absorption_coefficient::alpha_nu_X(n_X, g_K, E_K, A_KK, nu);
+  const auto tau = astrea::math::trapezoid(alpha_nu_X_, x_X);
   return tau;
 }
 

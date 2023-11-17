@@ -19,41 +19,34 @@ namespace astrea::population::balance_equation {
 /**
  * Builds single transitions rates matrix Q from S.
  * 
- * \param S_x Transitions rates matrix at coordinate x in s-1.
- * Axis 0: Initial term.
- * Axis 1: Final term.
- * \return Single transitions rates matrix at coordinate x in s-1.
- * Axis 0: Initial term.
- * Axis 1: Final term.
+ * \param S_KK Transitions rates matrix in s-1.
+ * \return Single transitions rates matrix in s-1.
  */
-inline Eigen::MatrixXd Q_x(const Eigen::MatrixXd& S_x) {
-  Eigen::MatrixXd Q_x = S_x.transpose();
-  for (int i = 0; i < S_x.rows(); i++) {
-    for (int j = 0; j < S_x.cols(); j++) {
+inline Eigen::MatrixXd Q_KK(const Eigen::MatrixXd& S_KK) {
+  Eigen::MatrixXd Q_KK = S_KK.transpose();
+  for (int i = 0; i < S_KK.rows(); i++) {
+    for (int j = 0; j < S_KK.cols(); j++) {
       if (i == j) {
-        Q_x(i, j) = -(S_x.row(i).sum() - S_x(i, j));
+        Q_KK(i, j) = -(S_KK.row(i).sum() - S_KK(i, j));
       }
     }
   }
-  return Q_x;
+  return Q_KK;
 }
 
 
 /**
  * Calculates single transition operator using transition rates matrix.
  * 
- * \param Q_x Transition rates matrix in s-1.
- * Axis 0: Initial term.
- * Axis 1: Final term.
+ * \param Q_KK Transition rates matrix in s-1.
  * \param Delta_t Time difference in s.
- * \return Transition operator at coordinate x in s-1.
- * Axis 0: Initial term.
- * Axis 1: Final term.
+ * \return Transition operator in s-1.
  */
-inline Eigen::MatrixXd P_x(const Eigen::MatrixXd& Q_x, const double Delta_t) {
-  Eigen::MatrixXd I = Eigen::MatrixXd::Identity(Q_x.rows(), Q_x.cols());
-  Eigen::MatrixXd P_x = (I - Q_x * Delta_t).inverse();
-  return P_x;
+inline Eigen::MatrixXd
+P_KK(const Eigen::MatrixXd& Q_KK, const double& Delta_t) {
+  Eigen::MatrixXd I_KK = Eigen::MatrixXd::Identity(Q_KK.rows(), Q_KK.cols());
+  Eigen::MatrixXd P_KK = (I_KK - Q_KK * Delta_t).inverse();
+  return P_KK;
 }
 
 
@@ -61,145 +54,113 @@ inline Eigen::MatrixXd P_x(const Eigen::MatrixXd& Q_x, const double Delta_t) {
  * Calculates current electrons populations single vector using previous
  * electrons populations single vector and single transition operator P.
  * 
- * \param p_x_t Previous electrons population at coordinate x in 1.
- * Axis 0: Term.
- * \param P_x Transition operator in s-1.
- * Axis 0: Initial term.
- * Axis 1: Final term.
- * \return Single electrons population vector at coordinate x in 1.
- * Axis 0: Term.
+ * \param p_K Previous electrons population in 1.
+ * \param P_KK Transition operator in s-1.
+ * \return Single electrons population vector in 1.
  */
 inline Eigen::VectorXd
-p_x_t_plus_Delta_t(const Eigen::VectorXd& p_x_t, const Eigen::MatrixXd& P_x) {
-  Eigen::VectorXd p_x_t_plus_Delta_t = P_x * p_x_t;
-  return p_x_t_plus_Delta_t;
+p_t_plus_Delta_t_K(const Eigen::VectorXd& p_K, const Eigen::MatrixXd& P_KK) {
+  Eigen::VectorXd p_t_plus_Delta_t_K = P_KK * p_K;
+  return p_t_plus_Delta_t_K;
 }
 
 
 /**
  * Builds single electrons population vector p_t from set of n_t vectors.
  * 
- * \param n_x_t Previous electrons population at coordinate x.
- * Axis 0: Element index.
- * Axis 1: Term.
- * \return Single electrons population vector at coordinate x in 1.
- * Axis 0: Term.
+ * \param n_ZK Previous electrons population in 1.
+ * \return Single electrons population vector in 1.
  */
-inline Eigen::VectorXd p_x_t(const std::vector<Eigen::VectorXd>& n_x_t) {
-  int size = 0;
-  for (const auto& n : n_x_t) {
-    size += n.size();
+inline Eigen::VectorXd p_K(const std::vector<Eigen::VectorXd>& n_ZK) {
+  int K = 0;
+  for (const auto& n_K : n_ZK) {
+    K += n_K.size();
   }
 
-  Eigen::VectorXd p_x_t = Eigen::VectorXd::Zero(size);
+  Eigen::VectorXd p_K = Eigen::VectorXd::Zero(K);
   int idx = 0;
-  for (const auto& n_x : n_x_t) {
-    p_x_t.segment(idx, n_x.size()) = n_x;
-    idx += n_x.size();
+  for (const auto& n_K : n_ZK) {
+    p_K.segment(idx, n_K.size()) = n_K;
+    idx += n_K.size();
   }
 
-  return p_x_t;
+  return p_K;
 }
 
 
 /**
  * Builds single transitions rates matrix S from set of R matrices.
  * 
- * \param R_x_ij Excitation transitions rates at coordinate x in s-1.
- * Axis 0: Element index.
- * Axis 1: Initial term.
- * Axis 2: Final term.
- * \param R_x_ji De-excitation transitions rates at coordinate x in s-1.
- * Axis 0: Element index.
- * Axis 1: Initial term.
- * Axis 2: Final term.
- * \param R_x_ik Ionization transitions rates at coordinate x in s-1.
- * Axis 0: Element index.
- * Axis 1: Initial term.
- * \param R_x_ki Recombination transitions rates at coordinate x in s-1.
- * Axis 0: Element index.
- * Axis 1: Final term.
- * \return Single transitions rates matrix at coordinate x in s-1.
- * Axis 0: Initial term.
- * Axis 1: Final term.
+ * \param R_ij_ZKK Excitation transitions rates in s-1.
+ * \param R_ji_ZKK De-excitation transitions rates in s-1.
+ * \param R_ik_ZK Ionization transitions rates in s-1.
+ * \param R_ki_ZK Recombination transitions rates in s-1.
+ * \return Single transitions rates matrix in s-1.
  */
-inline Eigen::MatrixXd S_x(
-  const std::vector<Eigen::MatrixXd>& R_x_ij,
-  const std::vector<Eigen::MatrixXd>& R_x_ji,
-  const std::vector<Eigen::VectorXd>& R_x_ik,
-  const std::vector<Eigen::VectorXd>& R_x_ki
+inline Eigen::MatrixXd S_KK(
+  const std::vector<Eigen::MatrixXd>& R_ij_ZKK,
+  const std::vector<Eigen::MatrixXd>& R_ji_ZKK,
+  const std::vector<Eigen::VectorXd>& R_ik_ZK,
+  const std::vector<Eigen::VectorXd>& R_ki_ZK
 ) {
   int size = 0;
-  for (const auto& R_x : R_x_ij) {
-    size += R_x.rows();
+  for (const auto& R_ij_KK : R_ij_ZKK) {
+    size += R_ij_KK.rows();
   }
 
-  Eigen::MatrixXd S_x = Eigen::MatrixXd::Zero(size, size);
+  Eigen::MatrixXd S_KK = Eigen::MatrixXd::Zero(size, size);
   int idx = 0;
-  for (int i = 0; i < R_x_ij.size(); i++) {
-    S_x.block(idx, idx, R_x_ij[i].rows(), R_x_ij[i].cols()) =
-      R_x_ij[i] + R_x_ji[i];
-    idx += R_x_ij[i].rows();
+  for (int z = 0; z < R_ij_ZKK.size(); z++) {
+    S_KK.block(idx, idx, R_ij_ZKK[z].rows(), R_ij_ZKK[z].cols()) =
+      R_ij_ZKK[z] + R_ji_ZKK[z];
+    idx += R_ij_ZKK[z].rows();
   }
   idx = 0;
-  for (int i = 0; i < R_x_ik.size() - 1; i++) {
-    S_x.block(idx, idx + R_x_ik[i].size(), R_x_ik[i].size(), 1) = R_x_ik[i];
-    S_x.block(idx + R_x_ki[i].size(), idx, 1, R_x_ki[i].size()) =
-      R_x_ki[i].transpose();
-    idx += R_x_ik[i].rows();
+  for (int z = 0; z < R_ik_ZK.size() - 1; z++) {
+    S_KK.block(idx, idx + R_ik_ZK[z].size(), R_ik_ZK[z].size(), 1) = R_ik_ZK[z];
+    S_KK.block(idx + R_ki_ZK[z].size(), idx, 1, R_ki_ZK[z].size()) =
+      R_ki_ZK[z].transpose();
+    idx += R_ik_ZK[z].rows();
   }
 
-  return S_x;
+  return S_KK;
 }
 
 
 /**
  * Calculates NLTE electrons population using balance equation.
  * 
- * \param n_x_t Previous electrons population at coordinate x.
- * Axis 0: Element index.
- * Axis 1: Term.
- * \param R_x_ij Excitation transitions rates at coordinate x in s-1.
- * Axis 0: Element index.
- * Axis 1: Initial term.
- * Axis 2: Final term.
- * \param R_x_ji De-excitation transitions rates at coordinate x in s-1.
- * Axis 0: Element index.
- * Axis 1: Initial term.
- * Axis 2: Final term.
- * \param R_x_ik Ionization transitions rates at coordinate x in s-1.
- * Axis 0: Element index.
- * Axis 1: Initial term.
- * \param R_x_ki Recombination transitions rates at coordinate x in s-1.
- * Axis 0: Element index.
- * Axis 1: Final term.
+ * \param n_ZK Previous electrons population in 1.
+ * \param R_ij_ZKK Excitation transitions rates in s-1.
+ * \param R_ji_ZKK De-excitation transitions rates in s-1.
+ * \param R_ik_ZK Ionization transitions rates in s-1.
+ * \param R_ki_ZK Recombination transitions rates in s-1.
  * \param Delta_t Time difference in s.
- * \return Electrons population at coordinate x in 1.
- * Axis 0: Element index.
- * Axis 1: Term.
+ * \return Electrons population in 1.
  */
-inline std::vector<Eigen::VectorXd> n_x_t_plus_Delta_t(
-  const std::vector<Eigen::VectorXd>& n_x_t,
-  const std::vector<Eigen::MatrixXd>& R_x_ij,
-  const std::vector<Eigen::MatrixXd>& R_x_ji,
-  const std::vector<Eigen::VectorXd>& R_x_ik,
-  const std::vector<Eigen::VectorXd>& R_x_ki,
-  const double Delta_t
+inline std::vector<Eigen::VectorXd> n_t_plus_Delta_t_ZK(
+  const std::vector<Eigen::VectorXd>& n_ZK,
+  const std::vector<Eigen::MatrixXd>& R_ij_ZKK,
+  const std::vector<Eigen::MatrixXd>& R_ji_ZKK,
+  const std::vector<Eigen::VectorXd>& R_ik_ZK,
+  const std::vector<Eigen::VectorXd>& R_ki_ZK,
+  const double& Delta_t
 ) {
-  const Eigen::VectorXd p_x_t_ = p_x_t(n_x_t);
-  const Eigen::MatrixXd S_x_ = S_x(R_x_ij, R_x_ji, R_x_ik, R_x_ki);
-  const Eigen::MatrixXd Q_x_ = Q_x(S_x_);
-  const Eigen::MatrixXd P_x_ = P_x(Q_x_, Delta_t);
-  const Eigen::VectorXd p_x_t_plus_Delta_t_ = p_x_t_plus_Delta_t(p_x_t_, P_x_);
+  const Eigen::VectorXd p_K_ = p_K(n_ZK);
+  const Eigen::MatrixXd S_KK_ = S_KK(R_ij_ZKK, R_ji_ZKK, R_ik_ZK, R_ki_ZK);
+  const Eigen::MatrixXd Q_KK_ = Q_KK(S_KK_);
+  const Eigen::MatrixXd P_KK_ = P_KK(Q_KK_, Delta_t);
+  const Eigen::VectorXd p_t_plus_Delta_t_K_ = p_t_plus_Delta_t_K(p_K_, P_KK_);
 
-  auto n_x_t_plus_Delta_t_ = n_x_t;
+  auto n_t_plus_Delta_t_ZK_ = n_ZK;
   int idx = 0;
-  for (auto& n_x : n_x_t_plus_Delta_t_) {
-    n_x = p_x_t_plus_Delta_t_.segment(idx, n_x.size());
-    idx += n_x.size();
+  for (auto& n_t_plus_Delta_t_K_ : n_t_plus_Delta_t_ZK_) {
+    n_t_plus_Delta_t_K_ =
+      p_t_plus_Delta_t_K_.segment(idx, n_t_plus_Delta_t_K_.size());
+    idx += n_t_plus_Delta_t_K_.size();
   }
 
-  return n_x_t_plus_Delta_t_;
+  return n_t_plus_Delta_t_ZK_;
 }
 
 
@@ -207,52 +168,37 @@ inline std::vector<Eigen::VectorXd> n_x_t_plus_Delta_t(
  * Calculates NLTE electrons population using balance equation across all
  * spatial points.
  * 
- * \param x Any vector with shape corresponding to spatial points.
- * Axis 0: Coordinate index.
- * \param n_t Previous electrons population.
- * Axis 0: Coordinate index.
- * Axis 1: Element index.
- * Axis 2: Term.
- * \param R_ij Excitation transitions rates.
- * Axis 0: Coordinate index.
- * Axis 1: Element index.
- * Axis 2: Initial term.
- * Axis 3: Final term.
- * \param R_ji De-excitation transitions rates.
- * Axis 0: Coordinate index.
- * Axis 1: Element index.
- * Axis 2: Initial term.
- * Axis 3: Final term.
- * \param R_ik Ionization transitions rates.
- * Axis 0: Coordinate index.
- * Axis 1: Element index.
- * Axis 2: Initial term.
- * \param R_ki Recombination transitions rates.
- * Axis 0: Coordinate index.
- * Axis 1: Element index.
- * Axis 2: Final term.
+ * \param x_X Any vector with shape corresponding to spatial points.
+ * \param n_t_XZK Previous electrons population.
+ * \param R_ij_XZKK Excitation transitions rates.
+ * \param R_ji_XZKK De-excitation transitions rates.
+ * \param R_ik_XZK Ionization transitions rates.
+ * \param R_ki_XZK Recombination transitions rates.
  * \param Delta_t Time difference in s.
  * \return Electrons population in 1.
- * Axis 0: Coordinate index.
- * Axis 1: Element index.
- * Axis 2: Term.
  */
-inline std::vector<std::vector<Eigen::VectorXd>> n_t_plus_Delta_t(
-  const Eigen::VectorXd& x,
-  const std::vector<std::vector<Eigen::VectorXd>>& n_t,
-  const std::vector<std::vector<Eigen::MatrixXd>>& R_ij,
-  const std::vector<std::vector<Eigen::MatrixXd>>& R_ji,
-  const std::vector<std::vector<Eigen::VectorXd>>& R_ik,
-  const std::vector<std::vector<Eigen::VectorXd>>& R_ki,
-  const double Delta_t
+inline std::vector<std::vector<Eigen::VectorXd>> n_t_plus_Delta_t_XZK(
+  const Eigen::VectorXd& x_X,
+  const std::vector<std::vector<Eigen::VectorXd>>& n_t_XZK,
+  const std::vector<std::vector<Eigen::MatrixXd>>& R_ij_XZKK,
+  const std::vector<std::vector<Eigen::MatrixXd>>& R_ji_XZKK,
+  const std::vector<std::vector<Eigen::VectorXd>>& R_ik_XZK,
+  const std::vector<std::vector<Eigen::VectorXd>>& R_ki_XZK,
+  const double& Delta_t
 ) {
-  const auto& X = x.size();
-  std::vector<std::vector<Eigen::VectorXd>> n_t_plus_Delta_t(X);
-  for (int i = 0; i < X; i++) {
-    n_t_plus_Delta_t[i] =
-      n_x_t_plus_Delta_t(n_t[i], R_ij[i], R_ji[i], R_ik[i], R_ki[i], Delta_t);
+  const auto& X = x_X.size();
+  std::vector<std::vector<Eigen::VectorXd>> n_t_plus_Delta_t_XZK(X);
+  for (int x = 0; x < X; x++) {
+    n_t_plus_Delta_t_XZK[x] = n_t_plus_Delta_t_ZK(
+      n_t_XZK[x],
+      R_ij_XZKK[x],
+      R_ji_XZKK[x],
+      R_ik_XZK[x],
+      R_ki_XZK[x],
+      Delta_t
+    );
   }
-  return n_t_plus_Delta_t;
+  return n_t_plus_Delta_t_XZK;
 }
 
 
