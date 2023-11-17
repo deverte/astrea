@@ -22,6 +22,8 @@
 #include "./element/mg_iii.h"
 #include "./element/o_i.h"
 #include "./element/o_ii.h"
+#include "./optics/absorption_coefficient.h"
+#include "./optics/optical_depth.h"
 #include "./math/interp1d_linear.h"
 #include "./math/interp1d_nearest.h"
 #include "./math/trapezoid.h"
