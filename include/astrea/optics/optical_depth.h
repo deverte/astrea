@@ -20,26 +20,38 @@ namespace astrea::optics::optical_depth {
 /**
  * Optical depth.
  * 
- * \param x_X Coordinates in au.
- * \param n_X Element number densities in cm-3.
- * \param g_K Statistical weights in 1.
- * \param E_K Energies in eV.
- * \param A_KK Spontaneous emission rates in s-1.
- * \param nu Frequency in s-1.
+ * \param x_X Coordinates (positive, over single axis in ascending order) in au.
+ * \param alpha_nu_X Absorption coefficients in au-1.
  * \return Optical depth in 1.
  */
 inline double tau(
   const Eigen::VectorXd& x_X,
-  const Eigen::VectorXd& n_X,
-  const Eigen::VectorXd& g_K,
-  const Eigen::VectorXd& E_K,
-  const Eigen::MatrixXd& A_KK,
-  const double& nu
+  const Eigen::VectorXd& alpha_nu_X
 ) {
-  const auto alpha_nu_X_ =
-    absorption_coefficient::alpha_nu_X(n_X, g_K, E_K, A_KK, nu);
-  const auto tau = astrea::math::trapezoid(alpha_nu_X_, x_X);
+  const auto tau = astrea::math::trapezoid(alpha_nu_X, x_X);
   return tau;
+}
+
+
+/**
+ * Optical depth.
+ * 
+ * \param x_X Coordinates (positive, over single axis in ascending order) in au.
+ * \param alpha_nu_X Absorption coefficients in au-1.
+ * \return Optical depth in 1.
+ */
+inline Eigen::VectorXd tau_X(
+  const Eigen::VectorXd& x_X,
+  const Eigen::VectorXd& alpha_nu_X
+) {
+  const auto& X = x_X.size();
+
+  Eigen::VectorXd tau_X = Eigen::VectorXd::Zero(X);
+  for (int x = 0; x < X; x++) {
+    tau_X[x] = tau(x_X.head(x + 1), alpha_nu_X.head(x + 1));
+  }
+
+  return tau_X;
 }
 
 
