@@ -37,7 +37,9 @@ inline double H(
 
   auto H = 0.0;
   for (int j = 0; j < K; j++) {
-    H += a * E_K(j) * R_KK(j, 0) * n_K(j);
+    for (int i = 0; i < j; i++) {
+      H += a * (E_K(j) - E_K(i)) * R_KK(i, j) * n_K(i);
+    }
   }
 
   return H;
