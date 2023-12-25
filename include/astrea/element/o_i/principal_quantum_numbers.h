@@ -22,7 +22,7 @@ namespace astrea::element::o_i {
  * - Axis 0: Term.
  *   - Principal quantum number in 1.
  */
-inline const Eigen::VectorXd n() {
+inline const Eigen::VectorXd n_K() {
   Eigen::VectorXd n = Eigen::Vector<double, 51>::Zero();
   n(static_cast<int>(STRUCTURE::LS_He_2s2_2p3_4So_3s_3So)) = 3.0;
   n(static_cast<int>(STRUCTURE::LS_He_2s2_2p3_4So_3s_5So)) = 3.0;

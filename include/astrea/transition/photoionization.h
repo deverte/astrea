@@ -1,6 +1,6 @@
 /**
- * \file astrea/transitions/ri.h
- * Radiative ionization transition.
+ * \file astrea/transition/photoionization.h
+ * Photoionization transition.
  * 
  * \copyright GPL
  * \author Artem Shepelin (4.shepelin@gmail.com)
@@ -17,11 +17,11 @@
 #include "astrea/math/trapezoid.h"
 
 
-namespace astrea::transition::ri {
+namespace astrea::transition::photoionization {
 
 
 /**
- * Radiative ionization (photoionization) transition rate.
+ * Photoionization transition rate.
  * 
  * \param sigma_vs_nu Photoionization cross section.
  * Axis 0: Bivariate data (row). Row 0: Frequency in s-1. Row 1: Cross section
@@ -58,24 +58,24 @@ inline double R_ik(
   const Eigen::VectorXd lambda = c / nu.array(); // nm
 
   const Eigen::VectorXd F_lambda = // W m-2 nm-1
-    astrea::math::interp1d_linear_X(lambda_L, F_lambda_L, lambda)
-  ;
+    astrea::math::interp1d_linear::f_X(lambda_L, F_lambda_L, lambda);
   const Eigen::VectorXd F_nu =
     c / nu.array().pow(2) * F_lambda.array(); // W m-2 s
 
   const Eigen::VectorXd sigma = // cm2
-    astrea::math::interp1d_linear_X(nu_A, sigma_A, nu);
+    astrea::math::interp1d_linear::f_X(nu_A, sigma_A, nu);
 
   const Eigen::VectorXd C = a * sigma.array() * F_nu.array() / nu.array(); // 1
 
-  const auto R_ik = astrea::math::trapezoid_dx(C, d_nu) * std::exp(-tau); // s-1
+  const auto R_ik =
+    astrea::math::trapezoid::F_dx(C, d_nu) * std::exp(-tau); // s-1
 
   return R_ik;
 }
 
 
 /**
- * Radiative ionization (photoionization) transition rates.
+ * Photoionization transition rates.
  * 
  * \param sigma_vs_nu_K Photoionization cross sections.
  * Axis 0: Bivariate data (row). Row 0: Frequency in s-1. Row 1: Cross section
@@ -104,7 +104,7 @@ inline Eigen::VectorXd R_K(
 
 
 /**
- * Radiative ionization (photoionization) transition rates.
+ * Photoionization transition rates.
  * 
  * \param sigma_vs_nu_ZK Photoionization cross sections.
  * Axis 0: Bivariate data (row). Row 0: Frequency in s-1. Row 1: Cross section
@@ -133,7 +133,7 @@ inline std::vector<Eigen::VectorXd> R_ZK(
 
 
 /**
- * Radiative ionization (photoionization) transition rates.
+ * Photoionization transition rates.
  * 
  * \param x_X Any vector with shape corresponding to spatial points.
  * \param sigma_vs_nu_ZK Photoionization cross sections in cm2.

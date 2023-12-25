@@ -1,7 +1,6 @@
 /**
- * \file astrea/transitions/cd.h
- * Collisional de-excitation transitions rates from LTE (using Boltzmann
- * distribution).
+ * \file astrea/transition/spontaneous_emission.h
+ * Spontaneous emission transitions rates using oscillator strengths.
  * 
  * \copyright GPL
  * \author Artem Shepelin (4.shepelin@gmail.com)
@@ -15,39 +14,35 @@
 #include <Eigen/Dense>
 
 
-namespace astrea::transition::cd {
+namespace astrea::transition::spontaneous_emission {
 
 
 /**
- * Collisional de-excitation transitions rates from LTE (using Boltzmann
- * distribution).
+ * Spontaneous emission transitions rates using oscillator strengths.
  * 
- * \param T Temperature in K.
- * \param R_ij Collisional excitation rate in s-1.
+ * \param f_ij Oscillator strengths in 1.
  * \param g_i Statistical weight of term i in 1.
  * \param g_j Statistical weight of term j in 1.
  * \param E_ij Energy differenece between terms i and j in eV.
- * \return Transition rate in s-1.
+ * \return Transitions rate in s-1.
  */
 inline double R_ji(
-  const double& T,
-  const double& R_ij,
+  const double& f_ij,
   const double& g_i,
   const double& g_j,
   const double& E_ij
 ) {
-  const auto k_B = 8.617333262e-5; // eV K-1
-  const auto R_ji = R_ij * std::exp(E_ij / (k_B * T)) * g_i / g_j;
+  const auto a = 43391988.531763464; // eV-2 s-1
+  const auto R_ji = a * f_ij * g_i / g_j * std::pow(E_ij, 2.0);
   return R_ji;
 }
 
 
 /**
- * Collisional de-excitation transitions rates from LTE (using Boltzmann
- * distribution).
+ * Spontaneous emission transitions rates using oscillator strengths.
  * 
- * \param T Temperature in K.
- * \param R_KK Collisional excitation rate in s-1.
+ * \param f_KK Oscillator strengths in 1.
+ * Must be sorted in ascending order over energies!
  * \param g_K Statistical weights in 1.
  * Must be sorted in ascending order over energies!
  * \param E_K Energies in eV.
@@ -55,8 +50,7 @@ inline double R_ji(
  * \return Transitions rates in s-1.
  */
 inline Eigen::MatrixXd R_KK(
-  const double& T,
-  const Eigen::MatrixXd& R_KK,
+  const Eigen::MatrixXd& f_KK,
   const Eigen::VectorXd& g_K,
   const Eigen::VectorXd& E_K
 ) {
@@ -65,7 +59,7 @@ inline Eigen::MatrixXd R_KK(
   for (int i = 0; i < K; i++) {
     for (int j = i + 1; j < K; j++) {
       const auto E_ij = E_K(j) - E_K(i);
-      R_KK_(j, i) = R_ji(T, R_KK(i, j), g_K(i), g_K(j), E_ij);
+      R_KK_(j, i) = R_ji(f_KK(i, j), g_K(i), g_K(j), E_ij);
     }
   }
   return R_KK_;
@@ -73,11 +67,10 @@ inline Eigen::MatrixXd R_KK(
 
 
 /**
- * Collisional de-excitation transitions rates from LTE (using Boltzmann
- * distribution).
+ * Spontaneous emission transitions rates using oscillator strengths.
  * 
- * \param T Temperature in K.
- * \param R_ZKK Collisional excitation rates in s-1.
+ * \param f_ZKK Oscillator strengths in 1.
+ * Must be sorted in ascending order over energies per element!
  * \param g_ZK Statistical weights in 1.
  * Must be sorted in ascending order over energies per element!
  * \param E_ZK Energies in eV.
@@ -85,26 +78,25 @@ inline Eigen::MatrixXd R_KK(
  * \return Transitions rates in s-1.
  */
 inline std::vector<Eigen::MatrixXd> R_ZKK(
-  const double& T,
-  const std::vector<Eigen::MatrixXd>& R_ZKK,
+  const std::vector<Eigen::MatrixXd>& f_ZKK,
   const std::vector<Eigen::VectorXd>& g_ZK,
   const std::vector<Eigen::VectorXd>& E_ZK
 ) {
   const auto& Z = g_ZK.size();
   std::vector<Eigen::MatrixXd> R_ZKK_(Z);
   for (int z = 0; z < Z; z++) {
-    R_ZKK_[z] = R_KK(T, R_ZKK[z], g_ZK[z], E_ZK[z]);
+    R_ZKK_[z] = R_KK(f_ZKK[z], g_ZK[z], E_ZK[z]);
   }
   return R_ZKK_;
 }
 
 
 /**
- * Collisional de-excitation transitions rates from LTE (using Boltzmann
- * distribution).
+ * Spontaneous emission transitions rates using oscillator strengths.
  * 
- * \param T_X Temperatures in K.
- * \param R_XZKK Collisional excitation rates in s-1.
+ * \param x_X Any vector with shape corresponding to spatial points.
+ * \param f_ZKK Oscillator strengths in 1.
+ * Must be sorted in ascending order over energies per element!
  * \param g_ZK Statistical weights in 1.
  * Must be sorted in ascending order over energies per element!
  * \param E_ZK Energies in eV.
@@ -112,15 +104,16 @@ inline std::vector<Eigen::MatrixXd> R_ZKK(
  * \return Transitions rates in s-1.
  */
 inline std::vector<std::vector<Eigen::MatrixXd>> R_XZKK(
-  const Eigen::VectorXd& T_X,
-  const std::vector<std::vector<Eigen::MatrixXd>>& R_XZKK,
+  const Eigen::VectorXd& x_X,
+  const std::vector<Eigen::MatrixXd>& f_ZKK,
   const std::vector<Eigen::VectorXd>& g_ZK,
   const std::vector<Eigen::VectorXd>& E_ZK
 ) {
-  const auto& X = T_X.size();
+  const auto& X = x_X.size();
   std::vector<std::vector<Eigen::MatrixXd>> R_XZKK_(X);
+  const auto R_XZKK__ = R_ZKK(f_ZKK, g_ZK, E_ZK);
   for (int x = 0; x < X; x++) {
-    R_XZKK_[x] = R_ZKK(T_X(x), R_XZKK[x], g_ZK, E_ZK);
+    R_XZKK_[x] = R_XZKK__;
   }
   return R_XZKK_;
 }

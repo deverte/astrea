@@ -92,7 +92,8 @@
         "scoped_allocator": "cpp",
         "format": "cpp",
         "stdfloat": "cpp",
-        "*.yaml": "cpp"
+        "*.yaml": "cpp",
+        "hash_set": "cpp"
     },
     "mesonbuild.configureOnOpen": false,
     "svg.preview.background": "white"

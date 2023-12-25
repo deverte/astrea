@@ -24,7 +24,7 @@ namespace astrea::element::o_ii {
  * - Axis 0: Term.
  *   - Energy in eV.
  */
-inline const Eigen::VectorXd E() {
+inline const Eigen::VectorXd E_K() {
   Eigen::VectorXd E = Eigen::Vector<double, 1>::Zero();
   E(static_cast<int>(STRUCTURE::LS_He_2s2_2p3_4S)) = 0.0;
   return E;

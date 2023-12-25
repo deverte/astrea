@@ -11,7 +11,7 @@
 #include <Eigen/Dense>
 
 
-namespace astrea::math {
+namespace astrea::math::interp1d_linear {
 
 
 /**
@@ -22,7 +22,7 @@ namespace astrea::math {
  * \param x x point to interpolate.
  * \return Interpolated y.
  */
-inline double interp1d_linear(
+inline double f(
   const Eigen::VectorXd& x_Y,
   const Eigen::VectorXd& y_Y,
   const double& x
@@ -52,7 +52,7 @@ inline double interp1d_linear(
  * \param x_X x points to interpolate.
  * \return Interpolated y.
  */
-inline Eigen::VectorXd interp1d_linear_X(
+inline Eigen::VectorXd f_X(
   const Eigen::VectorXd& x_Y,
   const Eigen::VectorXd& y_Y,
   const Eigen::VectorXd& x_X
@@ -60,7 +60,7 @@ inline Eigen::VectorXd interp1d_linear_X(
   Eigen::VectorXd y_X = Eigen::VectorXd(x_X.size());
 
   for (int i = 0; i < x_X.size(); i++) {
-    y_X(i) = interp1d_linear(x_Y, y_Y, x_X(i));
+    y_X(i) = f(x_Y, y_Y, x_X(i));
   }
 
   return y_X;

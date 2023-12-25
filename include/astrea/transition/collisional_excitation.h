@@ -1,5 +1,5 @@
 /**
- * \file astrea/transitions/ce.h
+ * \file astrea/transition/collisional_excitation.h
  * Collisional excitation transitions rates using collision rate coefficients.
  * 
  * \copyright GPL
@@ -16,7 +16,7 @@
 #include "astrea/math/interp1d_linear.h"
 
 
-namespace astrea::transition::ce {
+namespace astrea::transition::collisional_excitation {
 
 
 /**
@@ -41,7 +41,7 @@ inline double R_ij(
     const auto& T_X = C_vs_T.row(0);
     const auto& C_X = C_vs_T.row(1);
 
-    C_ij = astrea::math::interp1d_linear(T_X, C_X, T);
+    C_ij = astrea::math::interp1d_linear::f(T_X, C_X, T);
   }
 
   const auto R_ij = N_e * C_ij;

@@ -23,7 +23,7 @@ namespace astrea::element::fe_i {
  * - Axis 1: Final term (j-index).
  *   - Oscillator strength in 1.
  */
-inline const Eigen::MatrixXd f() {
+inline const Eigen::MatrixXd f_KK() {
   Eigen::MatrixXd f = Eigen::Matrix<double, 239, 239>::Zero();
   f(
     static_cast<int>(STRUCTURE::LS_Ar_3d7_4P_4s_a5P),

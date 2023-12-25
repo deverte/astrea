@@ -5,12 +5,18 @@
 Header-only C++17 library for statistical equilibrium calculations in cosmic
 plasma.
 
+Available physical processes:
+
+- elements and electron levels populations (LTE and NLTE)
+- thermodynamics
+- optics
+
 Available detailed balance pairs:
 
 - collisional bound-bound transitions
 - radiative bound-bound transitions
-- collisional ionization / recombination (in progress)
-- radiative ionization / recombination (in progress)
+- collisional ionization / recombination
+- radiative ionization / recombination
 
 Available elements:
 
@@ -25,15 +31,14 @@ Available elements:
 - Fe I
 - Fe II
 - Fe III
+- Custom
 
 Available spectra:
 
 - KELT-9
+- Custom
 
-> See also Python version [astrea_py](https://gitea.zarux.ru/astro/astrea_py)
-> and high-level API [urania](https://gitea.zarux.ru/astro/urania) with Jupyter
-> Notebook
-> [examples](https://gitea.zarux.ru/astro/urania/src/branch/main/examples).
+> See also Python version [astrea_py](https://gitea.zarux.ru/astro/astrea_py).
 
 ## Installation
 
@@ -73,7 +78,7 @@ namespaces.
 ```
 <parent namespaces...>::<quantity>::<symbol>
 
-astrea::cooling::cooling_rate::L
+astrea::thermodynamics::cooling_rate::L
 ```
 
 ### Dimensions
@@ -118,6 +123,7 @@ Conventional symbols for dimensions:
 - `X` - coordinate
 - `Z` - element
 - `K` - element level (term)
+- `E` - continuous energy, frequency or wavelength
 
 ### Multivariate distributions
 

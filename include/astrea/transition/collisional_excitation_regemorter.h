@@ -1,5 +1,5 @@
 /**
- * \file astrea/transitions/ce_regemorter.h
+ * \file astrea/transition/collisional_excitation_regemorter.h
  * Collisional excitation transitions rates using Regemorter formula.
  * 
  * \copyright GPL
@@ -16,7 +16,7 @@
 #include "astrea/math/interp1d_linear.h"
 
 
-namespace astrea::transition::ce_regemorter {
+namespace astrea::transition::collisional_excitation_regemorter {
 
 
 /**
@@ -45,7 +45,7 @@ inline double R_ij(
     const auto& T_X = f_vs_T.row(0);
     const auto& f_X = f_vs_T.row(1);
 
-    f_ij = astrea::math::interp1d_linear(T_X, f_X, T);
+    f_ij = astrea::math::interp1d_linear::f(T_X, f_X, T);
   }
 
   const auto a = 8.62913210858377e-6; // cm3 s-1 K1/2

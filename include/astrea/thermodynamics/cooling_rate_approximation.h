@@ -1,5 +1,5 @@
 /**
- * \file astrea/cooling/cooling_rate_approximation.h
+ * \file astrea/thermodynamics/cooling_rate_approximation.h
  * Cooling rate approximation.
  * 
  * \copyright GPL
@@ -13,7 +13,7 @@
 #include "astrea/math/interp1d_linear.h"
 
 
-namespace astrea::cooling::cooling_rate_approximation {
+namespace astrea::thermodynamics::cooling_rate_approximation {
 
 
 /**
@@ -38,7 +38,7 @@ inline Eigen::VectorXd L_X(
   const auto& T_ = Lambda_vs_T.row(0);
   const auto& Lambda_ = Lambda_vs_T.row(1);
 
-  const auto Lambda = astrea::math::interp1d_linear_X(T_, Lambda_, T_X);
+  const auto Lambda = astrea::math::interp1d_linear::f_X(T_, Lambda_, T_X);
 
   const auto L = Lambda.array() * N_A_X.array() * N_e_X.array();
 

@@ -1,5 +1,5 @@
 /**
- * \file astrea/cooling/cooling_rate.h
+ * \file astrea/thermodynamics/cooling_rate.h
  * Cooling rate.
  * 
  * \copyright GPL
@@ -13,7 +13,7 @@
 #include <Eigen/Dense>
 
 
-namespace astrea::cooling::cooling_rate {
+namespace astrea::thermodynamics::cooling_rate {
 
 
 /**

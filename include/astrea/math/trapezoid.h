@@ -11,7 +11,7 @@
 #include <Eigen/Dense>
 
 
-namespace astrea::math {
+namespace astrea::math::trapezoid {
 
 
 /**
@@ -21,7 +21,7 @@ namespace astrea::math {
  * \param dx Spacing between sample points.
  * \return Definite integral.
  */
-inline double trapezoid_dx(const Eigen::VectorXd& y_X, const double& dx) {
+inline double F_dx(const Eigen::VectorXd& y_X, const double& dx) {
   auto trapezoid = 0.0;
   for (int i = 0; i < y_X.size() - 1; i++) {
     trapezoid += (y_X(i) + y_X(i + 1)) / 2.0 * dx;
@@ -37,8 +37,7 @@ inline double trapezoid_dx(const Eigen::VectorXd& y_X, const double& dx) {
  * \param x_X Sample points corresponding to y values.
  * \return Definite integral.
  */
-inline double
-trapezoid(const Eigen::VectorXd& y_X, const Eigen::VectorXd& x_X) {
+inline double F(const Eigen::VectorXd& y_X, const Eigen::VectorXd& x_X) {
   auto trapezoid = 0.0;
   for (int i = 0; i < y_X.size() - 1; i++) {
     const auto dx = x_X(i + 1) - x_X(i);

@@ -24,7 +24,7 @@ namespace astrea::element::o_ii {
  * - Axis 0: Term.
  *   - Statistical weight in 1.
  */
-inline const Eigen::VectorXd g() {
+inline const Eigen::VectorXd g_K() {
   Eigen::VectorXd g = Eigen::Vector<double, 1>::Zero();
   g(static_cast<int>(STRUCTURE::LS_He_2s2_2p3_4S)) = 4.0;
   return g;

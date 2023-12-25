@@ -1,7 +1,6 @@
 /**
- * \file astrea/transitions/re_lorentz.h
- * Radiative excitation (photoexcitation) transitions rates using Lorentz line
- * shape.
+ * \file astrea/transition/photoexcitation_lorentz.h
+ * Photoexcitation transitions rates using Lorentz line shape.
  * 
  * \copyright GPL
  * \author Artem Shepelin (4.shepelin@gmail.com)
@@ -17,12 +16,11 @@
 #include "astrea/math/interp1d_linear.h"
 
 
-namespace astrea::transition::re_lorentz {
+namespace astrea::transition::photoexcitation_lorentz {
 
 
 /**
- * Radiative excitation (photoexcitation) transition rate using Lorentz line
- * shape.
+ * Photoexcitation transition rate using Lorentz line shape.
  * 
  * \param g_i Statistical weight term i in 1.
  * \param g_j Statistical weight of term j in 1.
@@ -49,7 +47,7 @@ inline double R_ij(
   const auto& F_lambda_L = F_lambda_vs_lambda.row(1); // W m-2 nm-1
 
   const auto F_lambda = // W m-2 nm-1
-    astrea::math::interp1d_linear(lambda_L, F_lambda_L, lambda_ij);
+    astrea::math::interp1d_linear::f(lambda_L, F_lambda_L, lambda_ij);
 
   const auto R_ij =
     a * A_ji * g_j / g_i * std::pow(lambda_ij, 5.0) * F_lambda * std::exp(-tau);
@@ -58,8 +56,7 @@ inline double R_ij(
 
 
 /**
- * Radiative excitation (photoexcitation) transition rates using Lorentz line
- * shape.
+ * Photoexcitation transition rates using Lorentz line shape.
  * 
  * \param g_K Statistical weights in 1.
  * Must be sorted in ascending order over energies!
@@ -95,8 +92,7 @@ inline Eigen::MatrixXd R_KK(
 
 
 /**
- * Radiative excitation (photoexcitation) transition rates using Lorentz line
- * shape.
+ * Photoexcitation transition rates using Lorentz line shape.
  * 
  * \param g_ZK Statistical weights in 1.
  * Must be sorted in ascending order over energies per element!
@@ -129,8 +125,7 @@ inline std::vector<Eigen::MatrixXd> R_ZKK(
 
 
 /**
- * Radiative excitation (photoexcitation) transition rates using Lorentz line
- * shape.
+ * Photoexcitation transition rates using Lorentz line shape.
  * 
  * \param x_X Any vector with shape corresponding to spatial points.
  * \param g_ZK Statistical weights in 1.
