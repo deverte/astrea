@@ -12,9 +12,12 @@
 #pragma once
 
 
+#include "astrea/element/o_ii/collision_rate_coefficients.h"
 #include "astrea/element/o_ii/cooling_efficiency.h"
 #include "astrea/element/o_ii/energies.h"
 #include "astrea/element/o_ii/info.h"
+#include "astrea/element/o_ii/oscillator_strengths.h"
+#include "astrea/element/o_ii/photoionization_cross_sections.h"
 #include "astrea/element/o_ii/principal_quantum_numbers.h"
 #include "astrea/element/o_ii/statistical_weights.h"
 #include "astrea/element/o_ii/structure.h"

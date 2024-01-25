@@ -38,7 +38,7 @@ inline double L(
   auto L = 0.0;
   for (int j = 0; j < K; j++) {
     for (int i = 0; i < j; i++) {
-      L += a * (E_K(j) - E_K(i)) * R_KK(j, i) * n_K(j);
+      L += a * (E_K(j) - E_K(i)) * R_KK(i, j) * n_K(i);
     }
   }
 

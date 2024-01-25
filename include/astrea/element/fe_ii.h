@@ -15,6 +15,7 @@
 #include "astrea/element/fe_ii/energies.h"
 #include "astrea/element/fe_ii/info.h"
 #include "astrea/element/fe_ii/oscillator_strengths.h"
+#include "astrea/element/fe_ii/photoionization_cross_sections.h"
 #include "astrea/element/fe_ii/principal_quantum_numbers.h"
 #include "astrea/element/fe_ii/statistical_weights.h"
 #include "astrea/element/fe_ii/structure.h"

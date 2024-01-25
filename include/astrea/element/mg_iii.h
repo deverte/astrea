@@ -10,7 +10,10 @@
 
 
 #include "astrea/element/mg_iii/cooling_efficiency.h"
+#include "astrea/element/mg_iii/effective_collision_strengths.h"
 #include "astrea/element/mg_iii/energies.h"
 #include "astrea/element/mg_iii/info.h"
+#include "astrea/element/mg_iii/oscillator_strengths.h"
+#include "astrea/element/mg_iii/photoionization_cross_sections.h"
 #include "astrea/element/mg_iii/statistical_weights.h"
 #include "astrea/element/mg_iii/structure.h"
