@@ -75,4 +75,42 @@ inline Eigen::VectorXd H_X(
 }
 
 
+/**
+ * Heating rate.
+ * 
+ * \param x_X Any array with coordinates shape.
+ * \param n_XZK Electrons population in 1.
+ * Must be sorted over energies!
+ * \param R_XZKK Transitions rates in s-1.
+ * Must be sorted over energies!
+ * \param E_ZK Energies of elements in eV.
+ * Must be sorted!
+ * \return Cooling rates in erg s-1 cm-3.
+ */
+inline std::vector<Eigen::VectorXd> H_ZX(
+  const Eigen::VectorXd& x_X,
+  const std::vector<std::vector<Eigen::VectorXd>>& n_XZK,
+  const std::vector<std::vector<Eigen::MatrixXd>>& R_XZKK,
+  const std::vector<Eigen::VectorXd>& E_ZK
+) {
+  const auto& X = x_X.size();
+  const auto& Z = E_ZK.size();
+
+  std::vector<Eigen::VectorXd> H_ZX(Z);
+  for (int z = 0; z < Z; z++) {
+    std::vector<Eigen::VectorXd> n_XK(X);
+    std::vector<Eigen::MatrixXd> R_XKK(X);
+
+    for (int x = 0; x < X; x++) {
+      n_XK[x] = n_XZK[x][z];
+      R_XKK[x] = R_XZKK[x][z];
+    }
+
+    H_ZX[z] = H_X(x_X, n_XK, R_XKK, E_ZK[z]);
+  }
+
+  return H_ZX;
+}
+
+
 }

@@ -1,25 +1,25 @@
-project = astrea
-version = 0.7.1
+PROJECT = astrea
+VER = 0.7.2
 
 
 .PHONY: update-version
 update-version:
-	perl -i -pe 's/version\s=\s\".*\"/version = \"${version}\"/g' conanfile.py
+	python3 -c "import pathlib; import re; f = pathlib.Path('conanfile.py');\
+f.write_text(re.sub('version = \".*\"', 'version = \"${VER}\"', f.read_text()))"
 
 
 .PHONY: install
 install:
 	$(MAKE) update-version
 	conan config install ./remotes.json
-	# conan create . --build=missing # build inside Conan cache (~/conan2/p)
 	conan create .
 
 
 .PHONY: uninstall
 uninstall:
-	conan remove ${project}
+	conan remove ${PROJECT}
 
 
 .PHONY: publish
 publish:
-	conan upload --remote=astro ${project}/${version}
+	conan upload --remote=astro ${PROJECT}/${VER}

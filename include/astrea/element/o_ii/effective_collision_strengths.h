@@ -1,6 +1,6 @@
 /**
- * \file astrea/element/o_ii/collision_rate_coefficients.h
- * O II collision rate coefficients.
+ * \file astrea/element/o_ii/effective_collision_strengths.h
+ * O II effective collision strengths.
  * 
  * \copyright GPL
  * \author Artem Shepelin (4.shepelin@gmail.com)
@@ -17,20 +17,20 @@ namespace astrea::element::o_ii {
 
 
 /**
- * O II collision rate coefficients.
+ * O II effective collision strengths.
  * 
  * - Axis 0: Initial term (i-index).
  * - Axis 1: Final term (j-index).
  * - Axis 2: Bivariate data (row).
  *   - Row 0: Temperature in K.
- *   - Row 1: Collision rate coefficient in cm3 s-1.
+ *   - Row 1: Effective collision strength in 1.
  * - Axis 3: Bivariate pair index (column).
  */
-inline const std::vector<std::vector<Eigen::Matrix<double, 2, 0>>> C_vs_T_KK() {
+inline const std::vector<std::vector<Eigen::Matrix<double, 2, 0>>> f_vs_T_KK() {
   std::vector<std::vector<Eigen::Matrix<double, 2, 0>>>
-  C_vs_T_KK(1, std::vector<Eigen::Matrix<double, 2, 0>>(1));
+  f_vs_T_KK(1, std::vector<Eigen::Matrix<double, 2, 0>>(1));
 
-  return C_vs_T_KK;
+  return f_vs_T_KK;
 }
 
 

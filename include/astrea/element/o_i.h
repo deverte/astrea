@@ -12,8 +12,8 @@
 #pragma once
 
 
-#include "astrea/element/o_i/collision_rate_coefficients.h"
 #include "astrea/element/o_i/cooling_efficiency.h"
+#include "astrea/element/o_i/effective_collision_strengths.h"
 #include "astrea/element/o_i/energies.h"
 #include "astrea/element/o_i/info.h"
 #include "astrea/element/o_i/oscillator_strengths.h"

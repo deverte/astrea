@@ -4,7 +4,7 @@ from conan.tools.files import copy
 
 class Astrea(ConanFile):
     name = "astrea"
-    version = "0.7.1" # Managed by Makefile
+    version = "0.7.2" # Managed by Makefile
     exports_sources = "include/*"
     no_copy_source = True
 

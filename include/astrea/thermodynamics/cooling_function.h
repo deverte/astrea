@@ -1,6 +1,6 @@
 /**
- * \file astrea/thermodynamics/cooling_rate.h
- * Cooling rate.
+ * \file astrea/thermodynamics/cooling_function.h
+ * Cooling function.
  * 
  * \copyright GPL
  * \author Artem Shepelin (4.shepelin@gmail.com)
@@ -12,12 +12,15 @@
 
 #include <Eigen/Dense>
 
+#include "astrea/thermodynamics/cooling_rate.h"
+#include "astrea/thermodynamics/heating_rate.h"
 
-namespace astrea::thermodynamics::cooling_rate {
+
+namespace astrea::thermodynamics::cooling_function {
 
 
 /**
- * Cooling rate.
+ * Cooling function.
  * 
  * \param n_K Electrons population in 1.
  * Must be sorted over energies!
@@ -27,27 +30,20 @@ namespace astrea::thermodynamics::cooling_rate {
  * Must be sorted!
  * \return Cooling rate in erg s-1 cm-3.
  */
-inline double L(
+inline double Lambda(
   const Eigen::VectorXd& n_K,
   const Eigen::MatrixXd& R_KK,
   const Eigen::VectorXd& E_K
 ) {
-  const auto a = 1.602176634e-12; // erg eV-1
-  const auto& K = n_K.size();
-
-  auto L = 0.0;
-  for (int j = 0; j < K; j++) {
-    for (int i = 0; i < j; i++) {
-      L += a * (E_K(j) - E_K(i)) * R_KK(i, j) * n_K(i);
-    }
-  }
-
-  return L;
+  const auto L = astrea::thermodynamics::cooling_rate::L(n_K, R_KK, E_K);
+  const auto H = astrea::thermodynamics::heating_rate::H(n_K, R_KK, E_K);
+  const auto Lambda = L - H;
+  return Lambda;
 }
 
 
 /**
- * Cooling rate.
+ * Cooling function.
  * 
  * \param x_X Any array with coordinates shape.
  * \param n_XK Electrons population in 1.
@@ -58,25 +54,23 @@ inline double L(
  * Must be sorted!
  * \return Cooling rates in erg s-1 cm-3.
  */
-inline Eigen::VectorXd L_X(
+inline Eigen::VectorXd Lambda_X(
   const Eigen::VectorXd& x_X,
   const std::vector<Eigen::VectorXd>& n_XK,
   const std::vector<Eigen::MatrixXd>& R_XKK,
   const Eigen::VectorXd& E_K
 ) {
-  const auto& X = x_X.size();
-
-  Eigen::VectorXd L_X = Eigen::VectorXd::Zero(X);
-  for (int x = 0; x < X; x++) {
-    L_X(x) = L(n_XK[x], R_XKK[x], E_K);
-  }
-
-  return L_X;
+  const auto L_X =
+    astrea::thermodynamics::cooling_rate::L_X(x_X, n_XK, R_XKK, E_K);
+  const auto H_X =
+    astrea::thermodynamics::heating_rate::H_X(x_X, n_XK, R_XKK, E_K);
+  const auto Lambda_X = L_X - H_X;
+  return Lambda_X;
 }
 
 
 /**
- * Cooling rate.
+ * Cooling function.
  * 
  * \param x_X Any array with coordinates shape.
  * \param n_XZK Electrons population in 1.
@@ -87,29 +81,25 @@ inline Eigen::VectorXd L_X(
  * Must be sorted!
  * \return Cooling rates in erg s-1 cm-3.
  */
-inline std::vector<Eigen::VectorXd> L_ZX(
+inline std::vector<Eigen::VectorXd> Lambda_ZX(
   const Eigen::VectorXd& x_X,
   const std::vector<std::vector<Eigen::VectorXd>>& n_XZK,
   const std::vector<std::vector<Eigen::MatrixXd>>& R_XZKK,
   const std::vector<Eigen::VectorXd>& E_ZK
 ) {
-  const auto& X = x_X.size();
   const auto& Z = E_ZK.size();
 
-  std::vector<Eigen::VectorXd> L_ZX(Z);
+  const auto L_ZX =
+    astrea::thermodynamics::cooling_rate::L_ZX(x_X, n_XZK, R_XZKK, E_ZK);
+  const auto H_ZX =
+    astrea::thermodynamics::heating_rate::H_ZX(x_X, n_XZK, R_XZKK, E_ZK);
+
+  std::vector<Eigen::VectorXd> Lambda_ZX(Z);
   for (int z = 0; z < Z; z++) {
-    std::vector<Eigen::VectorXd> n_XK(X);
-    std::vector<Eigen::MatrixXd> R_XKK(X);
-
-    for (int x = 0; x < X; x++) {
-      n_XK[x] = n_XZK[x][z];
-      R_XKK[x] = R_XZKK[x][z];
-    }
-
-    L_ZX[z] = L_X(x_X, n_XK, R_XKK, E_ZK[z]);
+    Lambda_ZX[z] = L_ZX[z] - H_ZX[z];
   }
 
-  return L_ZX;
+  return Lambda_ZX;
 }
 
 
