@@ -1,6 +1,6 @@
 /**
- * \file astrea/element/mg_i/info.h
- * Mg I information by Alexeeva+2018, NIST
+ * \file astrea/element/h_ii/info.h
+ * H II information by Mashonkina+2008, NIST
  * (https://www.nist.gov/pml/atomic-spectra-database).
  * 
  * \copyright GPL
@@ -9,14 +9,14 @@
 #pragma once
 
 
-namespace astrea::element::mg_i {
+namespace astrea::element::h_ii {
 
 
 /**
  * State of ionization in 1.
  */
 inline constexpr double i() {
-  return 0.0;
+  return 1.0;
 }
 
 
@@ -24,7 +24,7 @@ inline constexpr double i() {
  * Atomic number in 1.
  */
 inline constexpr double Z() {
-  return 12.0;
+  return 1.0;
 }
 
 
@@ -32,7 +32,7 @@ inline constexpr double Z() {
  * Mass number in 1 (mass in Da).
  */
 inline constexpr double M() {
-  return 24.304;
+  return 1.0;
 }
 
 
@@ -40,7 +40,7 @@ inline constexpr double M() {
  * Ionization energy in eV.
  */
 inline constexpr double I() {
-  return 7.6451952529134;
+  return 0.0;
 }
 
 
@@ -48,7 +48,7 @@ inline constexpr double I() {
  * Element solar abundance relative to H.
  */
 inline constexpr double A_H_sun() {
-  return 3.46737e-5;
+  return 1.0;
 }
 
 

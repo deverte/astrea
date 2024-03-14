@@ -9,7 +9,7 @@
     pkgs = import nixpkgs { inherit system; };
     stdenv = pkgs.llvmPackages_17.stdenv;
   in {
-    devShell.${system} = stdenv.mkDerivation {
+    devShells.${system}.default = stdenv.mkDerivation {
       name = "astrea";
       nativeBuildInputs = [
         pkgs.conan
@@ -18,15 +18,15 @@
       ];
     };
 
-    defaultPackage.${system} = stdenv.mkDerivation {
+    packages.${system}.default = stdenv.mkDerivation {
       name = "astrea";
-      version = "0.7.3"; # managed by justfile
+      version = "0.7.4"; # managed by justfile
       src = ./.;
       nativeBuildInputs = [
         pkgs.cmake
       ];
       meta = {
-        homepage = "https://gitea.zarux.ru/astro/astrea";
+        homepage = "http://gitea.nul/astro/astrea";
         licencse = pkgs.lib.licenses.gpl3;
         platforms = pkgs.lib.platforms.linux ++ pkgs.lib.platforms.darwin;
         maintainers = [ pkgs.lib.maintainers.deverte ];

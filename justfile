@@ -1,5 +1,5 @@
 project := "astrea"
-ver := "0.7.3"
+ver := "0.7.4"
 
 build-nix:
   nix build
@@ -23,6 +23,11 @@ update-version:
   pattern = 'version = ".*"; # managed'
   repl = 'version = "{{ver}}"; # managed'
   flake.write_text(re.sub(pattern, repl, flake.read_text()))
+
+  readme = pathlib.Path('README.md')
+  pattern = '\/archive\/.*\.tar\.gz'
+  repl = '/archive/{{ver}}.tar.gz'
+  readme.write_text(re.sub(pattern, repl, readme.read_text()))
 
 install-conan:
   just update-version

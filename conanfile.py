@@ -4,7 +4,7 @@ from conan.tools.files import copy
 
 class Astrea(ConanFile):
     name = "astrea"
-    version = "0.7.3" # managed by justfile
+    version = "0.7.4" # managed by justfile
     exports_sources = "include/*"
     no_copy_source = True
 

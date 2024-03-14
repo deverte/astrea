@@ -27,7 +27,7 @@ inline double f(
   const Eigen::VectorXd& y_Y,
   const double& x
 ) {
-  if (x < x_Y(0) || x > x_Y(Eigen::last)) {
+  if (x < x_Y(0) || x >= x_Y(Eigen::last)) {
     return 0.0;
   }
 

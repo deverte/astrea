@@ -34,7 +34,7 @@ inline Eigen::VectorXd Sigma_Z(
 
   const auto& Z = g_ZK.size(); // 1
 
-  Eigen::VectorXd Sigma_Z = Eigen::VectorXd(Z); // 1
+  Eigen::VectorXd Sigma_Z = Eigen::VectorXd::Zero(Z); // 1
   for (int z = 0; z < Z; z++) {
     const auto& K = g_ZK[z].size(); // 1
     for (int k = 0; k < K; k++) {
@@ -74,7 +74,7 @@ inline Eigen::VectorXd Phi_Z(
 
   const auto Sigma_Z_ = Sigma_Z(T, g_ZK, E_ZK);
 
-  Eigen::VectorXd Phi_Z = Eigen::VectorXd(Z); // cm3
+  Eigen::VectorXd Phi_Z = Eigen::VectorXd::Zero(Z); // cm3
   for (int z = 0; z < Z - 1; z++) {
     const auto& K = g_ZK[z].size(); // 1
     for (int k = 0; k < K; k++) {
@@ -113,7 +113,7 @@ inline Eigen::VectorXd Pi_Z(
 
   const auto Phi_Z_ = Phi_Z(T, I_Z, g_ZK, E_ZK); // cm3
 
-  Eigen::VectorXd Pi_Z = Eigen::VectorXd(Z); // 1
+  Eigen::VectorXd Pi_Z = Eigen::VectorXd::Ones(Z); // 1
   for (int ze = 0; ze < Z; ze++) {
     for (int zi = ze; zi < Z - 1; zi++) {
       Pi_Z(ze) *= N_e * Phi_Z_(zi);
@@ -178,7 +178,7 @@ inline Eigen::VectorXd N_Z(
   const auto Pi_Z_ = Pi_Z(T, N_e, I_Z, g_ZK, E_ZK); // 1
   const auto Sigma_Pi_ = Sigma_Pi(T, N_e, I_Z, g_ZK, E_ZK); // 1
 
-  Eigen::VectorXd N_Z = Eigen::VectorXd(Z); // 1
+  Eigen::VectorXd N_Z = Eigen::VectorXd::Zero(Z); // 1
   for (int z = 0; z < Z; z++) {
     N_Z(z) = Pi_Z_(z) / Sigma_Pi_;
   }

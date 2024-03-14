@@ -44,4 +44,12 @@ inline constexpr double I() {
 }
 
 
+/**
+ * Element solar abundance relative to H.
+ */
+inline constexpr double A_H_sun() {
+  return 3.01995e-5;
+}
+
+
 }

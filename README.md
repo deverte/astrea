@@ -20,6 +20,8 @@ Available detailed balance pairs:
 
 Available elements:
 
+- H I
+- H II
 - C I
 - C II
 - C III
@@ -35,19 +37,50 @@ Available elements:
 
 Available spectra:
 
+- GJ 436
+- GJ 3470
+- HAT-P-11
+- HD 73583
+- HD 85512
+- HD 189733
+- HD 209458
 - KELT-9
+- Sun
+- WASP-80
 - Custom
 
-> See also Python version [astrea_py](https://gitea.zarux.ru/astro/astrea_py).
+> See also Python version [astrea_py](http://gitea.nul/astro/astrea_py).
 
 ## Installation
+
+### Using Nix
+
+```
+{
+  inputs = {
+    astreaPkg.url = "http://gitea.nul/astro/astrea/archive/0.7.4.tar.gz";
+  };
+
+  outputs = inputs@{ self, astreaPkg, ... }:
+  let
+    system = "x86_64-linux";
+    astrea = astreaPkg.packages.${system}.default;
+  in {
+    devShells.${system}.default = pkgs.mkShell {
+      buildInputs = [
+        astrea
+      ];
+    };
+  };
+}
+```
 
 ### Using Conan
 
 Add repo:
 
 ```sh
-conan remote add astro https://gitea.zarux.ru/api/packages/astro/conan
+conan remote add astro http://gitea.nul/api/packages/astro/conan
 ```
 
 Insall package:
@@ -61,7 +94,7 @@ conan install --remote=astro --requires=astrea/<VERSION>
 You can clone, use as submodule, or download this repo.
 
 ```sh
-git clone https://gitea.zarux.ru/astro/astrea
+git clone http://gitea.nul/astro/astrea
 ```
 
 Next, install the following dependencies:
