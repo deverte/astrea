@@ -46,11 +46,12 @@ inline Eigen::Matrix<double, 2, 1019> F_lambda_vs_lambda() {
   const double alpha = 1.9864458571489286e-11; // m-2 W A s cm2
   const double A_to_nm = 1.0e-1; // nm A-1
 
+  const auto irradiance = E_q_lambda_vs_lambda();
+
   Eigen::Matrix<double, 2, 1019> F_lambda_vs_lambda;
-  F_lambda_vs_lambda.row(0) = E_q_lambda_vs_lambda.row(0) * A_to_nm;
+  F_lambda_vs_lambda.row(0) = irradiance.row(0) * A_to_nm;
   F_lambda_vs_lambda.row(1) =
-    + alpha / F_lambda_vs_lambda.row(0).array()
-    * E_q_lambda_vs_lambda.row(1).array();
+    alpha / F_lambda_vs_lambda.row(0).array() * irradiance.row(1).array();
 
   return F_lambda_vs_lambda;
 }

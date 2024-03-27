@@ -17,7 +17,7 @@ namespace astrea::element::h_i {
 
 
 /**
- * H I statistical weights by Mashonkina+2015.
+ * H I statistical weights by Mashonkina+2008.
  * 
  * - Axis 0: Term.
  *   - Statistical weight in 1.

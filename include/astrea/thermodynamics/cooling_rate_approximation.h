@@ -10,7 +10,7 @@
 
 #include <Eigen/Dense>
 
-#include "astrea/math/interp1d_linear.h"
+#include "astrea/math/interp1d_log10xy.h"
 
 
 namespace astrea::thermodynamics::cooling_rate_approximation {
@@ -38,7 +38,7 @@ inline Eigen::VectorXd L_X(
   const auto& T_ = Lambda_vs_T.row(0);
   const auto& Lambda_ = Lambda_vs_T.row(1);
 
-  const auto Lambda = astrea::math::interp1d_linear::f_X(T_, Lambda_, T_X);
+  const auto Lambda = astrea::math::interp1d_log10xy::f_X(T_, Lambda_, T_X);
 
   const auto L = Lambda.array() * N_A_X.array() * N_e_X.array();
 

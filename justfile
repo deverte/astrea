@@ -1,5 +1,5 @@
 project := "astrea"
-ver := "0.7.4"
+ver := "0.7.5"
 
 build-nix:
   nix build
@@ -26,7 +26,10 @@ update-version:
 
   readme = pathlib.Path('README.md')
   pattern = '\/archive\/.*\.tar\.gz'
-  repl = '/archive/{{ver}}.tar.gz'
+  repl = '/archive/v{{ver}}.tar.gz'
+  readme.write_text(re.sub(pattern, repl, readme.read_text()))
+  pattern = '\-\-requires\=astrea\/.*'
+  repl = '--requires=astrea/{{ver}}'
   readme.write_text(re.sub(pattern, repl, readme.read_text()))
 
 install-conan:

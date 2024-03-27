@@ -13,7 +13,7 @@
 
 #include <Eigen/Dense>
 
-#include "astrea/math/interp1d_linear.h"
+#include "astrea/math/interp1d_log10xy.h"
 
 
 namespace astrea::transition::photoexcitation_lorentz {
@@ -47,7 +47,7 @@ inline double R_ij(
   const auto& F_lambda_L = F_lambda_vs_lambda.row(1); // W m-2 nm-1
 
   const auto F_lambda = // W m-2 nm-1
-    astrea::math::interp1d_linear::f(lambda_L, F_lambda_L, lambda_ij);
+    astrea::math::interp1d_log10xy::f(lambda_L, F_lambda_L, lambda_ij);
 
   const auto R_ij =
     a * A_ji * g_j / g_i * std::pow(lambda_ij, 5.0) * F_lambda * std::exp(-tau);

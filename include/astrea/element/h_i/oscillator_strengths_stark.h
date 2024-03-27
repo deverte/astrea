@@ -13,7 +13,7 @@
 #include "astrea/element/h_i/structure.h"
 
 
-namespace astrea::element::h_i {
+namespace astrea::element::h_i::oscillator_strengths_stark {
 
 
 /**

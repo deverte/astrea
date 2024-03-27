@@ -20,7 +20,7 @@
 
     packages.${system}.default = stdenv.mkDerivation {
       name = "astrea";
-      version = "0.7.4"; # managed by justfile
+      version = "0.7.5"; # managed by justfile
       src = ./.;
       nativeBuildInputs = [
         pkgs.cmake

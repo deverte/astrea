@@ -13,7 +13,7 @@
 
 #include <Eigen/Dense>
 
-#include "astrea/math/interp1d_linear.h"
+#include "astrea/math/interp1d_log10xy.h"
 
 
 namespace astrea::transition::collisional_excitation {
@@ -47,7 +47,7 @@ inline double R_ij(
 
     f_ij =
       ((T_X(0) <= T) && (T <= T_X(Eigen::last))) ?
-      astrea::math::interp1d_linear::f(T_X, f_X, T) :
+      astrea::math::interp1d_log10xy::f(T_X, f_X, T) :
       1.0
     ;
   }

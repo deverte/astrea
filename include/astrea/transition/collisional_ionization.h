@@ -13,7 +13,7 @@
 
 #include <Eigen/Dense>
 
-#include "astrea/math/interp1d_linear.h"
+#include "astrea/math/interp1d_log10xy.h"
 #include "astrea/math/trapezoid.h"
 
 
@@ -58,9 +58,9 @@ inline double R_ik(
     Eigen::VectorXd::LinSpaced(E, v_ij, v_infty);
 
   const Eigen::VectorXd sigma_E = // cm2
-    astrea::math::interp1d_linear::f_X(v_E1, sigma_E1, v_E);
+    astrea::math::interp1d_log10xy::f_X(v_E1, sigma_E1, v_E);
   const Eigen::VectorXd f_E = // km-1 s
-    astrea::math::interp1d_linear::f_X(v_E2, f_E2, v_E);
+    astrea::math::interp1d_log10xy::f_X(v_E2, f_E2, v_E);
 
   const auto R_ik = // s-1
     + a

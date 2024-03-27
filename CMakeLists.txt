@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 project(
     astrea
-    VERSION 0.7.4 # managed by justfile
+    VERSION 0.7.5 # managed by justfile
     LANGUAGES CXX
 )
 

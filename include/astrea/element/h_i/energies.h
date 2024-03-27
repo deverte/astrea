@@ -17,7 +17,7 @@ namespace astrea::element::h_i {
 
 
 /**
- * H I energies by Alexeeva+2015.
+ * H I energies by Mashonkina+2008.
  * 
  * - Axis 0: Term.
  *   - Energy in eV.

@@ -21,7 +21,7 @@ Available detailed balance pairs:
 Available elements:
 
 - H I
-- H II
+- H II (protons)
 - C I
 - C II
 - C III
@@ -58,7 +58,7 @@ Available spectra:
 ```
 {
   inputs = {
-    astreaPkg.url = "http://gitea.nul/astro/astrea/archive/0.7.4.tar.gz";
+    astreaPkg.url = "http://gitea.nul/astro/astrea/archive/v0.7.5.tar.gz";
   };
 
   outputs = inputs@{ self, astreaPkg, ... }:
@@ -86,7 +86,7 @@ conan remote add astro http://gitea.nul/api/packages/astro/conan
 Insall package:
 
 ```sh
-conan install --remote=astro --requires=astrea/<VERSION>
+conan install --remote=astro --requires=astrea/0.7.5
 ```
 
 ### Other
