@@ -4,6 +4,11 @@
             "name": "conancenter",
             "url": "https://center.conan.io",
             "verify_ssl": true
+        },
+        {
+            "name": "astro",
+            "url": "http://gitea.nul/api/packages/astro/conan",
+            "verify_ssl": false
         }
     ]
 }

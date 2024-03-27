@@ -58,7 +58,7 @@ Available spectra:
 ```
 {
   inputs = {
-    astreaPkg.url = "http://gitea.nul/astro/astrea/archive/v0.7.5.tar.gz";
+    astreaPkg.url = "http://gitea.nul/astro/astrea/archive/v0.7.6.tar.gz";
   };
 
   outputs = inputs@{ self, astreaPkg, ... }:
@@ -86,7 +86,7 @@ conan remote add astro http://gitea.nul/api/packages/astro/conan
 Insall package:
 
 ```sh
-conan install --remote=astro --requires=astrea/0.7.5
+conan install --remote=astro --requires=astrea/0.7.6
 ```
 
 ### Other

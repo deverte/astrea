@@ -46,9 +46,9 @@ inline double R_ij(
     const auto& f_X = f_vs_T.row(1);
 
     f_ij =
-      ((T_X(0) <= T) && (T <= T_X(Eigen::last))) ?
-      astrea::math::interp1d_log10xy::f(T_X, f_X, T) :
-      1.0
+      (T < T_X(0)) ? f_X(0) :
+      (T > T_X(Eigen::last)) ? f_X(Eigen::last) :
+      astrea::math::interp1d_log10xy::f(T_X, f_X, T)
     ;
   }
 

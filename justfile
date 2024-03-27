@@ -1,5 +1,5 @@
 project := "astrea"
-ver := "0.7.5"
+ver := "0.7.6"
 
 build-nix:
   nix build
