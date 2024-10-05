@@ -1,6 +1,6 @@
 {
   inputs = {
-    nixpkgs.url = "nixpkgs/nixos-23.11";
+    nixpkgs.url = "nixpkgs/nixos-24.05";
   };
 
   outputs = inputs@{ self, nixpkgs, ... }:
@@ -20,7 +20,7 @@
 
     packages.${system}.default = stdenv.mkDerivation {
       name = "astrea";
-      version = "0.7.6"; # managed by justfile
+      version = "0.7.7"; # managed by justfile
       src = ./.;
       nativeBuildInputs = [
         pkgs.cmake

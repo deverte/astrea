@@ -19,6 +19,8 @@
 #include "./element/mg_i.h"
 #include "./element/mg_ii.h"
 #include "./element/mg_iii.h"
+#include "./element/n_i.h"
+#include "./element/n_ii.h"
 #include "./element/o_i.h"
 #include "./element/o_ii.h"
 #include "./math/cauchy_lorentz_distribution.h"

@@ -10,8 +10,10 @@
 
 
 #include "astrea/element/h_ii/cooling_efficiency.h"
+#include "astrea/element/h_ii/effective_collision_strengths.h"
 #include "astrea/element/h_ii/energies.h"
 #include "astrea/element/h_ii/info.h"
+#include "astrea/element/h_ii/oscillator_strengths.h"
 #include "astrea/element/h_ii/principal_quantum_numbers.h"
 #include "astrea/element/h_ii/statistical_weights.h"
 #include "astrea/element/h_ii/structure.h"
