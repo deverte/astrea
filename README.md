@@ -21,7 +21,7 @@ Available detailed balance pairs:
 Available elements:
 
 - H I
-- H II (protons)
+- p<sup>+</sup>
 - C I
 - C II
 - C III
@@ -49,16 +49,19 @@ Available spectra:
 - WASP-80
 - Custom
 
-> See also Python version [astrea_py](http://gitea.nul/astro/astrea_py).
+> See also Python version [astrea_py](https://github.com/deverte/astrea_py).
 
 ## Installation
 
-### Using Nix
+### Using Nix Flake
 
-```
+`flake.nix`:
+
+```nix
 {
   inputs = {
-    astreaPkg.url = "http://gitea.nul/astro/astrea/archive/v0.7.7.tar.gz";
+    astreaPkg.url =
+      "https://github.com/deverte/astrea/archive/refs/tags/v0.8.0.tar.gz";
   };
 
   outputs = inputs@{ self, astreaPkg, ... }:
@@ -75,31 +78,46 @@ Available spectra:
 }
 ```
 
-### Using Conan
-
-Add repo:
-
-```sh
-conan remote add astro http://gitea.nul/api/packages/astro/conan
-```
-
-Insall package:
-
-```sh
-conan install --remote=astro --requires=astrea/0.7.7
-```
-
 ### Other
 
-You can clone, use as submodule, or download this repo.
+#### Step 1. Install dependencies
 
-```sh
-git clone http://gitea.nul/astro/astrea
-```
-
-Next, install the following dependencies:
+This step is OS-specific, so it's better to follow the official documentation
+for each dependency (e.g. installing by system package manager), or build them
+manually.
 
 - [Eigen](https://eigen.tuxfamily.org/index.php?title=Main_Page)
+
+#### Step 2. Install Astrea
+
+##### Method 1. Manual (recommended)
+
+```sh
+# From any temporary folder
+git clone https://github.com/deverte/astrea
+cd astrea
+just install
+```
+
+Include path: `/usr/local/include/astrea`.
+
+##### Method 2. Git submodule
+
+```sh
+# From your project root
+git submodule add https://github.com/deverte/astrea
+```
+
+Include path: `./astrea/include/astrea`.
+
+##### Method 3. Subproject (not recommended)
+
+```sh
+# From your project root
+git clone https://github.com/deverte/astrea
+```
+
+Include path: `./astrea/include/astrea`.
 
 ## Documentation
 

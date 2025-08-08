@@ -1,8 +1,13 @@
 project := "astrea"
-ver := "0.7.7"
+version := "0.8.0"
 
-build-nix:
-  nix build
+
+install:
+  mkdir build
+  cd build; \
+    cmake ..; \
+    sudo make install
+
 
 update-version:
   #!/usr/bin/env python3
@@ -11,34 +16,15 @@ update-version:
 
   cmake = pathlib.Path('CMakeLists.txt')
   pattern = 'VERSION .* # managed'
-  repl = 'VERSION {{ver}} # managed'
+  repl = 'VERSION {{version}} # managed'
   cmake.write_text(re.sub(pattern, repl, cmake.read_text()))
-
-  conanfile = pathlib.Path('conanfile.py')
-  pattern = 'version = ".*" # managed'
-  repl = 'version = "{{ver}}" # managed'
-  conanfile.write_text(re.sub(pattern, repl, conanfile.read_text()))
 
   flake = pathlib.Path('flake.nix')
   pattern = 'version = ".*"; # managed'
-  repl = 'version = "{{ver}}"; # managed'
+  repl = 'version = "{{version}}"; # managed'
   flake.write_text(re.sub(pattern, repl, flake.read_text()))
 
   readme = pathlib.Path('README.md')
-  pattern = '\/archive\/.*\.tar\.gz'
-  repl = '/archive/v{{ver}}.tar.gz'
+  pattern = '\/archive\/refs\/tags\/.*\.tar\.gz'
+  repl = '/archive/refs/tags/v{{version}}.tar.gz'
   readme.write_text(re.sub(pattern, repl, readme.read_text()))
-  pattern = '\-\-requires\=astrea\/.*'
-  repl = '--requires=astrea/{{ver}}'
-  readme.write_text(re.sub(pattern, repl, readme.read_text()))
-
-install-conan:
-  just update-version
-  conan config install ./remotes.json
-  conan create .
-
-uninstall-conan:
-  conan remove {{project}}
-
-publish-conan:
-  conan upload --remote=astro {{project}}/{{ver}}
